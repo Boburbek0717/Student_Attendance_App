@@ -117,7 +117,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 57 tests use isolated databases, not real student data. Read the
+All 60 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 

@@ -2,7 +2,7 @@
 
 This records the review before the attendance stage. The later attendance stage
 implements and tests the check-in rules listed below as future work; see
-[attendance.md](attendance.md) for the current behavior and 57-test suite.
+[attendance.md](attendance.md) for the current behavior and 60-test suite.
 
 Reviewed the current source, including the interrupted teacher implementation,
 using isolated database/HTTP tests, source inspection, installed-package checks

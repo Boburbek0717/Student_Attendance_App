@@ -8,7 +8,8 @@ import unittest
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select
+from sqlalchemy import event, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.attendance import check_in, start_lesson
@@ -151,6 +152,47 @@ class AttendanceRulesTests(unittest.TestCase):
         self.lesson()
         with self.assertRaisesRegex(ValueError, "Only a student"):
             check_in(self.engine, self.teacher_id, "000123")
+
+    def test_ambiguous_active_code_is_rejected_without_using_a_lesson(self):
+        self.lesson()
+        self.lesson(group_id=self.other_group_id)
+        with self.assertRaisesRegex(ValueError, "invalid or has expired"):
+            check_in(self.engine, self.student_id, "000123")
+        self.assertEqual(self.count(), 0)
+
+    def test_failed_attendance_write_rolls_back_and_can_be_retried(self):
+        self.lesson()
+
+        def fail(mapper, connection, target):
+            raise IntegrityError("test insert failure", {}, Exception("forced failure"))
+
+        event.listen(Attendance, "before_insert", fail)
+        try:
+            with self.assertRaisesRegex(ValueError, "could not be saved"):
+                check_in(self.engine, self.student_id, "000123")
+        finally:
+            event.remove(Attendance, "before_insert", fail)
+        self.assertEqual(self.count(), 0)
+        check_in(self.engine, self.student_id, "000123")
+        self.assertEqual(self.count(), 1)
+
+    def test_database_lock_returns_retry_message_without_recording_attendance(self):
+        self.lesson()
+        contender = make_engine(self.engine.url.database)
+        self.addCleanup(contender.dispose)
+
+        @event.listens_for(contender, "connect")
+        def short_timeout(connection, record):
+            connection.execute("PRAGMA busy_timeout=1")
+
+        with self.engine.connect() as holder:
+            holder.exec_driver_sql("BEGIN IMMEDIATE")
+            with self.assertRaisesRegex(ValueError, "database is busy"):
+                check_in(contender, self.student_id, "000123")
+            holder.rollback()
+        self.assertEqual(self.count(), 0)
+        check_in(contender, self.student_id, "000123")
+        self.assertEqual(self.count(), 1)
 
     def concurrent(self, actions):
         barrier = Barrier(len(actions))

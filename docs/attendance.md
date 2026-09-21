@@ -91,10 +91,10 @@ each package separately and preserves its attendance when another package exists
 - `student.html` and `teacher.html`: check-in and lesson controls.
 - `package_summary.html` and `attendance_history.html`: shared display fragments.
 - `student_history.html`: teacher's view of one student's records.
-- `tests/test_attendance.py`: 17 new tests, including actual parallel database
+- `tests/test_attendance.py`: 20 tests, including actual parallel database
   connections competing for the last lesson and duplicate lesson starts.
 
-Run all 57 tests:
+Run all 60 tests:
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
@@ -103,6 +103,12 @@ Run all 57 tests:
 The interruption check also verified the real database using read-only integrity
 and foreign-key checks: integrity was OK and there were zero foreign-key violations.
 All automated write tests use temporary databases.
+
+The follow-up review on September 22 also found no duplicate attendance, overdrawn
+packages, wrong-group attendance or mismatched package ownership in the local
+database. Added regression tests confirm that ambiguous active codes are rejected,
+failed attendance writes roll back, and database locks produce a retry message
+without consuming a lesson. A retry succeeds after the failure or lock is removed.
 
 Exercises: explain why `expires_at > now` rejects the exact expiry boundary.
 Then explain why the final-lesson concurrency test uses two different lesson IDs.
