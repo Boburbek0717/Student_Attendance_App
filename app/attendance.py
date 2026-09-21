@@ -10,6 +10,19 @@ from app.database import write_transaction
 from app.packages import package_balance, package_rows
 
 
+def new_attendance_code(db: Session, now, previous_code=None) -> str:
+    for _ in range(100):
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        if code == previous_code:
+            continue
+        collision = db.scalar(select(Lesson.id).where(
+            Lesson.attendance_code == code, Lesson.code_expires_at > now,
+        ))
+        if collision is None:
+            return code
+    raise ValueError("Could not create a unique code. Please try again.")
+
+
 def start_lesson(engine: Engine, teacher_id: int, group_id: int, minutes: int = 15) -> int:
     if not 0 < group_id < 2**63 or not 1 <= minutes <= 60:
         raise ValueError("Choose a valid group and a code duration of 1–60 minutes.")
@@ -25,15 +38,7 @@ def start_lesson(engine: Engine, teacher_id: int, group_id: int, minutes: int = 
         ).order_by(Lesson.id.desc()))
         if existing is not None:
             return existing.id
-        for _ in range(100):
-            code = f"{secrets.randbelow(1_000_000):06d}"
-            collision = db.scalar(select(Lesson.id).where(
-                Lesson.attendance_code == code, Lesson.code_expires_at > now,
-            ))
-            if collision is None:
-                break
-        else:
-            raise ValueError("Could not create a unique code. Please try again.")
+        code = new_attendance_code(db, now)
         lesson = Lesson(group_id=group_id, started_at=now, attendance_code=code,
                         code_expires_at=now + timedelta(minutes=minutes))
         db.add(lesson)

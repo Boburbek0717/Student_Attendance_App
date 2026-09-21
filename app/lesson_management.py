@@ -1,0 +1,121 @@
+from datetime import timedelta
+
+from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException
+
+from app.database import write_transaction
+from app.attendance import new_attendance_code
+from app.models import Attendance, Enrollment, Group, Lesson, User, utc_now
+from app.security import verify_csrf
+from app.teacher import require_teacher
+from app.web import get_db, render
+
+
+router = APIRouter(prefix="/teacher")
+
+
+def find_record(db, model, record_id):
+    record = db.get(model, record_id) if 0 < record_id < 2**63 else None
+    if record is None:
+        raise HTTPException(404, "Lesson or group not found.")
+    return record
+
+
+def code_version(lesson):
+    return f"{lesson.attendance_code or ''}:{lesson.code_expires_at.isoformat() if lesson.code_expires_at else ''}"
+
+
+def change_check_in(engine, teacher_id, lesson_id, expected_version, *, reopen=False, minutes=15):
+    with write_transaction(engine) as db:
+        teacher = db.get(User, teacher_id)
+        if teacher is None or teacher.role != "teacher":
+            raise HTTPException(403, "Only a teacher can manage check-in.")
+        lesson = find_record(db, Lesson, lesson_id)
+        if not reopen and lesson.attendance_code is None:
+            return
+        if expected_version != code_version(lesson):
+            raise ValueError("Check-in changed since you opened this page. Review its current status and try again.")
+        if reopen:
+            if not 1 <= minutes <= 60:
+                raise ValueError("Choose a code duration of 1–60 minutes.")
+            now = utc_now()
+            if lesson.started_at > now:
+                raise ValueError("This lesson has not started yet.")
+            active = db.scalar(select(Lesson.id).where(
+                Lesson.group_id == lesson.group_id, Lesson.code_expires_at > now,
+            ))
+            if active is not None:
+                raise ValueError("A lesson in this group already has open check-in. Close it before reopening this lesson.")
+            lesson.attendance_code = new_attendance_code(db, now, lesson.attendance_code)
+            lesson.code_expires_at = now + timedelta(minutes=minutes)
+            return
+        # Clear both fields together to satisfy the code-window constraint.
+        # This is safe to repeat and never changes attendance or packages.
+        lesson.attendance_code = None
+        lesson.code_expires_at = None
+
+
+@router.get("/groups/{group_id}/lessons", response_class=HTMLResponse)
+def lesson_history(group_id: int, request: Request, page: int = 1,
+                   db: Session = Depends(get_db), user: User = Depends(require_teacher)):
+    group = find_record(db, Group, group_id)
+    count = db.scalar(select(func.count()).select_from(Lesson).where(Lesson.group_id == group_id))
+    last_page = max(1, (count + 24) // 25)
+    page = max(1, min(page, last_page))
+    lessons = db.execute(select(Lesson, func.count(Attendance.id)).outerjoin(
+        Attendance, Attendance.lesson_id == Lesson.id,
+    ).where(Lesson.group_id == group_id).group_by(Lesson.id)
+        .order_by(Lesson.started_at.desc(), Lesson.id.desc()).offset((page - 1) * 25).limit(25)).all()
+    return render(request, "lessons.html", user=user, group=group, lessons=lessons,
+                  now=utc_now(), page=page, last_page=last_page)
+
+
+def lesson_page(request, db, user, lesson_id, error=None):
+    lesson = find_record(db, Lesson, lesson_id)
+    group = db.get(Group, lesson.group_id)
+    attended = db.execute(select(User, Attendance).join(
+        Enrollment, Enrollment.student_id == User.id,
+    ).join(Attendance, Attendance.enrollment_id == Enrollment.id)
+        .where(Attendance.lesson_id == lesson.id).order_by(User.display_name, User.id)).all()
+    checked_ids = {student.id for student, attendance in attended}
+    current_students = db.scalars(select(User).join(Enrollment, Enrollment.student_id == User.id)
+        .where(Enrollment.group_id == group.id, Enrollment.active.is_(True))
+        .order_by(User.display_name, User.id)).all()
+    return render(request, "lesson.html", 400 if error else 200, user=user, lesson=lesson,
+                  group=group, attended=attended, now=utc_now(), error=error,
+                  version=code_version(lesson), code_minutes=request.app.state.code_minutes,
+                  missing=[student for student in current_students if student.id not in checked_ids])
+
+
+@router.get("/lessons/{lesson_id}", response_class=HTMLResponse)
+def lesson_detail(lesson_id: int, request: Request, db: Session = Depends(get_db),
+                  user: User = Depends(require_teacher)):
+    return lesson_page(request, db, user, lesson_id)
+
+
+@router.post("/lessons/{lesson_id}/close", response_class=HTMLResponse)
+def close_lesson(lesson_id: int, request: Request, csrf: str = Form(default=""),
+                 expected_version: str = Form(default=""),
+                 db: Session = Depends(get_db), user: User = Depends(require_teacher)):
+    verify_csrf(request, csrf)
+    try:
+        change_check_in(request.app.state.database_engine, user.id, lesson_id, expected_version)
+    except ValueError as error:
+        return lesson_page(request, db, user, lesson_id, error=str(error))
+    return RedirectResponse(f"/teacher/lessons/{lesson_id}", status_code=303)
+
+
+@router.post("/lessons/{lesson_id}/reopen", response_class=HTMLResponse)
+def reopen_lesson(lesson_id: int, request: Request, csrf: str = Form(default=""),
+                  expected_version: str = Form(default=""),
+                  db: Session = Depends(get_db), user: User = Depends(require_teacher)):
+    verify_csrf(request, csrf)
+    try:
+        change_check_in(request.app.state.database_engine, user.id, lesson_id, expected_version,
+                        reopen=True, minutes=request.app.state.code_minutes)
+    except ValueError as error:
+        return lesson_page(request, db, user, lesson_id, error=str(error))
+    return RedirectResponse(f"/teacher/lessons/{lesson_id}", status_code=303)

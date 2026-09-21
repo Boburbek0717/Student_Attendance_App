@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Lessons · {{ group.name }}{% endblock %}
+{% block content %}
+<a href="/teacher#group-{{ group.id }}">Back to group</a>
+<h1>{{ group.name }} · Lessons</h1>
+<p>Open a lesson to review attendance or close check-in. All times are UTC.</p>
+{% for lesson, count in lessons %}
+<article class="group-card">
+    <h2><a href="/teacher/lessons/{{ lesson.id }}">Lesson #{{ lesson.id }}</a></h2>
+    <p>{{ lesson.started_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ count }} checked in</p>
+    <p>Check-in: {{ 'Open' if lesson.code_expires_at and lesson.started_at <= now < lesson.code_expires_at else 'Closed' }}</p>
+</article>
+{% else %}<p>No lessons yet. Start your first lesson from the group card.</p>{% endfor %}
+<nav aria-label="Lesson history pages">
+{% if page > 1 %}<a href="?page={{ page - 1 }}">Newer lessons</a>{% endif %}
+<span>Page {{ page }} of {{ last_page }}</span>
+{% if page < last_page %}<a href="?page={{ page + 1 }}">Older lessons</a>{% endif %}
+</nav>
+{% endblock %}

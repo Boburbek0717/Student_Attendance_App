@@ -68,10 +68,12 @@
     {% for group in groups %}
     <article class="group-card" id="group-{{ group.id }}">
         <h3>{{ group.name }} <span class="hint">#{{ group.id }}</span></h3>
+        <p><a href="/teacher/groups/{{ group.id }}/lessons">Manage lessons</a></p>
         {% set lesson = active_lessons.get(group.id) %}
         {% if lesson %}
         <div class="lesson-code">
             <p>Lesson #{{ lesson.id }} · Attendance code</p>
+            <p><a href="/teacher/lessons/{{ lesson.id }}">View attendance / close check-in</a></p>
             <strong class="code">{{ lesson.attendance_code }}</strong>
             <p>Expires at {{ lesson.code_expires_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC.</p>
             <p class="hint">Share this code with your group. Refresh to see updated attendance and code status.</p>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Lesson #{{ lesson.id }}{% endblock %}
+{% block content %}
+<a href="/teacher/groups/{{ group.id }}/lessons">Back to group lessons</a>
+<h1>{{ group.name }} · Lesson #{{ lesson.id }}</h1>
+<p>Started {{ lesson.started_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+{% if lesson.code_expires_at and lesson.started_at <= now < lesson.code_expires_at %}
+<section class="group-card">
+    <h2>Check-in open</h2>
+    <strong class="code">{{ lesson.attendance_code }}</strong>
+    <p>Expires {{ lesson.code_expires_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC.</p>
+    <p>Closing stops new check-ins immediately. Existing attendance and balances are preserved.</p>
+    <form method="post" action="/teacher/lessons/{{ lesson.id }}/close">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+        <input type="hidden" name="expected_version" value="{{ version }}">
+        <button type="submit">Close check-in</button>
+    </form>
+</section>
+{% else %}
+<section class="group-card">
+    <h2>Check-in closed</h2>
+    <p>Reopen this same lesson for {{ code_minutes }} minutes with a newly generated code. The lesson date and existing check-ins stay unchanged; students who already checked in cannot be charged again.</p>
+    <form method="post" action="/teacher/lessons/{{ lesson.id }}/reopen">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+        <input type="hidden" name="expected_version" value="{{ version }}">
+        <button type="submit">Reopen check-in for this lesson</button>
+    </form>
+</section>
+{% endif %}
+<h2>Checked in · {{ attended|length }}</h2>
+<ul>
+{% for student, attendance in attended %}
+<li><a href="/teacher/students/{{ student.id }}/history">{{ student.display_name }} ({{ student.username }})</a> · {{ attendance.checked_in_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</li>
+{% else %}<li>No check-ins recorded.</li>{% endfor %}
+</ul>
+<h2>Current active students without a check-in · {{ missing|length }}</h2>
+<p class="hint">This uses today's group roster, not the roster when the lesson started. It is not a historical absence record.</p>
+<ul>{% for student in missing %}<li>{{ student.display_name }} ({{ student.username }})</li>
+{% else %}<li>None.</li>{% endfor %}</ul>
+<p><a href="/teacher/lessons/{{ lesson.id }}">Refresh attendance and status</a></p>
+{% endblock %}

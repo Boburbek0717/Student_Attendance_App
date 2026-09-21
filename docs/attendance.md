@@ -3,7 +3,8 @@
 This describes the attendance milestone before manual renewal was added. The
 current late-payment rule allows check-in after credit runs out and counts lessons
 owed; see [packages.md](packages.md). The write-transaction helper now lives in
-`app/database.py`, and the current suite has 71 tests.
+`app/database.py`. For the current suite and capabilities, see the README and
+[lesson management](lesson-management.md).
 
 The teacher starts a group lesson and shares a temporary code. An authenticated,
 enrolled student can submit it once, consuming one lesson from the oldest package
@@ -61,8 +62,9 @@ $env:ATTENDANCE_CODE_MINUTES = "10"
 - Configuration changes affect newly created lessons, not existing expiry times.
 - A second start while the group has an open lesson returns that same lesson,
   even if requests arrive together. After expiry, **Start a new lesson** creates a
-  separate class. Reopening an old class or extending its code is not implemented;
-  do not use a new lesson to extend the previous class's attendance window.
+  separate class. The lesson-management stage now supports reopening that same
+  class from its detail page; do not use a new lesson to extend the previous
+  class's attendance window.
 - Students get ten submission attempts per minute per account, shared across
   sessions in this server process. A code identifies a lesson, not the student.
 - Codes are shown only on teacher pages, not student dashboards/history or URLs.

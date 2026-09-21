@@ -1,4 +1,4 @@
-# Student Attendance Tracker — Student management
+# Student Attendance Tracker — Lesson management
 
 The teacher page supports creating groups, creating student accounts, enrolling
 students with a 12-lesson package, starting group lessons, and viewing balances
@@ -7,6 +7,8 @@ manually renew packages, including early and late renewals; no payments are take
 in the app. Available, advance and owed lesson counters are calculated from records.
 Teachers can also search students, edit profiles, reset passwords and deactivate
 or reactivate group enrollments from **Manage students**.
+Each group now has **Manage lessons** for lesson history, attendance lists, and
+closing or reopening check-in for the same class.
 
 ## Run
 
@@ -45,7 +47,8 @@ The attendance and renewal stages need no database-schema changes or new depende
 6. Click **Start a new lesson** on the group's card. Share its six-digit code with
    the group. It lasts 15 minutes by default; starting again while it is open reuses
    the same lesson. After expiry, the button starts a new class, not an extension
-   of the old one.
+   of the old one. To give students more time for the same class, open that lesson
+   from **Manage lessons** and use **Reopen check-in for this lesson** instead.
 7. Log in as the student in a separate browser/private window, or log out of the
    teacher account first. Enter the code on the student page and click **Check in**.
 8. The student sees `1 / 12 lessons used`, `11 remaining`, and a history entry.
@@ -87,6 +90,20 @@ open a student's management page. This also lists students without a group.
 There is no account deletion or student self-service editing in this increment.
 See [the student-management lesson](docs/student-management.md) for the code and tests.
 
+## Lesson management
+
+Choose **Manage lessons** on a group card, then open a lesson to see recorded
+attendees and check-in times. History is newest first, with 25 lessons per page.
+**Close check-in** stops new submissions without changing attendance or balances.
+**Reopen check-in for this lesson** creates a new code window for the same class;
+it preserves the original date and prevents duplicate attendance charges.
+Close any other open lesson in that group before reopening an earlier one.
+
+The unrecorded-students list uses the current active roster; it is not a record
+of historical absences. All times are UTC. Refresh to see new check-ins.
+See [the lesson-management guide](docs/lesson-management.md) for the flow,
+relationships, transactions and code explanation.
+
 ## Concepts introduced
 
 A **transaction** saves related records together. Enrollment creates a membership
@@ -127,6 +144,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `app/teacher.py` | Teacher-only routes, renewal preview/confirmation, enrollment and lessons |
 | `app/student.py` | Student-only dashboard and check-in form handling |
 | `app/student_management.py` | Teacher student search, profile updates, password resets and enrollment status |
+| `app/lesson_management.py` | Group lesson history, attendance details and close/reopen check-in |
 | `app/attendance.py` | Serialized lesson creation/check-in and student record queries |
 | `app/packages.py` | Package accounting, carried debt, renewal transaction and stale-form checks |
 | `app/web.py` | Shared template rendering and database connections per request |
@@ -139,6 +157,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `app/templates/renew_package.html` | Teacher renewal preview and confirmation |
 | `app/templates/lesson_balance.html` | Shared available, advance and owed counters |
 | `app/templates/students.html`, `manage_student.html` | Student directory and management forms |
+| `app/templates/lessons.html`, `lesson.html` | Lesson history and detail forms |
 | `app/templates/base.html` | Shared layout and logout form |
 | `app/static/style.css` | Responsive forms and roster styling |
 | `tests/test_teacher.py` | Teacher flow, access control, rollback and balance tests |
@@ -147,6 +166,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `tests/test_attendance.py` | Attendance rules, privacy, expiry, collisions and simultaneous requests |
 | `tests/test_packages.py` | Early/late renewal, debt settlement, history and concurrent requests |
 | `tests/test_student_management.py` | Management permissions, validation, password revocation and preserved records |
+| `tests/test_lesson_management.py` | Lesson access, close/reopen, pagination and simultaneous requests |
 
 ## Verify and learn
 
@@ -154,7 +174,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 80 tests use isolated databases, not real student data. Read the
+All 91 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 
