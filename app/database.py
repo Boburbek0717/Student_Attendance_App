@@ -1,5 +1,5 @@
 from pathlib import Path
-from sqlalchemy import URL, create_engine, event
+from sqlalchemy import URL, Engine, create_engine, event
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -31,8 +31,8 @@ def make_engine(database: str):
 engine = make_engine(str(DATABASE_PATH))
 
 
-def initialize_database() -> None:
+def initialize_database(database_engine: Engine = engine) -> None:
     # Import models so their tables are registered before creating the schema.
     from app import models
 
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(database_engine)

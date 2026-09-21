@@ -1,176 +1,195 @@
-# Student Attendance Tracker — Stage 2
+# Student Attendance Tracker — Stage 3
 
-Stage 2 adds the six database models planned from the uploaded specification,
-creates their tables at startup, and tests database constraints. The page stays
-simple. Account creation, authentication, enrollment screens, lesson creation,
-and attendance check-in are future increments.
+This increment adds local account creation, login, logout, and separate protected
+teacher/student welcome pages. It uses the six existing tables without changing
+or deleting their data. Group management and attendance check-in come later.
 
-The original architecture and user flows are preserved in [Stage 1](docs/stage-1.md).
-That document describes the earlier milestone; this README describes the current app.
+Earlier lessons: [Stage 1: requests and templates](docs/stage-1.md) and
+[Stage 2: tables and constraints](docs/stage-2.md).
 
-## Run
+## Run and try it
 
-From this folder in PowerShell (Python 3.14):
+In PowerShell, open this `attendance-tracker` folder. On this computer the packages
+are installed already. To install the updated dependencies on another checkout:
 
 ```powershell
-# Only needed on a new checkout:
 py -3.14 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
 
-# Start the app:
+Create your teacher account:
+
+```powershell
+.\.venv\Scripts\python.exe -m app.create_user teacher --name "Teacher" --role teacher
+```
+
+Choose and repeat a password at the hidden prompt. Use 12–128 characters. Passwords
+are never passed as command arguments, saved in source files, or printed back.
+Run this command in an interactive terminal so the password can remain hidden.
+There is no default password and no pre-created account.
+
+Create a student account to try both roles:
+
+```powershell
+.\.venv\Scripts\python.exe -m app.create_user madina --name "Madina"
+```
+
+The default role is student. Usernames use 3–100 ASCII letters, digits, dots,
+underscores or hyphens. They are trimmed and lowercased: `MADINA` and `madina` refer
+to the same account. Display names retain their case. Passwords are not trimmed
+or lowercased. An existing username is rejected, never overwritten.
+
+Start the app:
+
+```powershell
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-Open http://127.0.0.1:8000/ and stop with Ctrl+C. If the old Stage 1 server is
-still running, stop it first, or add `--port 8001` and open that port.
-Startup creates missing tables in `attendance.db`; it does not add sample users.
-The Python environment and database stay out of Git.
+Open http://127.0.0.1:8000/login. Stop an older server first if it occupies that
+port, or add `--port 8001` and open the new port. Press Ctrl+C to stop.
 
-## The new concept: models
+1. Log in as teacher and see the teacher welcome page.
+2. Log out, then log in as Madina and see the student welcome page.
+3. While logged in as Madina, open `/teacher`: it returns a permission error.
+4. Log out and try `/student`: it sends you back to login.
+5. Try a wrong password: the form shows an error and keeps the password field empty.
 
-We need a consistent shape for each kind of stored information. A **model** is a
-Python class mapped to a database table by SQLAlchemy's ORM. One object represents
-one row. Without this shared definition, every query would have to repeat our
-assumptions about columns and their types.
+We use a local account command in this stage so the teacher can create the first
+account without a public registration route. Anyone who can run this command with
+access to your local database can create a teacher. Student creation in the teacher
+interface will be a later increment; students cannot choose or change their role.
+
+## What happens when you log in
 
 ```text
-User --< Enrollment >-- Group --< Lesson
-             |
-             +--< LessonPackage --< Attendance >-- Lesson
-             +--------------------< Attendance
+Browser -- GET /login --> server renders form + hidden CSRF token
+   |
+   +-- POST /login (username, password, token; session cookie)
+                  |
+                  v
+           Check form token
+           Look up username in SQLite
+           Verify password against Argon2 hash
+                  |
+          +-------+---------+
+          |                 |
+        failure           success
+          |                 |
+     Show same error    Replace session contents
+     for unknown user   Store user ID + new form token
+     or bad password    Sign session cookie
+                            |
+                        303 redirect
+                            |
+Browser -- GET /student or /teacher --> look up user + check current role
+                            |
+                       Render welcome page
 ```
 
-`--<` means one-to-many. Each enrollment belongs to one student and one group.
-Each package belongs to an enrollment, keeping course balances separate. Each
-attendance points to a lesson, enrollment, and the specific package consumed.
+`GET` requests read pages. `POST` submits an action, which is why login and logout
+use forms. A **303 redirect** tells the browser to follow a successful POST with a
+GET, so refreshing the welcome page doesn't submit the login again.
 
-| Table | What one row means |
+## Three concepts to learn now
+
+**Password hashing:** we need to check a password without storing the password
+itself. Argon2 produces a salted, deliberately expensive hash. `pwdlib` handles
+hashing and verification; two users with the same password get different hashes.
+The database stores only the hash. This reduces the damage of a database leak;
+it does not make weak passwords impossible to guess. We use the established
+library rather than inventing a password algorithm.
+
+**Sessions:** after login, the browser needs a way to identify the same user on
+later requests. A cookie carries a small signed session containing only a user ID
+and form token. The signature detects edits. Signed does not mean encrypted, so
+we never put passwords or hashes in it. The local `.session-secret` key is generated
+once, reused across restarts, and ignored by Git. Keep it private. This simple
+server-rendered app uses Starlette's cookie sessions; JWT access/refresh tokens or
+a database-backed session system would add concepts we do not need for this stage.
+
+**Authentication versus authorization:** authentication asks “who are you?”;
+authorization asks “may you open this page?” A successful login proves identity.
+Every protected request separately reads the role from SQLite. Hiding a teacher
+link would not protect the teacher URL, so the server performs the check.
+
+The hidden **CSRF token** ties a submitted form to the browser session that loaded
+it. It helps prevent another website from tricking your browser into sending an
+action. Both login and logout require it, and login rotates it. A form from an old
+session may need to be reloaded. `HttpOnly` blocks JavaScript from reading the
+session cookie; `SameSite=Lax` limits when browsers send it across sites. These
+complement the form token.
+
+## Read the important files
+
+| File | What changed and why |
 | --- | --- |
-| users | An account with username, display name, password hash and role |
-| groups | A teaching group |
-| enrollments | A student's membership in a group, with an active flag |
-| lesson_packages | One purchase, normally 12 lessons, with its purchase time |
-| lessons | One group lesson; optional temporary-code fields reserved for later |
-| attendance | One enrollment attending one lesson using one package |
+| `app/create_user.py` | Local command, hidden password confirmation, input validation and account insertion. `create_user()` is also testable without a terminal. |
+| `app/security.py` | Username normalization, Argon2 verification, local signing key, current-user lookup and form-token checks. An unknown user still performs a dummy password check to reduce timing differences. |
+| `app/main.py` | Login/logout and protected routes. `create_app()` allows tests to provide a separate database and key. `get_db()` opens and closes a SQLAlchemy Session per request. |
+| `app/database.py` | Initialization can receive a test engine; the SQLite configuration remains the same. |
+| `app/models.py` | Unchanged. The existing User fields are sufficient for this increment. |
+| `app/templates/base.html` | Shared page structure and logout form; other templates extend it instead of repeating the same HTML. |
+| `app/templates/index.html` | Public welcome page with a login link. |
+| `app/templates/login.html` | Labeled form, browser password-manager support, hidden token and error message. |
+| `app/templates/teacher.html`, `student.html` | Separate welcome pages with the logged-in user's escaped display name. |
+| `app/templates/error.html` | Readable permission, expired-form and missing-page errors. |
+| `app/static/style.css` | Simple form styling and visible keyboard focus. |
+| `tests/test_auth.py` | Account creation, login, sessions, permissions, logout and invalid-input tests. |
+| `tests/test_database.py` | Existing Stage 2 integrity tests, still run unchanged. |
+| `requirements.txt` | Adds password hashing, cookie signing, form parsing and the HTTP test client, with pinned dependencies. |
+| `.gitignore` | Also excludes the local signing key. |
 
-The password column is for a hash, never a plaintext password. No password
-creation or verification is implemented. Tests use obvious placeholders only in
-throwaway databases. The models cannot determine whether a supplied string is
-actually a secure hash; the future account-creation code must ensure that.
+A **SQLAlchemy Session** is a unit of database work. It is unrelated to the
+**browser session** that remembers login. `Depends(get_db)` supplies a database
+session to each route and closes it afterward. `commit()` saves an account;
+`rollback()` clears a failed write, such as a duplicate username.
 
-## Read the code in this order
+`base.html` introduces template inheritance: each child fills its `content` block.
+Jinja2 escapes names and error values when displaying them as HTML. Protected
+pages use `Cache-Control: no-store` so normal browser caching does not retain them.
 
-1. `app/database.py`: `Base` collects table definitions. `make_engine()` creates
-   a connection manager and enables SQLite foreign keys on **every connection**.
-   SQLite needs this explicitly; otherwise declared links would not be enforced.
-   `initialize_database()` imports the models then creates missing tables.
-2. `app/models.py`: six model classes. `Mapped[int]` describes a Python attribute;
-   `mapped_column(primary_key=True)` makes its unique row ID. `ForeignKey` links
-   to another table. Non-optional mapped fields are required (`NOT NULL`).
-   Defaults such as 12 are supplied by SQLAlchemy when inserting a row.
-3. `app/main.py`: startup now calls `initialize_database()` instead of `SELECT 1`.
-   The home route and Jinja2 rendering still work as in Stage 1.
-4. `tests/test_database.py`: writes valid and invalid records into an in-memory
-   SQLite database and checks the outcomes. It never writes to `attendance.db`.
-
-Foreign keys express the relationships at this stage. We haven't added Python
-`relationship()` navigation attributes because no screen needs them yet.
-
-## Constraints: rules the database enforces
-
-- Usernames must be unique; roles must be teacher or student.
-- A student can have only one enrollment per group. Reactivate that membership
-  instead of creating another if the student returns.
-- Each enrollment can have only one attendance per lesson, even if someone tries
-  to use a different package for the second record.
-- A package's lesson allowance must be positive.
-- The attendance's package must belong to its enrollment. This uses a **composite
-  foreign key**: SQLite checks the pair `(package_id, enrollment_id)` together.
-  The matching unique pair in `lesson_packages` is required for that reference.
-- Referenced parents cannot be deleted; no cascade deletion removes history.
-- A lesson's code and expiry must either both be absent or both be present, with
-  expiry after lesson start. Code generation and collision handling come later.
-
-A foreign key prevents a reference to a missing row. A unique constraint prevents
-repeated combinations. A check constraint validates values in a row. These rules
-continue to work if a future route accidentally skips its own validation.
-
-Not every rule is in these tables: student-only enrollment, active membership,
-matching lesson/enrollment groups, unexpired codes, and remaining package capacity
-must be checked by future application code. Concurrent spending of the final
-lesson will also need transaction handling and tests. This schema alone is not a
-complete or usable check-in system. SQLite does not enforce `String(100)` as a
-length limit; future forms must validate length and normalize usernames.
-
-All stored timestamps represent UTC. SQLite returns naive datetimes, so
-`utc_now()` deliberately stores UTC without a timezone marker. Future expiry
-comparisons must follow the same convention.
-
-## History and balances
-
-A renewal creates a **new** LessonPackage row. Existing attendance continues to
-reference the old package. No used or remaining counters are stored:
-
-```text
-used = count of attendance rows for this package
-remaining = lesson_limit - used
-```
-
-The tests demonstrate 1 attendance out of 12 leaving 11, while a new package has
-zero attendance. This is a query demonstration, not a balance endpoint. The later
-check-in transaction must prevent consumption beyond the allowance.
-
-`create_all()` creates missing tables; it does **not** update existing table
-columns or constraints. It is sufficient to move from Stage 1's empty file to this
-first schema. Later schema changes will need migrations; do not delete real data
-to make a changed model take effect.
-
-## Verify
+## Test this stage
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Nine tests cover foreign keys, duplicate membership, duplicate attendance across
-packages, incorrect package ownership, invalid package sizes, renewal history,
-protected deletion, role/username constraints, and incomplete code windows.
-`Session` is SQLAlchemy's unit of database work; `commit()` saves it and
-`rollback()` clears a failed transaction so work can continue. Tests intentionally
-attempt invalid writes and expect `IntegrityError`, the database rejection.
+The suite has 25 tests: 9 database tests and 16 authentication tests. Authentication
+tests use temporary SQLite files and test-only passwords, never your real database.
+The HTTP client exercises actual routes, forms, cookies and templates in-process.
 
-For a read-only look at the local tables after startup:
+The checks include hashing and salting, normalization, validation, duplicate
+accounts, both roles, generic login errors, missing/wrong/cross-browser form tokens,
+POST-only logout, expired/tampered cookies, current database permissions, deleted
+users, HTML escaping, unusable placeholder hashes, and the account command.
 
-```powershell
-.\.venv\Scripts\python.exe -c "from sqlalchemy import inspect; from app.database import engine; print(inspect(engine).get_table_names())"
-```
+New libraries: `pwdlib` with Argon2 hashes passwords, `itsdangerous` signs cookies,
+`python-multipart` parses forms, and `httpx2` supports the installed Starlette test
+client. Python's built-in `unittest` remains the test runner.
 
-Refresh the home page to check HTML and CSS still load. No student data appears yet.
+## Exact limits of this increment
 
-## Files
+The cookie expires eight hours after issue. Logging out clears this browser's
+cookie; a previously copied cookie is not individually revoked by this cookie-only
+approach. Changing the signing key invalidates all existing cookies. There is no
+password-reset or session-management screen yet.
 
-| File | Purpose |
-| --- | --- |
-| `app/__init__.py` | Marks the app as a Python package |
-| `app/database.py` | Base, SQLite engine, foreign-key setup and schema creation |
-| `app/models.py` | Six tables and their constraints |
-| `app/main.py` | Application startup, home route and static-file serving |
-| `app/templates/index.html` | Jinja2-rendered welcome page |
-| `app/static/style.css` | Basic responsive styling |
-| `tests/test_database.py` | Isolated database tests using Python's built-in unittest |
-| `requirements.txt` | Pinned packages; no new dependencies in Stage 2 |
-| `.gitignore` | Excludes local databases, secrets, environments and caches |
-| `docs/stage-1.md` | Earlier design and beginner HTTP/template explanations |
-| `README.md` | Current stage, setup, concepts and verification |
+This remains a local HTTP app. Secure-only cookies are disabled so localhost HTTP
+works. Login throttling and the HTTPS/deployment configuration are not included in
+this increment and must be addressed before opening it to real students online.
+No schema migration is needed here; the six Stage 2 tables are unchanged.
 
-## Your turn
+## Your turn before the next stage
 
-1. Before running it, predict what happens if the same enrollment attends the same
-   lesson using a newly purchased package. Find the test that proves your answer.
-2. In the renewal test, add an assertion that the new package has 12 remaining
-   lessons. Calculate it from its allowance and attendance count.
+1. Predict what happens if Madina types `/teacher` directly into the address bar.
+   Find the comparison in `role_page()` that explains the result.
+2. Change the student welcome sentence in `student.html`, refresh the page, then
+   use `git diff` to inspect your change. Explain why the teacher page is unaffected.
 
-Use `git diff` to review your exercise change before committing it. This milestone
-is saved as `add database models and integrity tests`. A sensible next increment
-is safe account creation and authentication, after these relationships make sense.
+The Git milestone is `add account creation and session authentication`. The next
+small increment can add teacher group creation and student enrollment with a
+12-lesson package.
 
-Reference: [SQLAlchemy SQLite foreign keys](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support).
+References: [FastAPI password hashing](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#password-hashing)
+and [Starlette session middleware](https://www.starlette.io/middleware/#sessionmiddleware).
+We use the password-hashing guidance from the first reference, not its JWT flow.

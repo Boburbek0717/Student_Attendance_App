@@ -1,17 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
-</head>
-<body>
-    <main>
-        <p class="eyebrow">Stage 2 · Database foundation</p>
-        <h1>{{ title }}</h1>
-        <p>Welcome! This is the first page of your lesson-package and attendance tracker.</p>
-        <p>The local app is running. Student accounts, groups, and check-in will be added in later stages.</p>
-    </main>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome</h1>
+<p>Log in to your teacher or student account.</p>
+<p><a class="button" href="/login">Log in</a></p>
+{% endblock %}

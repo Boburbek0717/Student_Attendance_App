@@ -1,0 +1,76 @@
+import re
+import secrets
+from pathlib import Path
+
+from fastapi import HTTPException, Request
+from pwdlib import PasswordHash
+from pwdlib.exceptions import UnknownHashError
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.models import User
+
+
+password_hasher = PasswordHash.recommended()
+# Unknown accounts still perform verification to reduce timing clues.
+DUMMY_HASH = password_hasher.hash(secrets.token_urlsafe(32))
+SECRET_PATH = Path(__file__).resolve().parent.parent / ".session-secret"
+
+
+def load_session_secret() -> str:
+    if not SECRET_PATH.exists():
+        try:
+            with SECRET_PATH.open("x", encoding="utf-8") as secret_file:
+                secret_file.write(secrets.token_hex(32))
+        except FileExistsError:
+            pass
+    secret = SECRET_PATH.read_text(encoding="utf-8").strip()
+    if len(secret) < 64:
+        raise RuntimeError("The local .session-secret file is invalid.")
+    return secret
+
+
+def normalize_username(username: str) -> str:
+    username = username.strip().lower()
+    if not re.fullmatch(r"[a-z0-9_.-]{3,100}", username):
+        raise ValueError("Use 3–100 letters, numbers, dots, underscores or hyphens for the username.")
+    return username
+
+
+def authenticate(db: Session, username: str, password: str) -> User | None:
+    try:
+        username = normalize_username(username)
+    except ValueError:
+        username = ""
+    if not 1 <= len(password) <= 128:
+        return None
+    user = db.scalar(select(User).where(User.username == username))
+    stored_hash = user.password_hash if user else DUMMY_HASH
+    try:
+        valid = password_hasher.verify(password, stored_hash)
+    except (UnknownHashError, ValueError):
+        # Stage 2 placeholders are not real credentials and cannot authenticate.
+        valid = False
+    return user if valid else None
+
+
+def current_user(request: Request, db: Session) -> User | None:
+    user_id = request.session.get("user_id")
+    if type(user_id) is not int:
+        return None
+    user = db.get(User, user_id)
+    if user is None:
+        request.session.clear()
+    return user
+
+
+def csrf_token(request: Request) -> str:
+    if "csrf_token" not in request.session:
+        request.session["csrf_token"] = secrets.token_urlsafe(32)
+    return request.session["csrf_token"]
+
+
+def verify_csrf(request: Request, submitted: str) -> None:
+    expected = request.session.get("csrf_token")
+    if not expected or not secrets.compare_digest(expected.encode(), submitted.encode()):
+        raise HTTPException(status_code=403, detail="This form has expired. Reload the page and try again.")

@@ -17,3 +17,19 @@ main {
 }
 h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); line-height: 1.2; }
 .eyebrow { color: #365caf; font-size: 0.9rem; font-weight: 600; }
+label { display: block; margin-top: 1rem; font-weight: 600; }
+input {
+    width: 100%; padding: 0.7rem; margin: 0.3rem 0 0.7rem;
+    font: inherit; border: 1px solid #8190a5; border-radius: 0.3rem;
+}
+button, .button {
+    display: inline-block; padding: 0.65rem 1.2rem; border: 0;
+    border-radius: 0.3rem; background: #284d99; color: white;
+    font: inherit; text-decoration: none; cursor: pointer;
+}
+a { color: #284d99; }
+:focus-visible { outline: 3px solid #a25a00; outline-offset: 3px; }
+.error { padding: 0.8rem; color: #8f1a1a; background: #fff0f0; }
+.hint { font-size: 0.9rem; color: #4d5d73; }
+.logout { border-top: 1px solid #d8e0eb; margin-top: 2rem; padding-top: 1rem; }
+.secondary { color: #203047; background: #e5ebf3; }
