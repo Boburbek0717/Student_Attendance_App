@@ -1,10 +1,12 @@
-# Student Attendance Tracker — Manual package renewal
+# Student Attendance Tracker — Student management
 
 The teacher page supports creating groups, creating student accounts, enrolling
 students with a 12-lesson package, starting group lessons, and viewing balances
 and attendance history. Students can check in with a temporary code. Teachers can
 manually renew packages, including early and late renewals; no payments are taken
 in the app. Available, advance and owed lesson counters are calculated from records.
+Teachers can also search students, edit profiles, reset passwords and deactivate
+or reactivate group enrollments from **Manage students**.
 
 ## Run
 
@@ -65,8 +67,25 @@ See [the attendance lesson](docs/attendance.md) for the flow, configuration and
 concurrency explanation.
 
 Group names may repeat; IDs distinguish them. Usernames are unique and lowercased.
-Inactive enrollments are shown but cannot be re-created or renewed. Reactivation
-is a later feature. All teachers administer the same business.
+Inactive enrollments cannot be re-created or renewed. Use **Manage students** to
+reactivate the existing enrollment without adding a package. All teachers
+administer the same business.
+
+## Student management
+
+Choose **Manage students** on the teacher page, search by name or username, and
+open a student's management page. This also lists students without a group.
+
+- **Save details** updates name and username; it keeps the same account ID and history.
+- **Reset password** requires two matching entries of 12–128 characters and signs
+  out that student's existing sessions. Share the new password privately yourself.
+- **Deactivate enrollment** blocks check-in and renewal for that group, while
+  keeping available/owed lessons and history. The student can still log in.
+- **Reactivate enrollment** restores the same membership and balance; it creates
+  no new package. Other groups are unaffected.
+
+There is no account deletion or student self-service editing in this increment.
+See [the student-management lesson](docs/student-management.md) for the code and tests.
 
 ## Concepts introduced
 
@@ -107,6 +126,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `app/main.py` | App setup, login/logout, code-duration configuration and route registration |
 | `app/teacher.py` | Teacher-only routes, renewal preview/confirmation, enrollment and lessons |
 | `app/student.py` | Student-only dashboard and check-in form handling |
+| `app/student_management.py` | Teacher student search, profile updates, password resets and enrollment status |
 | `app/attendance.py` | Serialized lesson creation/check-in and student record queries |
 | `app/packages.py` | Package accounting, carried debt, renewal transaction and stale-form checks |
 | `app/web.py` | Shared template rendering and database connections per request |
@@ -118,6 +138,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `app/templates/teacher.html` | Forms, errors and group rosters |
 | `app/templates/renew_package.html` | Teacher renewal preview and confirmation |
 | `app/templates/lesson_balance.html` | Shared available, advance and owed counters |
+| `app/templates/students.html`, `manage_student.html` | Student directory and management forms |
 | `app/templates/base.html` | Shared layout and logout form |
 | `app/static/style.css` | Responsive forms and roster styling |
 | `tests/test_teacher.py` | Teacher flow, access control, rollback and balance tests |
@@ -125,6 +146,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `tests/test_database.py` | Database-integrity tests |
 | `tests/test_attendance.py` | Attendance rules, privacy, expiry, collisions and simultaneous requests |
 | `tests/test_packages.py` | Early/late renewal, debt settlement, history and concurrent requests |
+| `tests/test_student_management.py` | Management permissions, validation, password revocation and preserved records |
 
 ## Verify and learn
 
@@ -132,7 +154,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 71 tests use isolated databases, not real student data. Read the
+All 80 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 

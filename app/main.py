@@ -15,6 +15,7 @@ from app.security import AttemptLimiter, start_session, revoke_session
 from app.middleware import RequestBodyLimit
 from app.teacher import router as teacher_router
 from app.student import router as student_router
+from app.student_management import router as management_router
 from app.web import APP_DIRECTORY, get_db, render
 
 
@@ -48,6 +49,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     app.mount("/static", StaticFiles(directory=APP_DIRECTORY / "static"), name="static")
     app.include_router(teacher_router)
     app.include_router(student_router)
+    app.include_router(management_router)
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException):

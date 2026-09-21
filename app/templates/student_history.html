@@ -5,6 +5,7 @@
 <a href="/teacher">Back to teacher page</a>
 <h1>{{ student.display_name }} — attendance</h1>
 <p class="hint">Username: {{ student.username }}</p>
+<p><a href="/teacher/students/{{ student.id }}/manage">Manage student</a></p>
 {% include "package_summary.html" %}
 {% include "attendance_history.html" %}
 {% endblock %}

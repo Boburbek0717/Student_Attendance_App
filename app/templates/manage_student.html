@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Manage student · Student Attendance Tracker{% endblock %}
+{% block content %}
+<a href="/teacher/students">Back to students</a>
+<h1>{{ student.display_name }}</h1>
+{% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
+<section class="group-card" aria-labelledby="profile-heading">
+    <h2 id="profile-heading">Student details</h2>
+    {% if section == 'profile' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="/teacher/students/{{ student.id }}/profile">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+        <input type="hidden" name="expected_username" value="{{ student.username }}">
+        <input type="hidden" name="expected_name" value="{{ student.display_name }}">
+        <label for="name">Display name</label>
+        <input id="name" name="display_name" value="{{ student.display_name }}" maxlength="100" required>
+        <label for="username">Username</label>
+        <input id="username" name="username" value="{{ student.username }}" minlength="3" maxlength="100" autocomplete="off" autocapitalize="none" spellcheck="false" required>
+        <p class="hint">Changing a username changes what the student types at login. Their records stay with the same account.</p>
+        <button type="submit">Save details</button>
+    </form>
+</section>
+<section class="group-card" aria-labelledby="password-heading">
+    <h2 id="password-heading">Reset password</h2>
+    {% if section == 'password' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <p>Resetting signs the student out of all existing logins. Share the new password privately.</p>
+    <form method="post" action="/teacher/students/{{ student.id }}/password">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+        <label for="new-password">New password (12–128 characters)</label>
+        <input id="new-password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+        <label for="repeat-password">Repeat new password</label>
+        <input id="repeat-password" name="confirm_password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+        <button type="submit">Reset password and sign out student</button>
+    </form>
+</section>
+<section id="memberships" aria-labelledby="memberships-heading">
+    <h2 id="memberships-heading">Group enrollments</h2>
+    {% if section == 'enrollment' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <p class="hint">Deactivation blocks check-in and renewal for that group. The student can still log in and view history. Reactivation restores the same enrollment without adding a package.</p>
+    {% for enrollment, group in memberships %}
+    <article class="group-card">
+        <h3>{{ group.name }}</h3>
+        <p>Status: <strong>{{ 'Active' if enrollment.active else 'Inactive' }}</strong></p>
+        {% set balance = balances[enrollment.id] %}
+        {% include "lesson_balance.html" %}
+        <form method="post" action="/teacher/students/{{ student.id }}/enrollments/{{ enrollment.id }}/status">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+            <input type="hidden" name="active" value="{{ 'false' if enrollment.active else 'true' }}">
+            <button type="submit" class="secondary">{{ 'Deactivate enrollment' if enrollment.active else 'Reactivate enrollment' }}</button>
+        </form>
+    </article>
+    {% else %}<p>No enrollments yet. Enroll this student from the teacher page.</p>{% endfor %}
+</section>
+<p><a href="/teacher/students/{{ student.id }}/history">View packages and attendance history</a></p>
+{% endblock %}

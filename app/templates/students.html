@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Manage students · Student Attendance Tracker{% endblock %}
+{% block content %}
+<a href="/teacher">Back to teacher page</a>
+<h1>Manage students</h1>
+<form method="get" action="/teacher/students">
+    <label for="search">Find by name or username</label>
+    <input id="search" name="q" value="{{ query }}" maxlength="100" type="search">
+    <button type="submit">Search</button> <a href="/teacher/students">Show all</a>
+</form>
+<p class="hint">Includes students who are not enrolled in a group yet.</p>
+{% for student in students %}
+<article class="group-card">
+    <h2>{{ student.display_name }}</h2>
+    <p>Username: {{ student.username }}</p>
+    <a href="/teacher/students/{{ student.id }}/manage">Manage student</a>
+</article>
+{% else %}<p>No students found. You can create students on the teacher page.</p>{% endfor %}
+{% endblock %}

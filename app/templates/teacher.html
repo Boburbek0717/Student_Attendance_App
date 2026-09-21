@@ -4,6 +4,7 @@
 {% block content %}
 <h1>Welcome, {{ user.display_name }}</h1>
 <p>You are logged in as a teacher.</p>
+<p><a class="button" href="/teacher/students">Manage students</a></p>
 {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
 <div class="teacher-forms">
     <section aria-labelledby="group-heading">
@@ -86,6 +87,7 @@
         <div class="member">
             <h4>{{ member.student.display_name }} <span class="hint">({{ member.student.username }})</span></h4>
             <a href="/teacher/students/{{ member.student.id }}/history">Attendance history</a>
+            · <a href="/teacher/students/{{ member.student.id }}/manage">Manage student</a>
             {% if member.active %}<p><a class="button" href="/teacher/enrollments/{{ member.enrollment_id }}/renew">Renew package</a></p>{% endif %}
             {% set balance = member.balance %}
             {% include "lesson_balance.html" %}
