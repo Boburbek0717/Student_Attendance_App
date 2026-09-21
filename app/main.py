@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.database import check_database, engine
+from app.database import initialize_database, engine
 
 
 APP_DIRECTORY = Path(__file__).resolve().parent
@@ -14,7 +14,7 @@ APP_DIRECTORY = Path(__file__).resolve().parent
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    check_database()
+    initialize_database()
     try:
         yield
     finally:

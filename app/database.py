@@ -1,16 +1,38 @@
 from pathlib import Path
+from sqlalchemy import URL, create_engine, event
+from sqlalchemy.orm import DeclarativeBase
 
-from sqlalchemy import URL, create_engine, text
+
+class Base(DeclarativeBase):
+    pass
 
 
 DATABASE_PATH = Path(__file__).resolve().parent.parent / "attendance.db"
-engine = create_engine(
-    URL.create("sqlite", database=str(DATABASE_PATH)),
-    connect_args={"check_same_thread": False},
-)
 
 
-def check_database() -> None:
-    """Open the SQLite file and verify that it can answer a query."""
-    with engine.connect() as connection:
-        connection.execute(text("SELECT 1"))
+def make_engine(database: str):
+    engine = create_engine(
+        URL.create("sqlite", database=database),
+        connect_args={"check_same_thread": False},
+    )
+
+    @event.listens_for(engine, "connect")
+    def enable_foreign_keys(connection, connection_record):
+        previous = connection.autocommit
+        connection.autocommit = True
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+        connection.autocommit = previous
+
+    return engine
+
+
+engine = make_engine(str(DATABASE_PATH))
+
+
+def initialize_database() -> None:
+    # Import models so their tables are registered before creating the schema.
+    from app import models
+
+    Base.metadata.create_all(engine)
