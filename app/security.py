@@ -22,12 +22,13 @@ DUMMY_HASH = password_hasher.hash(secrets.token_urlsafe(32))
 SECRET_PATH = Path(__file__).resolve().parent.parent / ".session-secret"
 
 
-class LoginLimiter:
+class AttemptLimiter:
     """A bounded, per-process limit for this local single-server app."""
 
-    def __init__(self):
+    def __init__(self, message="Too many login attempts. Wait a minute and try again."):
         self.attempts = OrderedDict()
         self.lock = Lock()
+        self.message = message
 
     def check(self, address: str) -> None:
         now = monotonic()
@@ -37,7 +38,7 @@ class LoginLimiter:
             if len(self.attempts) > 2048:
                 self.attempts.popitem(last=False)
             if len(recent) >= 10:
-                raise HTTPException(429, "Too many login attempts. Wait a minute and try again.",
+                raise HTTPException(429, self.message,
                                     headers={"Retry-After": "60"})
             recent.append(now)
 

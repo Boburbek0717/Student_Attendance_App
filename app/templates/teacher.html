@@ -63,12 +63,29 @@
 </div>
 <section id="groups" aria-labelledby="groups-heading">
     <h2 id="groups-heading">Groups and lesson packages</h2>
+    {% if section == 'lesson' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
     {% for group in groups %}
-    <article class="group-card">
+    <article class="group-card" id="group-{{ group.id }}">
         <h3>{{ group.name }} <span class="hint">#{{ group.id }}</span></h3>
+        {% set lesson = active_lessons.get(group.id) %}
+        {% if lesson %}
+        <div class="lesson-code">
+            <p>Lesson #{{ lesson.id }} · Attendance code</p>
+            <strong class="code">{{ lesson.attendance_code }}</strong>
+            <p>Expires at {{ lesson.code_expires_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC.</p>
+            <p class="hint">Share this code with your group. Refresh to see updated attendance and code status.</p>
+        </div>
+        {% else %}
+        <form method="post" action="/teacher/groups/{{ group.id }}/lessons">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+            <button type="submit">Start a new lesson</button>
+        </form>
+        <p class="hint">Creates a new lesson with a code valid for {{ code_minutes }} minutes. Use once per class.</p>
+        {% endif %}
         {% for member in members_by_group.get(group.id, []) %}
         <div class="member">
             <h4>{{ member.student.display_name }} <span class="hint">({{ member.student.username }})</span></h4>
+            <a href="/teacher/students/{{ member.student.id }}/history">Attendance history</a>
             {% if not member.active %}<p class="hint">Inactive enrollment</p>{% endif %}
             <ul>
                 {% for package in member.packages %}

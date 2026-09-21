@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -10,13 +11,18 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.database import engine, initialize_database
 from app.security import authenticate, current_user, load_session_secret, verify_csrf
-from app.security import LoginLimiter, start_session, revoke_session
+from app.security import AttemptLimiter, start_session, revoke_session
 from app.middleware import RequestBodyLimit
 from app.teacher import router as teacher_router
+from app.student import router as student_router
 from app.web import APP_DIRECTORY, get_db, render
 
 
-def create_app(database_engine: Engine = engine, session_secret: str | None = None) -> FastAPI:
+def create_app(database_engine: Engine = engine, session_secret: str | None = None, code_minutes: int | None = None) -> FastAPI:
+    if code_minutes is None:
+        code_minutes = int(os.environ.get("ATTENDANCE_CODE_MINUTES", "15"))
+    if not 1 <= code_minutes <= 60:
+        raise ValueError("ATTENDANCE_CODE_MINUTES must be between 1 and 60.")
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         initialize_database(database_engine)
@@ -27,7 +33,9 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
 
     app = FastAPI(title="Student Attendance Tracker", lifespan=lifespan)
     app.state.database_engine = database_engine
-    app.state.login_limiter = LoginLimiter()
+    app.state.login_limiter = AttemptLimiter()
+    app.state.checkin_limiter = AttemptLimiter("Too many check-in attempts. Wait a minute and try again.")
+    app.state.code_minutes = code_minutes
     app.add_middleware(
         SessionMiddleware,
         secret_key=session_secret or load_session_secret(),
@@ -39,6 +47,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     app.add_middleware(RequestBodyLimit)
     app.mount("/static", StaticFiles(directory=APP_DIRECTORY / "static"), name="static")
     app.include_router(teacher_router)
+    app.include_router(student_router)
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException):
@@ -87,18 +96,6 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         revoke_session(request, db)
         request.session.clear()
         return RedirectResponse("/login", status_code=303)
-
-    def role_page(request: Request, db: Session, role: str):
-        user = current_user(request, db)
-        if user is None:
-            return RedirectResponse("/login", status_code=303)
-        if user.role != role:
-            raise HTTPException(status_code=403, detail="Your account cannot open this page.")
-        return render(request, f"{role}.html", user=user)
-
-    @app.get("/student", response_class=HTMLResponse)
-    def student_page(request: Request, db: Session = Depends(get_db)):
-        return role_page(request, db, "student")
 
     return app
 

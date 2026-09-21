@@ -43,3 +43,9 @@ select { width: 100%; padding: 0.7rem; margin: 0.3rem 0 0.7rem; font: inherit; b
 .member + .member { border-top: 1px solid #d8e0eb; margin-top: 1rem; }
 .member { overflow-wrap: anywhere; }
 @media (max-width: 850px) { .teacher-forms { grid-template-columns: 1fr; } }
+.lesson-code { padding: 1rem; background: #edf3fd; border-radius: 0.4rem; }
+.code { font-size: 2rem; font-family: monospace; letter-spacing: 0.15em; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+th, td { padding: 0.7rem; border-bottom: 1px solid #d8e0eb; }
+th { background: #f3f6fa; }

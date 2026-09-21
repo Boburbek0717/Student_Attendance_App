@@ -1,0 +1,19 @@
+<section aria-labelledby="history-heading">
+    <h2 id="history-heading">Attendance history</h2>
+    {% if history %}
+    <p class="hint">All dates and times are shown in UTC.</p>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Attendance history table">
+        <table>
+            <thead><tr><th scope="col">Group</th><th scope="col">Lesson started</th><th scope="col">Checked in</th><th scope="col">Package</th></tr></thead>
+            <tbody>
+            {% for entry in history %}
+                <tr><td>{{ entry.group_name }} · #{{ entry.lesson_id }}</td>
+                    <td>{{ entry.started_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ entry.checked_in_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>#{{ entry.package_id }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}<p>No attendance recorded yet.</p>{% endif %}
+</section>

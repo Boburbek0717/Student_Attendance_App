@@ -1,0 +1,12 @@
+<section aria-labelledby="packages-heading">
+    <h2 id="packages-heading">Lesson packages</h2>
+    {% for enrollment, group in memberships %}
+    <article class="group-card">
+        <h3>{{ group.name }}</h3>
+        {% if not enrollment.active %}<p class="hint">Inactive enrollment</p>{% endif %}
+        {% for package in packages_by_enrollment.get(enrollment.id, []) %}
+        <p>Package #{{ package.id }}: {{ package.used }} / {{ package.limit }} lessons used · <strong>{{ package.remaining }} remaining</strong></p>
+        {% else %}<p>No package yet. Contact your teacher.</p>{% endfor %}
+    </article>
+    {% else %}<p>No group enrollments yet. Ask your teacher to enroll you.</p>{% endfor %}
+</section>

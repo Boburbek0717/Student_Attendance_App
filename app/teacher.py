@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 
 from app.create_user import create_user
-from app.models import Attendance, Enrollment, Group, LessonPackage, User
+from app.attendance import start_lesson, student_records
+from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, User, utc_now
 from app.security import current_user, verify_csrf
 from app.web import get_db, render
 
@@ -53,17 +54,46 @@ def dashboard(request: Request, db: Session, user: User, *, error=None, section=
             "student": student, "active": enrollment.active,
             "packages": packages_by_enrollment.get(enrollment.id, []),
         })
+    open_lessons = db.scalars(select(Lesson).where(
+        Lesson.started_at <= utc_now(), Lesson.code_expires_at > utc_now(),
+    ).order_by(Lesson.id)).all()
+    active_lessons = {lesson.group_id: lesson for lesson in open_lessons}
     return render(
         request, "teacher.html", 400 if error else 200, user=user,
         groups=groups, students=students, members_by_group=members_by_group,
         error=error, section=section, values=values or {},
         notice=NOTICES.get(request.query_params.get("created")) if not error else None,
+        active_lessons=active_lessons, code_minutes=request.app.state.code_minutes,
     )
 
 
 @router.get("", response_class=HTMLResponse)
 def teacher_page(request: Request, db: Session = Depends(get_db), user: User = Depends(require_teacher)):
     return dashboard(request, db, user)
+
+
+@router.post("/groups/{group_id}/lessons", response_class=HTMLResponse)
+def start_group_lesson(
+    group_id: int, request: Request, csrf: str = Form(default=""),
+    db: Session = Depends(get_db), user: User = Depends(require_teacher),
+):
+    verify_csrf(request, csrf)
+    try:
+        start_lesson(request.app.state.database_engine, user.id, group_id, request.app.state.code_minutes)
+    except ValueError as error:
+        return dashboard(request, db, user, error=str(error), section="lesson")
+    return RedirectResponse(f"/teacher#group-{group_id}", status_code=303)
+
+
+@router.get("/students/{student_id}/history", response_class=HTMLResponse)
+def student_history(
+    student_id: int, request: Request, db: Session = Depends(get_db), user: User = Depends(require_teacher),
+):
+    student = db.get(User, student_id) if 0 < student_id < 2**63 else None
+    if student is None or student.role != "student":
+        raise HTTPException(404, "Student not found.")
+    return render(request, "student_history.html", user=user, student=student,
+                  **student_records(db, student.id))
 
 
 @router.post("/groups", response_class=HTMLResponse)
