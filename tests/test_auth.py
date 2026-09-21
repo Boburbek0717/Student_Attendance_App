@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.create_user import create_user, main as create_user_command
 from app.database import initialize_database, make_engine
 from app.main import create_app
-from app.models import User
+from app.models import LoginSession, User, utc_now
 from app.security import password_hasher
 
 
@@ -89,7 +89,7 @@ class AuthenticationTests(unittest.TestCase):
         self.assertIn("samesite=lax", cookie_header)
         self.assertIn("max-age=28800", cookie_header)
         data = json.loads(base64.b64decode(self.client.cookies[COOKIE].split(".")[0]))
-        self.assertEqual(set(data), {"user_id", "csrf_token"})
+        self.assertEqual(set(data), {"session_id", "csrf_token"})
         self.assertNotIn(PASSWORD, page.text)
 
     def test_teacher_login_and_role_boundary(self):
@@ -202,6 +202,71 @@ class AuthenticationTests(unittest.TestCase):
         self.assertEqual(error.exception.code, 1)
         with Session(self.engine) as db:
             self.assertEqual(db.scalar(select(func.count()).select_from(User)), 2)
+
+    def test_logout_revokes_copied_cookie(self):
+        self.login()
+        copied_cookie = self.client.cookies[COOKIE]
+        token = self.token(self.client.get("/student"))
+        self.client.post("/logout", data={"csrf": token}, follow_redirects=False)
+        self.client.cookies.clear()
+        self.client.cookies.set(COOKIE, copied_cookie)
+        self.assertEqual(self.client.get("/student", follow_redirects=False).status_code, 303)
+
+    def test_deleted_account_cookie_cannot_access_reused_id(self):
+        self.login("teacher")
+        with Session(self.engine) as db:
+            teacher = db.scalar(select(User).where(User.username == "teacher"))
+            old_id = teacher.id
+            db.delete(teacher)
+            db.commit()
+            replacement = create_user(db, "replacement", "Replacement", PASSWORD, "teacher")
+            self.assertEqual(replacement.id, old_id)
+        self.assertEqual(self.client.get("/teacher", follow_redirects=False).status_code, 303)
+
+    def test_changed_password_invalidates_existing_login(self):
+        self.login()
+        with Session(self.engine) as db:
+            db.get(User, self.student_id).password_hash = password_hasher.hash("new test-only passphrase")
+            db.commit()
+        self.assertEqual(self.client.get("/student", follow_redirects=False).status_code, 303)
+
+    def test_database_expiry_invalidates_fresh_cookie(self):
+        from datetime import timedelta
+        self.login()
+        with Session(self.engine) as db:
+            session = db.scalar(select(LoginSession))
+            session.expires_at = utc_now() - timedelta(seconds=1)
+            db.commit()
+        self.assertEqual(self.client.get("/student", follow_redirects=False).status_code, 303)
+
+    def test_login_limit_and_recovery(self):
+        token = self.token(self.client.get("/login"))
+        with patch("app.security.monotonic", return_value=100):
+            for _ in range(10):
+                response = self.client.post("/login", data={
+                    "username": "madina", "password": "wrong", "csrf": token,
+                })
+                self.assertEqual(response.status_code, 401)
+            with patch("app.main.authenticate") as authenticate:
+                response = self.client.post("/login", data={
+                    "username": "madina", "password": PASSWORD, "csrf": token,
+                })
+                self.assertEqual(response.status_code, 429)
+                self.assertEqual(response.headers["retry-after"], "60")
+                authenticate.assert_not_called()
+        with patch("app.security.monotonic", return_value=161):
+            self.assertEqual(self.login().status_code, 303)
+
+    def test_oversized_and_streamed_body_rejected(self):
+        for body in (b"password=" + b"x" * 17000, iter([b"x" * 9000, b"y" * 9000])):
+            response = self.client.post("/login", content=body,
+                                        headers={"Content-Type": "application/x-www-form-urlencoded"})
+            self.assertEqual(response.status_code, 413)
+
+    def test_pages_restrict_embedding_and_form_destinations(self):
+        response = self.client.get("/login")
+        self.assertIn("frame-ancestors 'none'", response.headers["content-security-policy"])
+        self.assertIn("form-action 'self'", response.headers["content-security-policy"])
 
 
 if __name__ == "__main__":

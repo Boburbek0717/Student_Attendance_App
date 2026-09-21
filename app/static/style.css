@@ -33,3 +33,13 @@ a { color: #284d99; }
 .hint { font-size: 0.9rem; color: #4d5d73; }
 .logout { border-top: 1px solid #d8e0eb; margin-top: 2rem; padding-top: 1rem; }
 .secondary { color: #203047; background: #e5ebf3; }
+.teacher-dashboard { max-width: 76rem; }
+.teacher-forms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; align-items: start; }
+.teacher-forms section, .group-card { border: 1px solid #d8e0eb; border-radius: 0.5rem; padding: 1.2rem; margin: 1rem 0; }
+h2 { font-size: 1.25rem; }
+h3, h4 { margin-bottom: 0.5rem; }
+select { width: 100%; padding: 0.7rem; margin: 0.3rem 0 0.7rem; font: inherit; border: 1px solid #8190a5; border-radius: 0.3rem; background: white; }
+.notice { padding: 0.8rem; background: #eaf6ed; color: #1e5930; }
+.member + .member { border-top: 1px solid #d8e0eb; margin-top: 1rem; }
+.member { overflow-wrap: anywhere; }
+@media (max-width: 850px) { .teacher-forms { grid-template-columns: 1fr; } }

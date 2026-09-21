@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
 </head>
 <body>
-    <main>
+    <main class="{% block main_class %}{% endblock %}">
         <p class="eyebrow">Student Attendance Tracker</p>
         {% block content %}{% endblock %}
         {% if user %}

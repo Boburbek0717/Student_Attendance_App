@@ -1,7 +1,83 @@
 {% extends "base.html" %}
 {% block title %}Teacher · Student Attendance Tracker{% endblock %}
+{% block main_class %}teacher-dashboard{% endblock %}
 {% block content %}
 <h1>Welcome, {{ user.display_name }}</h1>
 <p>You are logged in as a teacher.</p>
-<p>Group management will be available in a later update.</p>
+{% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
+<div class="teacher-forms">
+    <section aria-labelledby="group-heading">
+        <h2 id="group-heading">1. Create a group</h2>
+        {% if section == 'group' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+        <form method="post" action="/teacher/groups">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+            <label for="group-name">Group name</label>
+            <input id="group-name" name="group_name" value="{{ values.get('group_name', '') }}" maxlength="100" required>
+            <button type="submit">Create group</button>
+        </form>
+    </section>
+    <section aria-labelledby="student-heading">
+        <h2 id="student-heading">2. Create a student</h2>
+        {% if section == 'student' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+        <form method="post" action="/teacher/students">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+            <label for="display-name">Student name</label>
+            <input id="display-name" name="display_name" value="{{ values.get('display_name', '') }}" maxlength="100" required>
+            <label for="student-username">Username</label>
+            <input id="student-username" name="username" value="{{ values.get('username', '') }}" minlength="3" maxlength="100"
+                   autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="username-hint" required>
+            <p id="username-hint" class="hint">Letters, numbers, dots, underscores or hyphens.</p>
+            <label for="student-password">Password</label>
+            <input id="student-password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+            <label for="confirm-password">Repeat password</label>
+            <input id="confirm-password" name="confirm_password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+            <p class="hint">Use 12–128 characters. Share the account details privately with the student.</p>
+            <button type="submit">Create student</button>
+        </form>
+    </section>
+    <section id="enroll" aria-labelledby="enroll-heading">
+        <h2 id="enroll-heading">3. Enroll a student</h2>
+        {% if section == 'enrollment' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+        {% if groups and students %}
+        <form method="post" action="/teacher/enrollments">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+            <label for="student-id">Student</label>
+            <select id="student-id" name="student_id" required>
+                <option value="">Choose a student</option>
+                {% for student in students %}
+                <option value="{{ student.id }}" {% if values.get('student_id') == student.id|string %}selected{% endif %}>{{ student.display_name }} ({{ student.username }})</option>
+                {% endfor %}
+            </select>
+            <label for="group-id">Group</label>
+            <select id="group-id" name="group_id" required>
+                <option value="">Choose a group</option>
+                {% for group in groups %}
+                <option value="{{ group.id }}" {% if values.get('group_id') == group.id|string %}selected{% endif %}>{{ group.name }} · #{{ group.id }}</option>
+                {% endfor %}
+            </select>
+            <p class="hint">Enrollment includes one new package of 12 lessons.</p>
+            <button type="submit">Enroll with 12 lessons</button>
+        </form>
+        {% else %}<p>Create a group and a student account first.</p>{% endif %}
+    </section>
+</div>
+<section id="groups" aria-labelledby="groups-heading">
+    <h2 id="groups-heading">Groups and lesson packages</h2>
+    {% for group in groups %}
+    <article class="group-card">
+        <h3>{{ group.name }} <span class="hint">#{{ group.id }}</span></h3>
+        {% for member in members_by_group.get(group.id, []) %}
+        <div class="member">
+            <h4>{{ member.student.display_name }} <span class="hint">({{ member.student.username }})</span></h4>
+            {% if not member.active %}<p class="hint">Inactive enrollment</p>{% endif %}
+            <ul>
+                {% for package in member.packages %}
+                <li>Package #{{ package.id }}: {{ package.used }} / {{ package.limit }} lessons used · <strong>{{ package.remaining }} remaining</strong></li>
+                {% else %}<li>No lesson package.</li>{% endfor %}
+            </ul>
+        </div>
+        {% else %}<p>No students enrolled yet.</p>{% endfor %}
+    </article>
+    {% else %}<p>No groups yet. Create your first group above.</p>{% endfor %}
+</section>
 {% endblock %}

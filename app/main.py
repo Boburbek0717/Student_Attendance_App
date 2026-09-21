@@ -1,36 +1,19 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.database import engine, initialize_database
-from app.security import authenticate, csrf_token, current_user, load_session_secret, verify_csrf
-
-
-APP_DIRECTORY = Path(__file__).resolve().parent
-templates = Jinja2Templates(directory=APP_DIRECTORY / "templates")
-
-
-def get_db(request: Request):
-    with Session(request.app.state.database_engine) as db:
-        yield db
-
-
-def render(request: Request, name: str, status_code: int = 200, **context):
-    return templates.TemplateResponse(
-        request=request,
-        name=name,
-        context={"csrf_token": csrf_token(request), **context},
-        status_code=status_code,
-        headers={"Cache-Control": "no-store"},
-    )
+from app.security import authenticate, current_user, load_session_secret, verify_csrf
+from app.security import LoginLimiter, start_session, revoke_session
+from app.middleware import RequestBodyLimit
+from app.teacher import router as teacher_router
+from app.web import APP_DIRECTORY, get_db, render
 
 
 def create_app(database_engine: Engine = engine, session_secret: str | None = None) -> FastAPI:
@@ -44,6 +27,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
 
     app = FastAPI(title="Student Attendance Tracker", lifespan=lifespan)
     app.state.database_engine = database_engine
+    app.state.login_limiter = LoginLimiter()
     app.add_middleware(
         SessionMiddleware,
         secret_key=session_secret or load_session_secret(),
@@ -52,11 +36,17 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         same_site="lax",
         https_only=False,  # Local HTTP development only.
     )
+    app.add_middleware(RequestBodyLimit)
     app.mount("/static", StaticFiles(directory=APP_DIRECTORY / "static"), name="static")
+    app.include_router(teacher_router)
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException):
-        return render(request, "error.html", error.status_code, message=error.detail)
+        if error.status_code == 303:
+            return RedirectResponse(error.headers["Location"], status_code=303)
+        response = render(request, "error.html", error.status_code, message=error.detail)
+        response.headers.update(error.headers or {})
+        return response
 
     @app.get("/", response_class=HTMLResponse)
     def home(request: Request, db: Session = Depends(get_db)):
@@ -81,20 +71,20 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         db: Session = Depends(get_db),
     ):
         verify_csrf(request, csrf)
+        app.state.login_limiter.check(request.client.host if request.client else "unknown")
         user = authenticate(db, username, password)
         if user is None:
             return render(
                 request, "login.html", 401,
                 error="Incorrect username or password.", username=username[:100],
             )
-        request.session.clear()
-        request.session["user_id"] = user.id
-        csrf_token(request)
+        start_session(request, db, user)
         return RedirectResponse(f"/{user.role}", status_code=303)
 
     @app.post("/logout")
-    def logout(request: Request, csrf: str = Form(default="")):
+    def logout(request: Request, csrf: str = Form(default=""), db: Session = Depends(get_db)):
         verify_csrf(request, csrf)
+        revoke_session(request, db)
         request.session.clear()
         return RedirectResponse("/login", status_code=303)
 
@@ -105,10 +95,6 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         if user.role != role:
             raise HTTPException(status_code=403, detail="Your account cannot open this page.")
         return render(request, f"{role}.html", user=user)
-
-    @app.get("/teacher", response_class=HTMLResponse)
-    def teacher_page(request: Request, db: Session = Depends(get_db)):
-        return role_page(request, db, "teacher")
 
     @app.get("/student", response_class=HTMLResponse)
     def student_page(request: Request, db: Session = Depends(get_db)):

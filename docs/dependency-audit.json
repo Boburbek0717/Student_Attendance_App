@@ -1,0 +1,168 @@
+{
+  "checked_at": "2026-09-21T15:40:16.349427+00:00",
+  "source": "PyPI version JSON vulnerability metadata",
+  "packages": [
+    {
+      "name": "annotated-doc",
+      "version": "0.0.5",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.8.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "anyio",
+      "version": "4.15.1",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "argon2-cffi",
+      "version": "25.1.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "argon2-cffi-bindings",
+      "version": "26.1.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "cffi",
+      "version": "2.1.1",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "click",
+      "version": "8.5.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "fastapi",
+      "version": "0.141.1",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "greenlet",
+      "version": "3.5.6",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "httpcore2",
+      "version": "2.13.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "httpx2",
+      "version": "2.13.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "idna",
+      "version": "3.20",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "itsdangerous",
+      "version": "2.2.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "Jinja2",
+      "version": "3.1.6",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "MarkupSafe",
+      "version": "3.0.3",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "pwdlib",
+      "version": "0.3.1",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "pycparser",
+      "version": "3.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "pydantic",
+      "version": "2.13.5",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "pydantic_core",
+      "version": "2.46.5",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "python-multipart",
+      "version": "0.0.32",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "SQLAlchemy",
+      "version": "2.0.54",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "starlette",
+      "version": "1.6.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "truststore",
+      "version": "0.10.4",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.4",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    },
+    {
+      "name": "uvicorn",
+      "version": "0.53.0",
+      "vulnerabilities": [],
+      "status": "checked"
+    }
+  ]
+}
