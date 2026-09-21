@@ -7,6 +7,7 @@ from starlette.exceptions import HTTPException
 
 from app.create_user import create_user
 from app.attendance import start_lesson, student_records
+from app.packages import package_balance, package_rows, renew_package
 from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, User, utc_now
 from app.security import current_user, verify_csrf
 from app.web import get_db, render
@@ -17,6 +18,7 @@ NOTICES = {
     "group": "Group created. You can now enroll students.",
     "student": "Student account created. You can now enroll the student in a group.",
     "enrollment": "Student enrolled with a new 12-lesson package.",
+    "renewal": "Renewal recorded: 12 lessons added. Any lessons owed were covered first.",
 }
 
 
@@ -42,17 +44,15 @@ def dashboard(request: Request, db: Session, user: User, *, error=None, section=
         .group_by(LessonPackage.id)
         .order_by(LessonPackage.purchased_at, LessonPackage.id)
     ).all()
-    packages_by_enrollment = {}
+    rows_by_enrollment = {}
     for package, used in packages:
-        packages_by_enrollment.setdefault(package.enrollment_id, []).append({
-            "id": package.id, "limit": package.lesson_limit,
-            "used": used, "remaining": package.lesson_limit - used,
-        })
+        rows_by_enrollment.setdefault(package.enrollment_id, []).append((package, used))
     members_by_group = {}
     for enrollment, student in memberships:
+        balance = package_balance(rows_by_enrollment.get(enrollment.id, []))
         members_by_group.setdefault(enrollment.group_id, []).append({
-            "student": student, "active": enrollment.active,
-            "packages": packages_by_enrollment.get(enrollment.id, []),
+            "student": student, "active": enrollment.active, "enrollment_id": enrollment.id,
+            "packages": balance["packages"], "balance": balance,
         })
     open_lessons = db.scalars(select(Lesson).where(
         Lesson.started_at <= utc_now(), Lesson.code_expires_at > utc_now(),
@@ -70,6 +70,45 @@ def dashboard(request: Request, db: Session, user: User, *, error=None, section=
 @router.get("", response_class=HTMLResponse)
 def teacher_page(request: Request, db: Session = Depends(get_db), user: User = Depends(require_teacher)):
     return dashboard(request, db, user)
+
+
+def renewal_page(request: Request, db: Session, user: User, enrollment_id: int, error=None):
+    enrollment = db.get(Enrollment, enrollment_id) if 0 < enrollment_id < 2**63 else None
+    if enrollment is None:
+        raise HTTPException(404, "Enrollment not found.")
+    student = db.get(User, enrollment.student_id)
+    group = db.get(Group, enrollment.group_id)
+    balance = package_balance(package_rows(db, enrollment.id))
+    after = balance["balance"] + 12
+    return render(request, "renew_package.html", 400 if error else 200, user=user,
+                  enrollment=enrollment, student=student, group=group, balance=balance,
+                  after_available=max(0, after), after_owed=max(0, -after), error=error)
+
+
+@router.get("/enrollments/{enrollment_id}/renew", response_class=HTMLResponse)
+def review_renewal(enrollment_id: int, request: Request, db: Session = Depends(get_db),
+                   user: User = Depends(require_teacher)):
+    return renewal_page(request, db, user, enrollment_id)
+
+
+@router.post("/enrollments/{enrollment_id}/renew", response_class=HTMLResponse)
+def record_renewal(
+    enrollment_id: int, request: Request, csrf: str = Form(default=""),
+    expected_package_id: str = Form(default=""), expected_attended: str = Form(default=""),
+    db: Session = Depends(get_db), user: User = Depends(require_teacher),
+):
+    verify_csrf(request, csrf)
+    try:
+        try:
+            package_id, attended = int(expected_package_id), int(expected_attended)
+            if package_id < 0 or attended < 0:
+                raise ValueError
+        except ValueError:
+            raise ValueError("Reload the renewal page and review the balance before confirming.") from None
+        renew_package(request.app.state.database_engine, user.id, enrollment_id, package_id, attended)
+    except ValueError as error:
+        return renewal_page(request, db, user, enrollment_id, error=str(error))
+    return RedirectResponse("/teacher?created=renewal#groups", status_code=303)
 
 
 @router.post("/groups/{group_id}/lessons", response_class=HTMLResponse)

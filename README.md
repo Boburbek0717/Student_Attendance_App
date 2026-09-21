@@ -1,9 +1,10 @@
-# Student Attendance Tracker — Attendance check-in
+# Student Attendance Tracker — Manual package renewal
 
 The teacher page supports creating groups, creating student accounts, enrolling
 students with a 12-lesson package, starting group lessons, and viewing balances
-and attendance history. Students can check in with a temporary code. Package
-renewal remains a future stage.
+and attendance history. Students can check in with a temporary code. Teachers can
+manually renew packages, including early and late renewals; no payments are taken
+in the app. Available, advance and owed lesson counters are calculated from records.
 
 ## Run
 
@@ -29,7 +30,7 @@ Start the local server:
 Open http://127.0.0.1:8000/login. Stop an older server if the port is occupied.
 The proxy flag makes local login limiting use the connection address rather than
 forwarded headers. Existing accounts are preserved. No default accounts are added.
-This attendance stage needs no database-schema changes or new dependencies.
+The attendance and renewal stages need no database-schema changes or new dependencies.
 
 ## Teacher workflow
 
@@ -48,6 +49,15 @@ This attendance stage needs no database-schema changes or new dependencies.
 8. The student sees `1 / 12 lessons used`, `11 remaining`, and a history entry.
    Refresh the teacher page to see the updated balance. Its **Attendance history**
    link opens the individual student's history.
+9. Click **Renew package** beside a student in the group roster or on their history
+   page. Review the current balance and the preview, then confirm **add 12 lessons**.
+   This records the teacher's manual renewal; there is no checkout or payment form.
+
+An early renewal preserves unused credit: 4 remaining + 12 = 16 available, with 12
+saved in the later package. Late students can still check in after credit runs out.
+Their extra attendance increases **Lessons owed**: 2 owed + a 12-lesson renewal =
+10 available and 0 owed. Counters are separate for each group and visible to both
+teacher and student. See [renewals and counters](docs/packages.md) for the examples.
 
 Repeat the check-in: it must show an error without using another lesson. Codes are
 sent through POST forms, never URLs. All displayed lesson times are labeled UTC.
@@ -55,8 +65,8 @@ See [the attendance lesson](docs/attendance.md) for the flow, configuration and
 concurrency explanation.
 
 Group names may repeat; IDs distinguish them. Usernames are unique and lowercased.
-Inactive enrollments are shown but cannot be re-created. Reactivation and renewal
-will have explicit actions later. All teachers administer the same business.
+Inactive enrollments are shown but cannot be re-created or renewed. Reactivation
+is a later feature. All teachers administer the same business.
 
 ## Concepts introduced
 
@@ -65,10 +75,11 @@ and package in one transaction. `flush()` obtains the membership ID without
 committing it; `commit()` saves both records. If package creation fails, `rollback()`
 undoes the pending membership. A test deliberately forces that failure.
 
-A **query** derives balances from history. The page counts attendance for each
-package, then calculates `remaining = lesson_limit - count`. An outer join keeps
-packages with zero attendance visible. Each package is listed separately so old
-and new purchases are not merged into a misleading balance.
+A **query** derives balances from history: `net balance = total package lessons -
+total attendance`, within one enrollment. Positive credit is available; negative
+credit is shown as lessons owed. Earlier excess attendance uses credit from later
+renewals without moving historical attendance records. No separate mutable counter
+can fall out of sync with the history.
 
 ## Security corrections
 
@@ -94,22 +105,26 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | File | Purpose |
 | --- | --- |
 | `app/main.py` | App setup, login/logout, code-duration configuration and route registration |
-| `app/teacher.py` | Teacher-only routes, enrollment, starting lessons and student history |
+| `app/teacher.py` | Teacher-only routes, renewal preview/confirmation, enrollment and lessons |
 | `app/student.py` | Student-only dashboard and check-in form handling |
 | `app/attendance.py` | Serialized lesson creation/check-in and student record queries |
+| `app/packages.py` | Package accounting, carried debt, renewal transaction and stale-form checks |
 | `app/web.py` | Shared template rendering and database connections per request |
 | `app/models.py` | Six business tables plus revocable login sessions |
-| `app/database.py` | SQLite setup, foreign keys and table creation |
+| `app/database.py` | SQLite setup, foreign keys, table creation and shared write transaction |
 | `app/security.py` | Password checks, sessions, CSRF tokens and login limiter |
 | `app/middleware.py` | Request body limit before parsing |
 | `app/create_user.py` | Reusable account creation and local teacher-account command |
 | `app/templates/teacher.html` | Forms, errors and group rosters |
+| `app/templates/renew_package.html` | Teacher renewal preview and confirmation |
+| `app/templates/lesson_balance.html` | Shared available, advance and owed counters |
 | `app/templates/base.html` | Shared layout and logout form |
 | `app/static/style.css` | Responsive forms and roster styling |
 | `tests/test_teacher.py` | Teacher flow, access control, rollback and balance tests |
 | `tests/test_auth.py` | Login, sessions, revocation and request-limit tests |
 | `tests/test_database.py` | Database-integrity tests |
 | `tests/test_attendance.py` | Attendance rules, privacy, expiry, collisions and simultaneous requests |
+| `tests/test_packages.py` | Early/late renewal, debt settlement, history and concurrent requests |
 
 ## Verify and learn
 
@@ -117,13 +132,13 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 60 tests use isolated databases, not real student data. Read the
+All 71 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 
-Exercise: predict the result of two check-ins arriving while only one lesson
-remains. Find the test that proves this and explain why a duplicate-attendance
-constraint alone would not protect two different lessons.
+Exercise: predict the balance after 14 attended lessons, one 12-lesson package,
+and then a renewal. Explain why changing a stored remaining counter would be less
+reliable than calculating from the package and attendance records.
 
 Earlier explanations are archived in [Stage 1](docs/stage-1.md),
 [Stage 2](docs/stage-2.md) and [Stage 3](docs/stage-3.md). Those describe earlier

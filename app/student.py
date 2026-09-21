@@ -40,8 +40,11 @@ def submit_attendance(
     verify_csrf(request, csrf)
     request.app.state.checkin_limiter.check(str(user.id))
     try:
-        check_in(request.app.state.database_engine, user.id, code)
+        balance = check_in(request.app.state.database_engine, user.id, code)
     except ValueError as error:
         return dashboard(request, db, user, error=str(error))
-    request.session["attendance_notice"] = "Attendance recorded. One lesson has been used from your package."
+    request.session["attendance_notice"] = (
+        f"Attendance recorded. You now have {-balance} lesson(s) owed. Your teacher can record a renewal."
+        if balance < 0 else "Attendance recorded. One lesson has been used from your package."
+    )
     return RedirectResponse("/student", status_code=303)

@@ -86,10 +86,15 @@
         <div class="member">
             <h4>{{ member.student.display_name }} <span class="hint">({{ member.student.username }})</span></h4>
             <a href="/teacher/students/{{ member.student.id }}/history">Attendance history</a>
+            {% if member.active %}<p><a class="button" href="/teacher/enrollments/{{ member.enrollment_id }}/renew">Renew package</a></p>{% endif %}
+            {% set balance = member.balance %}
+            {% include "lesson_balance.html" %}
             {% if not member.active %}<p class="hint">Inactive enrollment</p>{% endif %}
             <ul>
                 {% for package in member.packages %}
                 <li>Package #{{ package.id }}: {{ package.used }} / {{ package.limit }} lessons used · <strong>{{ package.remaining }} remaining</strong></li>
+                {% if package.carried_in %}<li class="hint">{{ package.carried_in }} owed lessons brought forward into this package.</li>{% endif %}
+                {% if package.carried_out %}<li class="hint">{{ package.carried_out }} excess lessons carried to later renewals.</li>{% endif %}
                 {% else %}<li>No lesson package.</li>{% endfor %}
             </ul>
         </div>

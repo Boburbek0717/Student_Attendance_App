@@ -1,31 +1,13 @@
-from contextlib import contextmanager
 from datetime import timedelta
 import re
 import secrets
 
-from sqlalchemy import Engine, func, select, text
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, User, utc_now
-
-
-@contextmanager
-def write_transaction(engine: Engine):
-    """Serialize validation and writes so concurrent requests see fresh balances."""
-    with Session(engine) as db:
-        try:
-            db.execute(text("BEGIN IMMEDIATE"))
-            yield db
-            db.commit()
-        except IntegrityError as error:
-            db.rollback()
-            raise ValueError("The record could not be saved. Refresh and check your history before retrying.") from error
-        except OperationalError as error:
-            db.rollback()
-            if (getattr(error.orig, "sqlite_errorcode", 0) & 255) in (5, 6):
-                raise ValueError("The database is busy. Please try again in a moment.") from error
-            raise
+from app.database import write_transaction
+from app.packages import package_balance, package_rows
 
 
 def start_lesson(engine: Engine, teacher_id: int, group_id: int, minutes: int = 15) -> int:
@@ -59,7 +41,7 @@ def start_lesson(engine: Engine, teacher_id: int, group_id: int, minutes: int = 
         return lesson.id
 
 
-def check_in(engine: Engine, student_id: int, code: str) -> None:
+def check_in(engine: Engine, student_id: int, code: str) -> int:
     code = code.strip()
     if not re.fullmatch(r"[0-9]{6}", code):
         raise ValueError("Enter the six-digit code from your teacher.")
@@ -85,16 +67,16 @@ def check_in(engine: Engine, student_id: int, code: str) -> None:
         ))
         if duplicate is not None:
             raise ValueError("You have already checked in to this lesson. No extra lesson was used.")
-        used = select(func.count(Attendance.id)).where(
-            Attendance.package_id == LessonPackage.id,
-        ).correlate(LessonPackage).scalar_subquery()
-        package = db.scalar(select(LessonPackage).where(
-            LessonPackage.enrollment_id == enrollment.id, used < LessonPackage.lesson_limit,
-        ).order_by(LessonPackage.purchased_at, LessonPackage.id))
-        if package is None:
-            raise ValueError("You have no lessons remaining in this group. Please contact your teacher.")
+        balance = package_balance(package_rows(db, enrollment.id))
+        if not balance["packages"]:
+            raise ValueError("You have no lesson package in this group. Please contact your teacher.")
+        # Once paid credit is exhausted, keep attendance on the latest package.
+        # Its excess carries into later renewals; historical rows never move.
+        package = next((item for item in balance["packages"] if item["remaining"] > 0),
+                       balance["packages"][-1])
         db.add(Attendance(enrollment_id=enrollment.id, lesson_id=lesson.id,
-                          package_id=package.id, checked_in_at=now))
+                          package_id=package["id"], checked_in_at=now))
+        return balance["balance"] - 1
 
 
 def student_records(db: Session, student_id: int):
@@ -108,12 +90,12 @@ def student_records(db: Session, student_id: int):
         .where(Enrollment.student_id == student_id)
         .group_by(LessonPackage.id).order_by(LessonPackage.purchased_at, LessonPackage.id)
     ).all()
-    by_enrollment = {}
+    rows_by_enrollment = {}
     for package, used in packages:
-        by_enrollment.setdefault(package.enrollment_id, []).append({
-            "id": package.id, "limit": package.lesson_limit, "used": used,
-            "remaining": package.lesson_limit - used,
-        })
+        rows_by_enrollment.setdefault(package.enrollment_id, []).append((package, used))
+    balances = {enrollment.id: package_balance(rows_by_enrollment.get(enrollment.id, []))
+                for enrollment, group in memberships}
+    by_enrollment = {key: balance["packages"] for key, balance in balances.items()}
     history = db.execute(
         select(Attendance.checked_in_at, Attendance.package_id, Lesson.id.label("lesson_id"),
                Lesson.started_at, Group.name.label("group_name"))
@@ -123,4 +105,5 @@ def student_records(db: Session, student_id: int):
         .where(Enrollment.student_id == student_id)
         .order_by(Attendance.checked_in_at.desc(), Attendance.id.desc())
     ).all()
-    return {"memberships": memberships, "packages_by_enrollment": by_enrollment, "history": history}
+    return {"memberships": memberships, "packages_by_enrollment": by_enrollment,
+            "balances": balances, "history": history}

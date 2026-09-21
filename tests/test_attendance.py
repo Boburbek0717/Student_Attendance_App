@@ -17,6 +17,7 @@ from app.database import initialize_database, make_engine
 from app.main import create_app
 from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, User, utc_now
 from app.security import password_hasher
+from app.packages import package_balance, package_rows
 
 
 class AttendanceRulesTests(unittest.TestCase):
@@ -104,16 +105,15 @@ class AttendanceRulesTests(unittest.TestCase):
         for code in ("", "12345", "１２３４５６", "abcdef"):
             with self.assertRaisesRegex(ValueError, "six-digit"):
                 check_in(self.engine, self.student_id, code)
-        with self.assertRaisesRegex(ValueError, "no lessons remaining"):
+        with self.assertRaisesRegex(ValueError, "no lesson package"):
             check_in(self.engine, self.student_id, "000123")
         self.assertEqual(self.count(), 0)
 
-    def test_exhausted_package_cannot_be_overdrawn(self):
+    def test_exhausted_package_records_lessons_owed(self):
         self.fill_package(12)
         self.lesson()
-        with self.assertRaisesRegex(ValueError, "no lessons remaining"):
-            check_in(self.engine, self.student_id, "000123")
-        self.assertEqual(self.count(), 12)
+        self.assertEqual(check_in(self.engine, self.student_id, "000123"), -1)
+        self.assertEqual(self.count(), 13)
 
     def test_oldest_available_package_and_history_preserved(self):
         with Session(self.engine) as db:
@@ -214,7 +214,7 @@ class AttendanceRulesTests(unittest.TestCase):
         self.assertCountEqual(result, ["saved", "rejected"])
         self.assertEqual(self.count(), 1)
 
-    def test_concurrent_different_lessons_cannot_spend_last_lesson_twice(self):
+    def test_concurrent_different_lessons_count_one_as_owed_after_credit_runs_out(self):
         self.fill_package(11)
         self.lesson()
         self.lesson(code="000456")
@@ -222,8 +222,11 @@ class AttendanceRulesTests(unittest.TestCase):
             lambda: check_in(self.engine, self.student_id, "000123"),
             lambda: check_in(self.engine, self.student_id, "000456"),
         ])
-        self.assertCountEqual(result, ["saved", "rejected"])
-        self.assertEqual(self.count(), 12)
+        self.assertCountEqual(result, ["saved", "saved"])
+        self.assertEqual(self.count(), 13)
+        with Session(self.engine) as db:
+            balance = package_balance(package_rows(db, self.enrollment_id))
+            self.assertEqual((balance["available"], balance["owed"]), (0, 1))
 
     def test_concurrent_starts_create_one_lesson(self):
         result = self.concurrent([lambda: start_lesson(self.engine, self.teacher_id, self.group_id)] * 2)

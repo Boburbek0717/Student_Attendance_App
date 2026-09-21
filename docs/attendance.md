@@ -1,5 +1,10 @@
 # Attendance: one working increment
 
+This describes the attendance milestone before manual renewal was added. The
+current late-payment rule allows check-in after credit runs out and counts lessons
+owed; see [packages.md](packages.md). The write-transaction helper now lives in
+`app/database.py`, and the current suite has 71 tests.
+
 The teacher starts a group lesson and shares a temporary code. An authenticated,
 enrolled student can submit it once, consuming one lesson from the oldest package
 with capacity. Both sides can inspect balances; teachers can open an individual

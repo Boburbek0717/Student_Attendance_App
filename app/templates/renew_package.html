@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Renew lesson package · Student Attendance Tracker{% endblock %}
+{% block content %}
+<a href="/teacher">Back to teacher page</a>
+<h1>Renew lesson package</h1>
+<h2>{{ student.display_name }} · {{ group.name }}</h2>
+<p class="hint">Username: {{ student.username }}. This renewal applies only to this group.</p>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+{% include "lesson_balance.html" %}
+{% if enrollment.active and student.role == 'student' %}
+<section class="group-card" aria-labelledby="renewal-preview">
+    <h2 id="renewal-preview">Add a new 12-lesson package</h2>
+    <p>After renewal: <strong>{{ after_available }} lessons available</strong> and <strong>{{ after_owed }} lessons owed</strong>.</p>
+    {% if balance.owed %}
+    <p>The new package covers previously owed lessons first. Attendance history stays unchanged.</p>
+    {% else %}<p>Unused lessons stay available. The new package follows your existing packages.</p>{% endif %}
+    <p>You record this renewal manually. No payment is taken in this app.</p>
+    <form method="post" action="/teacher/enrollments/{{ enrollment.id }}/renew">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+        <input type="hidden" name="expected_package_id" value="{{ balance.latest_package_id }}">
+        <input type="hidden" name="expected_attended" value="{{ balance.attended }}">
+        <button type="submit">Confirm renewal · add 12 lessons</button>
+    </form>
+</section>
+{% else %}<p>This enrollment cannot be renewed while inactive or assigned to a non-student account.</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,6 @@
+<div class="balance-counters" aria-label="Lesson balance">
+    <p><strong>{{ balance.available }}</strong><span>Lessons available</span></p>
+    <p><strong>{{ balance.queued }}</strong><span>Of these, saved for later packages</span></p>
+    <p class="{% if balance.owed %}owed{% endif %}"><strong>{{ balance.owed }}</strong><span>Lessons owed</span></p>
+</div>
+<p class="hint">{{ balance.included }} lessons added · {{ balance.attended }} attended in this group.</p>

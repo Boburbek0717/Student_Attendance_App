@@ -49,3 +49,9 @@ select { width: 100%; padding: 0.7rem; margin: 0.3rem 0 0.7rem; font: inherit; b
 table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
 th, td { padding: 0.7rem; border-bottom: 1px solid #d8e0eb; }
 th { background: #f3f6fa; }
+.balance-counters { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+.balance-counters p { flex: 1 1 9rem; margin: 0; padding: 0.8rem; background: #edf3fd; border-radius: 0.4rem; }
+.balance-counters strong, .balance-counters span { display: block; }
+.balance-counters strong { font-size: 1.6rem; }
+.balance-counters span { font-size: 0.85rem; }
+.balance-counters .owed { background: #fff0dc; color: #713900; }
