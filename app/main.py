@@ -64,9 +64,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     @app.get("/", response_class=HTMLResponse)
     def home(request: Request, db: Session = Depends(get_db)):
         user = current_user(request, db)
-        if user:
-            return RedirectResponse(f"/{user.role}", status_code=303)
-        return render(request, "index.html")
+        return render(request, "index.html", user=user)
 
     @app.get("/login", response_class=HTMLResponse)
     def login_page(request: Request, db: Session = Depends(get_db)):

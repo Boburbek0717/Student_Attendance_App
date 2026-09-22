@@ -1,6 +1,17 @@
 {% extends "base.html" %}
+{% block title %}Welcome · SAT Factory{% endblock %}
+{% block main_class %}welcome-page{% endblock %}
 {% block content %}
-<h1>Welcome</h1>
-<p>Log in to your teacher or student account.</p>
-<p><a class="button" href="/login">Log in</a></p>
+<section class="welcome-hero" aria-labelledby="welcome-heading">
+    <p class="eyebrow">WELCOME TO SAT FACTORY</p>
+    <h1 id="welcome-heading">Your SAT journey<br>starts here.</h1>
+    <p class="page-intro">Welcome to our course. This is the future home of SAT Factory — a space for new ideas and everything we build next.</p>
+    <p class="development-label">on development</p>
+    <p class="hint">Our welcome page is taking shape. You can already access your lessons and attendance through the course portal.</p>
+    {% if user %}
+    <a class="button" href="/{{ user.role }}">Go to my dashboard</a>
+    {% else %}
+    <a class="button" href="/login">Log in to the course portal</a>
+    {% endif %}
+</section>
 {% endblock %}

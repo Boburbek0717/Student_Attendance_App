@@ -35,7 +35,9 @@ Start the local server:
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --no-proxy-headers
 ```
 
-Open http://127.0.0.1:8000/login. Stop an older server if the port is occupied.
+Open http://127.0.0.1:8000/ for the welcome page, or /login for the course portal.
+The welcome page is a placeholder labeled “on development”; the brand header
+and login page link back to it. Signed-in users can open their dashboard from home. Stop an older server if the port is occupied.
 The proxy flag makes local login limiting use the connection address rather than
 forwarded headers. Existing accounts are preserved. No default accounts are added.
 The attendance and renewal stages need no database-schema changes or new dependencies.

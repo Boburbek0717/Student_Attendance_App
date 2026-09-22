@@ -107,3 +107,10 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
     .balance-counters p { flex-basis: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { button, .button { transition: none; } }
+
+.welcome-page { max-width: 58rem; }
+.welcome-hero { padding: clamp(1rem, 4vw, 3rem) 0; max-width: 38rem; }
+.welcome-hero h1 { font-size: clamp(2.3rem, 6vw, 4rem); margin-bottom: 1.5rem; }
+.welcome-hero .page-intro { font-size: 1.1rem; }
+.development-label { display: inline-block; padding: 0.35rem 0.85rem; border: 1px solid #e3c98f; border-radius: 2rem; background: #fff6e5; color: #795212; font-size: 0.85rem; font-weight: 600; }
+.welcome-hero .button { margin-top: 1.2rem; }
