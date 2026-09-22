@@ -1,6 +1,6 @@
 # SAT Factory — Course attendance app
 
-The portal uses SAT Factory branding, a navy and warm-neutral theme, responsive
+The portal uses SAT Factory branding, a workshop-inspired graphite, paper and lime theme, responsive
 layouts, and keyboard-visible focus styles. All styling and the SF mark are local;
 no external fonts or image services are required.
 
@@ -36,7 +36,9 @@ Start the local server:
 ```
 
 Open http://127.0.0.1:8000/ for the welcome page, or /login for the course portal.
-The welcome page is a placeholder labeled “on development”; the brand header
+The welcome page is a results-showcase preview labeled “on development”, with
+an anonymous score-ticket placeholder and planned story sections. No real student
+results or faces are displayed. The brand header
 and login page link back to it. Signed-in users can open their dashboard from home. Stop an older server if the port is occupied.
 The proxy flag makes local login limiting use the connection address rather than
 forwarded headers. Existing accounts are preserved. No default accounts are added.

@@ -12,9 +12,9 @@
         <header class="brand-header">
             <a class="brand" href="/" aria-label="SAT Factory home">
                 <span class="brand-mark" aria-hidden="true">SF<span>.</span></span>
-                <span><strong>SAT Factory</strong><small>COURSE PORTAL</small></span>
+                <span><strong>SAT Factory</strong><small>BUILT THROUGH PRACTICE</small></span>
             </a>
-            {% if user %}<a class="role-badge" href="/{{ user.role }}">{{ user.role|capitalize }} dashboard</a>{% endif %}
+            {% if user %}<a class="role-badge" href="/{{ user.role }}">{{ user.role|capitalize }} dashboard</a>{% else %}<a class="role-badge" href="/login">Course portal ↗</a>{% endif %}
         </header>
         {% block content %}{% endblock %}
         {% if user %}
