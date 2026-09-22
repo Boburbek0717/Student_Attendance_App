@@ -28,15 +28,19 @@
     </form>
 </section>
 {% endif %}
-<h2>Checked in · {{ attended|length }}</h2>
+<h2>Present · {{ attended|length }}</h2>
 <ul>
 {% for student, attendance in attended %}
 <li><a href="/teacher/students/{{ student.id }}/history">{{ student.display_name }} ({{ student.username }})</a> · {{ attendance.checked_in_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</li>
 {% else %}<li>No check-ins recorded.</li>{% endfor %}
 </ul>
-<h2>Current active students without a check-in · {{ missing|length }}</h2>
-<p class="hint">This uses today's group roster, not the roster when the lesson started. It is not a historical absence record.</p>
-<ul>{% for student in missing %}<li>{{ student.display_name }} ({{ student.username }})</li>
+<h2>Absent · {{ missing|length }}</h2>
+{% if has_snapshot %}
+<p class="hint">Students enrolled when this lesson started who have not checked in using its code. Absence does not deduct lessons. A later check-in changes their status to present.</p>
+{% else %}
+<p class="hint">This older lesson has no saved roster. Absences below use today's active enrollment and may not reflect who was enrolled at the time.</p>
+{% endif %}
+<ul>{% for student in missing %}<li><a href="/teacher/students/{{ student.id }}/manage#memberships">{{ student.display_name }} ({{ student.username }})</a> · <strong>Absent</strong></li>
 {% else %}<li>None.</li>{% endfor %}</ul>
 <p><a href="/teacher/lessons/{{ lesson.id }}">Refresh attendance and status</a></p>
 {% endblock %}

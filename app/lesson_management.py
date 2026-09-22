@@ -8,7 +8,7 @@ from starlette.exceptions import HTTPException
 
 from app.database import write_transaction
 from app.attendance import new_attendance_code
-from app.models import Attendance, Enrollment, Group, Lesson, User, utc_now
+from app.models import Attendance, Enrollment, Group, Lesson, LessonRoster, LessonRosterSnapshot, User, utc_now
 from app.security import verify_csrf
 from app.teacher import require_teacher
 from app.web import get_db, render
@@ -69,8 +69,23 @@ def lesson_history(group_id: int, request: Request, page: int = 1,
         Attendance, Attendance.lesson_id == Lesson.id,
     ).where(Lesson.group_id == group_id).group_by(Lesson.id)
         .order_by(Lesson.started_at.desc(), Lesson.id.desc()).offset((page - 1) * 25).limit(25)).all()
+    absence_counts = {}
+    for lesson, _ in lessons:
+        snapshot = db.get(LessonRosterSnapshot, lesson.id) is not None
+        roster = select(Enrollment.id).where(Enrollment.group_id == group.id)
+        if snapshot:
+            roster = roster.join(LessonRoster, LessonRoster.enrollment_id == Enrollment.id).where(
+                LessonRoster.lesson_id == lesson.id,
+            )
+        else:
+            roster = roster.where(Enrollment.active.is_(True))
+        attended_ids = select(Attendance.enrollment_id).where(Attendance.lesson_id == lesson.id)
+        absent = db.scalar(select(func.count()).select_from(roster.where(
+            Enrollment.id.not_in(attended_ids),
+        ).subquery()))
+        absence_counts[lesson.id] = (absent, snapshot)
     return render(request, "lessons.html", user=user, group=group, lessons=lessons,
-                  now=utc_now(), page=page, last_page=last_page)
+                  absence_counts=absence_counts, now=utc_now(), page=page, last_page=last_page)
 
 
 def lesson_page(request, db, user, lesson_id, error=None):
@@ -81,12 +96,18 @@ def lesson_page(request, db, user, lesson_id, error=None):
     ).join(Attendance, Attendance.enrollment_id == Enrollment.id)
         .where(Attendance.lesson_id == lesson.id).order_by(User.display_name, User.id)).all()
     checked_ids = {student.id for student, attendance in attended}
-    current_students = db.scalars(select(User).join(Enrollment, Enrollment.student_id == User.id)
-        .where(Enrollment.group_id == group.id, Enrollment.active.is_(True))
-        .order_by(User.display_name, User.id)).all()
+    has_snapshot = db.get(LessonRosterSnapshot, lesson.id) is not None
+    roster_query = select(User).join(Enrollment, Enrollment.student_id == User.id)
+    if has_snapshot:
+        roster_query = roster_query.join(LessonRoster, LessonRoster.enrollment_id == Enrollment.id).where(
+            LessonRoster.lesson_id == lesson.id,
+        )
+    else:
+        roster_query = roster_query.where(Enrollment.group_id == group.id, Enrollment.active.is_(True))
+    current_students = db.scalars(roster_query.order_by(User.display_name, User.id)).all()
     return render(request, "lesson.html", 400 if error else 200, user=user, lesson=lesson,
                   group=group, attended=attended, now=utc_now(), error=error,
-                  version=code_version(lesson), code_minutes=request.app.state.code_minutes,
+                  has_snapshot=has_snapshot, version=code_version(lesson), code_minutes=request.app.state.code_minutes,
                   missing=[student for student in current_students if student.id not in checked_ids])
 
 

@@ -7,8 +7,8 @@ from starlette.exceptions import HTTPException
 
 from app.create_user import create_user
 from app.attendance import start_lesson, student_records
-from app.packages import package_balance, package_rows, renew_package
-from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, User, utc_now
+from app.packages import package_balance, enrollment_balance, renew_package
+from app.models import Attendance, BalanceAdjustment, Enrollment, Group, Lesson, LessonPackage, User, utc_now
 from app.security import current_user, verify_csrf
 from app.web import get_db, render
 
@@ -47,9 +47,12 @@ def dashboard(request: Request, db: Session, user: User, *, error=None, section=
     rows_by_enrollment = {}
     for package, used in packages:
         rows_by_enrollment.setdefault(package.enrollment_id, []).append((package, used))
+    adjustments_by_enrollment = {}
+    for adjustment in db.scalars(select(BalanceAdjustment)).all():
+        adjustments_by_enrollment.setdefault(adjustment.enrollment_id, []).append(adjustment)
     members_by_group = {}
     for enrollment, student in memberships:
-        balance = package_balance(rows_by_enrollment.get(enrollment.id, []))
+        balance = package_balance(rows_by_enrollment.get(enrollment.id, []), adjustments_by_enrollment.get(enrollment.id, []))
         members_by_group.setdefault(enrollment.group_id, []).append({
             "student": student, "active": enrollment.active, "enrollment_id": enrollment.id,
             "packages": balance["packages"], "balance": balance,
@@ -78,7 +81,7 @@ def renewal_page(request: Request, db: Session, user: User, enrollment_id: int, 
         raise HTTPException(404, "Enrollment not found.")
     student = db.get(User, enrollment.student_id)
     group = db.get(Group, enrollment.group_id)
-    balance = package_balance(package_rows(db, enrollment.id))
+    balance = enrollment_balance(db, enrollment.id)
     after = balance["balance"] + 12
     return render(request, "renew_package.html", 400 if error else 200, user=user,
                   enrollment=enrollment, student=student, group=group, balance=balance,
@@ -95,17 +98,19 @@ def review_renewal(enrollment_id: int, request: Request, db: Session = Depends(g
 def record_renewal(
     enrollment_id: int, request: Request, csrf: str = Form(default=""),
     expected_package_id: str = Form(default=""), expected_attended: str = Form(default=""),
+    expected_adjustment_id: str = Form(default="0"),
     db: Session = Depends(get_db), user: User = Depends(require_teacher),
 ):
     verify_csrf(request, csrf)
     try:
         try:
             package_id, attended = int(expected_package_id), int(expected_attended)
-            if package_id < 0 or attended < 0:
+            adjustment_id = int(expected_adjustment_id)
+            if package_id < 0 or attended < 0 or adjustment_id < 0:
                 raise ValueError
         except ValueError:
             raise ValueError("Reload the renewal page and review the balance before confirming.") from None
-        renew_package(request.app.state.database_engine, user.id, enrollment_id, package_id, attended)
+        renew_package(request.app.state.database_engine, user.id, enrollment_id, package_id, attended, adjustment_id)
     except ValueError as error:
         return renewal_page(request, db, user, enrollment_id, error=str(error))
     return RedirectResponse("/teacher?created=renewal#groups", status_code=303)

@@ -95,3 +95,31 @@ class Attendance(Base):
     enrollment_id: Mapped[int] = mapped_column(ForeignKey("enrollments.id"))
     package_id: Mapped[int]
     checked_in_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class BalanceAdjustment(Base):
+    __tablename__ = "balance_adjustments"
+    __table_args__ = (CheckConstraint("new_balance - old_balance = delta", name="consistent_adjustment"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    enrollment_id: Mapped[int] = mapped_column(ForeignKey("enrollments.id"), index=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    old_balance: Mapped[int]
+    new_balance: Mapped[int]
+    delta: Mapped[int]
+    reason: Mapped[str] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class LessonRosterSnapshot(Base):
+    __tablename__ = "lesson_roster_snapshots"
+
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), primary_key=True)
+    captured_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class LessonRoster(Base):
+    __tablename__ = "lesson_roster"
+
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson_roster_snapshots.lesson_id"), primary_key=True)
+    enrollment_id: Mapped[int] = mapped_column(ForeignKey("enrollments.id"), primary_key=True)

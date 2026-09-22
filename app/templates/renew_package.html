@@ -19,6 +19,7 @@
         <input type="hidden" name="csrf" value="{{ csrf_token }}">
         <input type="hidden" name="expected_package_id" value="{{ balance.latest_package_id }}">
         <input type="hidden" name="expected_attended" value="{{ balance.attended }}">
+        <input type="hidden" name="expected_adjustment_id" value="{{ balance.latest_adjustment_id }}">
         <button type="submit">Confirm renewal · add 12 lessons</button>
     </form>
 </section>

@@ -55,3 +55,5 @@ th { background: #f3f6fa; }
 .balance-counters strong { font-size: 1.6rem; }
 .balance-counters span { font-size: 0.85rem; }
 .balance-counters .owed { background: #fff0dc; color: #713900; }
+details { margin: 1rem 0; }
+summary { color: #284d99; cursor: pointer; font-weight: 600; }

@@ -9,6 +9,7 @@ from app.database import write_transaction
 from app.models import Enrollment, LoginSession, User
 from app.security import normalize_username, password_hasher, verify_csrf
 from app.teacher import require_teacher
+from app.packages import set_balance, balance_version
 from app.web import get_db, render
 
 
@@ -73,7 +74,7 @@ def set_enrollment_active(engine, teacher_id: int, student_id: int, enrollment_i
 def detail_page(request, db, user, student_id, *, error=None, section=None):
     student = managed_student(db, student_id)
     return render(request, "manage_student.html", 400 if error else 200, user=user, student=student,
-                  error=error, section=section, notice=request.session.pop("management_notice", None),
+                  error=error, section=section, balance_version=balance_version, notice=request.session.pop("management_notice", None),
                   **student_records(db, student_id))
 
 
@@ -139,4 +140,24 @@ def save_enrollment_status(
         "Enrollment reactivated. Existing balances and history are unchanged."
         if active == "true" else "Enrollment deactivated. Check-in is blocked for this group; history and balances are preserved."
     )
+    return RedirectResponse(f"/teacher/students/{student_id}/manage#memberships", status_code=303)
+
+
+@router.post("/{student_id}/enrollments/{enrollment_id}/balance", response_class=HTMLResponse)
+def save_balance(
+    student_id: int, enrollment_id: int, request: Request, target: str = Form(default=""),
+    reason: str = Form(default=""), expected_version: str = Form(default=""), csrf: str = Form(default=""),
+    db: Session = Depends(get_db), user: User = Depends(require_teacher),
+):
+    verify_csrf(request, csrf)
+    try:
+        try:
+            new_balance = int(target)
+        except ValueError:
+            raise ValueError("Enter a whole number for the new lesson balance.") from None
+        set_balance(request.app.state.database_engine, user.id, student_id, enrollment_id,
+                    new_balance, reason, expected_version)
+    except ValueError as error:
+        return detail_page(request, db, user, student_id, error=str(error), section="enrollment")
+    request.session['management_notice'] = "Lesson balance saved. Attendance and renewal history are preserved."
     return RedirectResponse(f"/teacher/students/{student_id}/manage#memberships", status_code=303)

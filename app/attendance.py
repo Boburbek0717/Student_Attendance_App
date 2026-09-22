@@ -5,9 +5,9 @@ import secrets
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, User, utc_now
+from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, LessonRoster, LessonRosterSnapshot, BalanceAdjustment, User, utc_now
 from app.database import write_transaction
-from app.packages import package_balance, package_rows
+from app.packages import package_balance, enrollment_balance
 
 
 def new_attendance_code(db: Session, now, previous_code=None) -> str:
@@ -43,6 +43,12 @@ def start_lesson(engine: Engine, teacher_id: int, group_id: int, minutes: int = 
                         code_expires_at=now + timedelta(minutes=minutes))
         db.add(lesson)
         db.flush()
+        db.add(LessonRosterSnapshot(lesson_id=lesson.id, captured_at=now))
+        db.flush()
+        enrollment_ids = db.scalars(select(Enrollment.id).where(
+            Enrollment.group_id == group_id, Enrollment.active.is_(True),
+        )).all()
+        db.add_all([LessonRoster(lesson_id=lesson.id, enrollment_id=key) for key in enrollment_ids])
         return lesson.id
 
 
@@ -72,7 +78,7 @@ def check_in(engine: Engine, student_id: int, code: str) -> int:
         ))
         if duplicate is not None:
             raise ValueError("You have already checked in to this lesson. No extra lesson was used.")
-        balance = package_balance(package_rows(db, enrollment.id))
+        balance = enrollment_balance(db, enrollment.id)
         if not balance["packages"]:
             raise ValueError("You have no lesson package in this group. Please contact your teacher.")
         # Once paid credit is exhausted, keep attendance on the latest package.
@@ -98,7 +104,14 @@ def student_records(db: Session, student_id: int):
     rows_by_enrollment = {}
     for package, used in packages:
         rows_by_enrollment.setdefault(package.enrollment_id, []).append((package, used))
-    balances = {enrollment.id: package_balance(rows_by_enrollment.get(enrollment.id, []))
+    adjustments = db.scalars(select(BalanceAdjustment).join(
+        Enrollment, Enrollment.id == BalanceAdjustment.enrollment_id,
+    ).where(Enrollment.student_id == student_id).order_by(BalanceAdjustment.id)).all()
+    adjustments_by_enrollment = {}
+    for adjustment in adjustments:
+        adjustments_by_enrollment.setdefault(adjustment.enrollment_id, []).append(adjustment)
+    balances = {enrollment.id: package_balance(rows_by_enrollment.get(enrollment.id, []),
+                adjustments_by_enrollment.get(enrollment.id, []))
                 for enrollment, group in memberships}
     by_enrollment = {key: balance["packages"] for key, balance in balances.items()}
     history = db.execute(
@@ -111,4 +124,4 @@ def student_records(db: Session, student_id: int):
         .order_by(Attendance.checked_in_at.desc(), Attendance.id.desc())
     ).all()
     return {"memberships": memberships, "packages_by_enrollment": by_enrollment,
-            "balances": balances, "history": history}
+            "balances": balances, "history": history, "adjustments_by_enrollment": adjustments_by_enrollment}

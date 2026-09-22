@@ -1,6 +1,8 @@
 # Lesson management
 
-This stage adds a teacher view of each class. It uses the existing tables and
+This stage adds a teacher view of each class. The later
+[teacher conveniences](teacher-convenience.md) stage adds saved lesson rosters
+and Present/Absent labels. It uses the existing tables and
 needs no migration or new dependency.
 
 ## Try the workflow
@@ -43,7 +45,9 @@ The detail query follows `Lesson -> Attendance -> Enrollment -> User` to list
 recorded attendees. An attendee remains visible even if their enrollment is
 later deactivated. Display names and usernames reflect current profile values.
 
-The second list shows **current active students without a check-in**. Enrollment
+Originally the second list showed **current active students without a check-in**.
+New lessons now use saved starting rosters for absence; the fallback below only
+applies to older lessons. Enrollment
 history is not dated in this app, so this is deliberately not labeled historical
 absence. Someone who joined later may appear on that list for an earlier lesson.
 

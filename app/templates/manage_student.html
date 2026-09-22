@@ -42,6 +42,26 @@
         <p>Status: <strong>{{ 'Active' if enrollment.active else 'Inactive' }}</strong></p>
         {% set balance = balances[enrollment.id] %}
         {% include "lesson_balance.html" %}
+        <details>
+            <summary>Change remaining lesson count</summary>
+            <p>Set the balance for this group. Positive numbers mean lessons available; negative numbers mean lessons owed. Zero clears both. This preserves attendance and package purchases.</p>
+            <form method="post" action="/teacher/students/{{ student.id }}/enrollments/{{ enrollment.id }}/balance">
+                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <input type="hidden" name="expected_version" value="{{ balance_version(balance) }}">
+                <label for="balance-{{ enrollment.id }}">New lesson balance</label>
+                <input id="balance-{{ enrollment.id }}" name="target" type="number" step="1" min="-1000000" max="1000000" value="{{ balance.balance }}" required>
+                <label for="reason-{{ enrollment.id }}">Reason for correction</label>
+                <input id="reason-{{ enrollment.id }}" name="reason" maxlength="500" required>
+                <button type="submit">Save lesson balance</button>
+            </form>
+        </details>
+        {% if adjustments_by_enrollment.get(enrollment.id) %}
+        <details><summary>Balance correction history</summary>
+            <ul>{% for change in adjustments_by_enrollment[enrollment.id]|reverse %}
+                <li>{{ change.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ change.old_balance }} → {{ change.new_balance }} · {{ change.reason }} · Teacher #{{ change.teacher_id }}</li>
+            {% endfor %}</ul>
+        </details>
+        {% endif %}
         <form method="post" action="/teacher/students/{{ student.id }}/enrollments/{{ enrollment.id }}/status">
             <input type="hidden" name="csrf" value="{{ csrf_token }}">
             <input type="hidden" name="active" value="{{ 'false' if enrollment.active else 'true' }}">

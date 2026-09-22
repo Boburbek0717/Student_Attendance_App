@@ -81,8 +81,8 @@ class LessonManagementTests(unittest.TestCase):
             other_id = other.id
             db.commit()
         self.assertIn('1 checked in', self.client.get(self.history).text)
-        self.assertIn('Checked in · 1', self.client.get(self.url).text)
-        self.assertIn('without a check-in · 0', self.client.get(self.url).text)
+        self.assertIn('Present · 1', self.client.get(self.url).text)
+        self.assertIn('Absent · 0', self.client.get(self.url).text)
         self.assertIn('No lessons yet', self.client.get(f'/teacher/groups/{other_id}/lessons').text)
 
     def test_close_is_repeatable_preserves_records_and_rejects_code(self):

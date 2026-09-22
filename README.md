@@ -1,4 +1,4 @@
-# Student Attendance Tracker — Lesson management
+# Student Attendance Tracker — Teacher conveniences
 
 The teacher page supports creating groups, creating student accounts, enrolling
 students with a 12-lesson package, starting group lessons, and viewing balances
@@ -99,10 +99,23 @@ attendees and check-in times. History is newest first, with 25 lessons per page.
 it preserves the original date and prevents duplicate attendance charges.
 Close any other open lesson in that group before reopening an earlier one.
 
-The unrecorded-students list uses the current active roster; it is not a record
-of historical absences. All times are UTC. Refresh to see new check-ins.
+New lessons save their starting roster. Students without a code check-in show
+as **Absent**, and become **Present** on check-in. Absence does not deduct lessons.
+Older lessons use the current roster with an explicit historical-data warning. All times are UTC. Refresh to see new check-ins.
 See [the lesson-management guide](docs/lesson-management.md) for the flow,
 relationships, transactions and code explanation.
+
+## Balance corrections
+
+Use **Change balance** beside a student, then expand **Change remaining lesson
+count** in the relevant group. Enter the desired balance and a reason. Positive
+means available, negative means owed, and zero clears both. Corrections preserve
+attendance and purchases, appear in both dashboards, and work with later renewals.
+The management page keeps a correction history. Stale forms are rejected if the
+balance changed while the page was open.
+
+See [teacher conveniences](docs/teacher-convenience.md) for examples, absence
+rules and the three new tables created automatically on startup.
 
 ## Concepts introduced
 
@@ -111,7 +124,7 @@ and package in one transaction. `flush()` obtains the membership ID without
 committing it; `commit()` saves both records. If package creation fails, `rollback()`
 undoes the pending membership. A test deliberately forces that failure.
 
-A **query** derives balances from history: `net balance = total package lessons -
+A **query** derives balances from history: `net balance = total package lessons + corrections -
 total attendance`, within one enrollment. Positive credit is available; negative
 credit is shown as lessons owed. Earlier excess attendance uses credit from later
 renewals without moving historical attendance records. No separate mutable counter
@@ -148,7 +161,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `app/attendance.py` | Serialized lesson creation/check-in and student record queries |
 | `app/packages.py` | Package accounting, carried debt, renewal transaction and stale-form checks |
 | `app/web.py` | Shared template rendering and database connections per request |
-| `app/models.py` | Six business tables plus revocable login sessions |
+| `app/models.py` | Business tables, balance corrections, saved lesson rosters and login sessions |
 | `app/database.py` | SQLite setup, foreign keys, table creation and shared write transaction |
 | `app/security.py` | Password checks, sessions, CSRF tokens and login limiter |
 | `app/middleware.py` | Request body limit before parsing |
@@ -166,6 +179,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 | `tests/test_attendance.py` | Attendance rules, privacy, expiry, collisions and simultaneous requests |
 | `tests/test_packages.py` | Early/late renewal, debt settlement, history and concurrent requests |
 | `tests/test_student_management.py` | Management permissions, validation, password revocation and preserved records |
+| `tests/test_teacher_convenience.py` | Balance corrections, absence snapshots and regression checks |
 | `tests/test_lesson_management.py` | Lesson access, close/reopen, pagination and simultaneous requests |
 
 ## Verify and learn
@@ -174,7 +188,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 91 tests use isolated databases, not real student data. Read the
+All 100 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 

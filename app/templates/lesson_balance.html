@@ -4,3 +4,4 @@
     <p class="{% if balance.owed %}owed{% endif %}"><strong>{{ balance.owed }}</strong><span>Lessons owed</span></p>
 </div>
 <p class="hint">{{ balance.included }} lessons added · {{ balance.attended }} attended in this group.</p>
+{% if balance.adjustment %}<p class="hint">Teacher corrections: {{ '%+d'|format(balance.adjustment) }} lessons. Available and owed totals include these corrections; attendance and purchase history stay unchanged.</p>{% endif %}

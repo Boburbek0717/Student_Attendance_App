@@ -11,8 +11,8 @@
         {% if not enrollment.active %}<p class="hint">Inactive enrollment</p>{% endif %}
         {% for package in packages_by_enrollment.get(enrollment.id, []) %}
         <p>Package #{{ package.id }}: {{ package.used }} / {{ package.limit }} lessons used · <strong>{{ package.remaining }} remaining</strong></p>
-        {% if package.carried_in %}<p class="hint">{{ package.carried_in }} owed lessons brought forward into this package.</p>{% endif %}
-        {% if package.carried_out %}<p class="hint">{{ package.carried_out }} excess lessons carried to later renewals.</p>{% endif %}
+        {% if package.carried_in and not balance.adjustment %}<p class="hint">{{ package.carried_in }} owed lessons brought forward into this package.</p>{% endif %}
+        {% if package.carried_out and not balance.adjustment %}<p class="hint">{{ package.carried_out }} excess lessons carried to later renewals.</p>{% endif %}
         {% else %}<p>No package yet. Contact your teacher.</p>{% endfor %}
     </article>
     {% else %}<p>No group enrollments yet. Ask your teacher to enroll you.</p>{% endfor %}
