@@ -33,7 +33,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         finally:
             database_engine.dispose()
 
-    app = FastAPI(title="Student Attendance Tracker", lifespan=lifespan)
+    app = FastAPI(title="SAT Factory", lifespan=lifespan)
     app.state.database_engine = database_engine
     app.state.login_limiter = AttemptLimiter()
     app.state.checkin_limiter = AttemptLimiter("Too many check-in attempts. Wait a minute and try again.")

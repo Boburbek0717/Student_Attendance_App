@@ -1,4 +1,8 @@
-# Student Attendance Tracker — Teacher conveniences
+# SAT Factory — Course attendance app
+
+The portal uses SAT Factory branding, a navy and warm-neutral theme, responsive
+layouts, and keyboard-visible focus styles. All styling and the SF mark are local;
+no external fonts or image services are required.
 
 The teacher page supports creating groups, creating student accounts, enrolling
 students with a 12-lesson package, starting group lessons, and viewing balances

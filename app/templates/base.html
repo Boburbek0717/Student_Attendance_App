@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Student Attendance Tracker{% endblock %}</title>
+    <title>{% block title %}SAT Factory{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
 </head>
 <body>
-    <main class="{% block main_class %}{% endblock %}">
-        <p class="eyebrow">Student Attendance Tracker</p>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main id="main-content" class="{% block main_class %}{% endblock %}">
+        <header class="brand-header">
+            <a class="brand" href="{{ '/teacher' if user and user.role == 'teacher' else '/student' if user else '/login' }}" aria-label="SAT Factory home">
+                <span class="brand-mark" aria-hidden="true">SF<span>.</span></span>
+                <span><strong>SAT Factory</strong><small>COURSE PORTAL</small></span>
+            </a>
+            {% if user %}<span class="role-badge">{{ user.role|capitalize }}</span>{% endif %}
+        </header>
         {% block content %}{% endblock %}
         {% if user %}
         <form method="post" action="/logout" class="logout">
