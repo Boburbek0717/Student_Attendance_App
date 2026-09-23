@@ -208,3 +208,15 @@ As an owner with independent teachers, I can restrict access to assigned groups.
 Keep manual renewals and late check-in with owed lessons. Do not add online
 payments, facial recognition, GPS attendance, a parent portal or a messaging
 service merely because they are common in other school apps.
+
+## Owner-requested design preview — 2026-09-23
+
+A local visual exploration related to SF-06/SF-07 now compares three designs on
+/#results: score ticket, student story, and bold scorecard. The owner explicitly
+supplied Asilbek Shukurov's full name, 610 EBRW, 690 Math and testimonial for this
+preview. This request supersedes anonymous labels for this local example only;
+public publishing policy, draft editor and permissions remain unimplemented.
+Starting from zero is expressed as starting from scratch; no invented baseline,
+score improvement, date or test certification is shown. Comment is lightly edited.
+Desktop and mobile browser checks cover responsive cards and anchor navigation.
+No database changes or external publishing. SF-06/SF-07 remain Backlog.

@@ -40,9 +40,10 @@ Start the local server:
 ```
 
 Open http://127.0.0.1:8000/ for the welcome page, or /login for the course portal.
-The welcome page is a results-showcase preview labeled “on development”, with
-an anonymous score-ticket placeholder and planned story sections. No real student
-results or faces are displayed. The brand header
+The welcome page includes three local result-design alternatives using the owner-supplied
+Asilbek Shukurov example: 1300 total, EBRW 610, Math 690, and an edited testimonial.
+The starting point is described as starting from scratch, not a numeric zero score.
+No faces are displayed. This is a design preview, not a results-management system. The brand header
 and login page link back to it. Signed-in users can open their dashboard from home. Stop an older server if the port is occupied.
 The proxy flag makes local login limiting use the connection address rather than
 forwarded headers. Existing accounts are preserved. No default accounts are added.
