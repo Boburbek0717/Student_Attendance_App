@@ -4,7 +4,7 @@
 <a href="/teacher/lessons/{{ lesson.id }}">Back to lesson</a>
 <h1>Review attendance correction</h1>
 <h2>{{ student.display_name }} · {{ group.name }}</h2>
-<p>Lesson #{{ lesson.id }} · {{ lesson.started_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>
+<p>Lesson #{{ lesson.id }} · {{ lesson.started_at | school_time }}</p>
 <p>Current status: <strong>{{ 'Present' if present else 'Absent' }}</strong></p>
 {% if legacy %}<p class="hint">This older lesson has no saved roster. Eligibility uses an existing attendance record or current active membership.</p>{% endif %}
 {% if not enrollment.active %}<p class="hint">This enrollment is now inactive. You are correcting an existing record or the saved roster of this lesson.</p>{% endif %}
@@ -25,7 +25,7 @@
 </form>
 </section>
 <section aria-labelledby="audit-heading"><h2 id="audit-heading">Correction history</h2>
-{% if record %}<p>Original entry: {{ record.checked_in_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ 'Teacher entry' if history and history[0][0].action == 'manual' else 'Code check-in' }}.</p>{% endif %}
-<ul>{% for event, teacher_name in history %}<li>{{ event.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ teacher_name }} (#{{ event.teacher_id }}) · {{ event.action }} · {{ event.reason }}</li>{% else %}<li>No corrections recorded.</li>{% endfor %}</ul>
+{% if record %}<p>Original entry: {{ record.checked_in_at | school_time }} · {{ 'Teacher entry' if history and history[0][0].action == 'manual' else 'Code check-in' }}.</p>{% endif %}
+<ul>{% for event, teacher_name in history %}<li>{{ event.created_at | school_time }} · {{ teacher_name }} (#{{ event.teacher_id }}) · {{ event.action }} · {{ event.reason }}</li>{% else %}<li>No corrections recorded.</li>{% endfor %}</ul>
 </section>
 {% endblock %}

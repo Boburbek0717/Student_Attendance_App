@@ -75,7 +75,7 @@
             <p>Lesson #{{ lesson.id }} · Attendance code</p>
             <p><a href="/teacher/lessons/{{ lesson.id }}">View attendance / close check-in</a></p>
             <strong class="code">{{ lesson.attendance_code }}</strong>
-            <p>Expires at {{ lesson.code_expires_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC.</p>
+            <p>Expires at {{ lesson.code_expires_at | school_time }}.</p>
             <p class="hint">Share this code with your group. Refresh to see updated attendance and code status.</p>
         </div>
         {% else %}

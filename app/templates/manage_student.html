@@ -58,7 +58,7 @@
         {% if adjustments_by_enrollment.get(enrollment.id) %}
         <details><summary>Balance correction history</summary>
             <ul>{% for change in adjustments_by_enrollment[enrollment.id]|reverse %}
-                <li>{{ change.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ change.old_balance }} → {{ change.new_balance }} · {{ change.reason }} · Teacher #{{ change.teacher_id }}</li>
+                <li>{{ change.created_at | school_time }} · {{ change.old_balance }} → {{ change.new_balance }} · {{ change.reason }} · Teacher #{{ change.teacher_id }}</li>
             {% endfor %}</ul>
         </details>
         {% endif %}

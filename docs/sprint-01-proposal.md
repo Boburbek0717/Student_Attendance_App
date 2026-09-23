@@ -45,3 +45,5 @@ Sprint 2 theme: class clarity and recovery (SF-03, SF-04, SF-05 as capacity allo
 Sprint 3 theme: first approved anonymous results and enquiry route (SF-06–08,
 dependent on owner-supplied content). These are not fixed scope or dates.
 Public deployment requires SF-13 readiness and an explicit release decision.
+
+Next authorized step: SF-03; see [increment progress](sprint-02-progress.md).

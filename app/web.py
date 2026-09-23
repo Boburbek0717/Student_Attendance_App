@@ -5,10 +5,12 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.security import csrf_token
+from app.school_time import school_time
 
 
 APP_DIRECTORY = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=APP_DIRECTORY / "templates")
+templates.env.filters["school_time"] = school_time
 
 
 def get_db(request: Request):

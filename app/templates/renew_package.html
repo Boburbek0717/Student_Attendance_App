@@ -7,6 +7,9 @@
 <p class="hint">Username: {{ student.username }}. This renewal applies only to this group.</p>
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 {% include "lesson_balance.html" %}
+<details><summary>Package dates · Asia/Tashkent (UTC+05:00)</summary>
+<ul>{% for package in balance.packages %}<li>Package #{{ package.id }} · Recorded {{ package.purchased_at | school_time }}</li>{% endfor %}</ul>
+</details>
 {% if enrollment.active and student.role == 'student' %}
 <section class="group-card" aria-labelledby="renewal-preview">
     <h2 id="renewal-preview">Add a new 12-lesson package</h2>

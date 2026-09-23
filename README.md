@@ -80,7 +80,7 @@ Their extra attendance increases **Lessons owed**: 2 owed + a 12-lesson renewal 
 teacher and student. See [renewals and counters](docs/packages.md) for the examples.
 
 Repeat the check-in: it must show an error without using another lesson. Codes are
-sent through POST forms, never URLs. All displayed lesson times are labeled UTC.
+sent through POST forms, never URLs. Displayed dates use Asia/Tashkent (UTC+05:00); stored timestamps remain UTC.
 See [the attendance lesson](docs/attendance.md) for the flow, configuration and
 concurrency explanation.
 
@@ -116,7 +116,7 @@ Close any other open lesson in that group before reopening an earlier one.
 
 New lessons save their starting roster. Students without recorded attendance show
 as **Absent**, and become **Present** on check-in. Absence does not deduct lessons.
-Older lessons use the current roster with an explicit historical-data warning. All times are UTC. Refresh to see new check-ins.
+Older lessons use the current roster with an explicit historical-data warning. All times use Asia/Tashkent (UTC+05:00). Refresh to see new check-ins.
 See [the lesson-management guide](docs/lesson-management.md) for the flow,
 relationships, transactions and code explanation.
 
@@ -230,7 +230,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 119 tests use isolated databases, not real student data. Read the
+All 122 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 
@@ -241,3 +241,13 @@ reliable than calculating from the package and attendance records.
 Earlier explanations are archived in [Stage 1](docs/stage-1.md),
 [Stage 2](docs/stage-2.md) and [Stage 3](docs/stage-3.md). Those describe earlier
 milestones; this README describes the current app.
+
+## School-local times (SF-03)
+
+Lesson, attendance and correction timestamps use the shared `school_time` Jinja
+filter from `app/school_time.py`. Renewal previews include recorded package dates.
+Naive SQLite timestamps are explicitly interpreted as UTC, then converted using
+Asia/Tashkent IANA rules. Every formatted time includes the timezone and offset.
+Code expiry, ordering and saved form versions remain UTC-based. No schema or data
+migration is needed. Install requirements before restarting: tzdata provides the
+IANA database on Windows. Midnight rollover and exact expiry are regression-tested.

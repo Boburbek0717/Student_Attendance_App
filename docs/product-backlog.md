@@ -13,7 +13,7 @@ corrections, lesson reopening and persistent check-in limits already exist.
 Priority: P1 = essential next work; P2 = important next increments; P3 = later or
 conditional. Order within a priority is intentional. Estimates are provisional
 relative story points (2/3/5/8), not hours or promised delivery dates. Split an
-8-point item further if it cannot fit the selected sprint. SF-01 and SF-02: Done. All other statuses: Backlog.
+8-point item further if it cannot fit the selected sprint. SF-01 and SF-02: Done. SF-03: Done. All other statuses: Backlog.
 Evidence IDs refer to [the usage simulation](usage-simulation.md).
 
 | Order / ID | Priority | Backlog item | Points | Evidence | Dependencies |
