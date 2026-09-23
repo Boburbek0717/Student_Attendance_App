@@ -230,3 +230,6 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
  .bold-score-row { gap:1rem; } .bold-quote { gap:.8rem; }
  .result-options a { flex:1 1 auto; text-align:center; }
 }
+
+/* Selected score-ticket gallery. */
+.ticket-score-panel h3 { margin:1rem 0; font-size:1.6rem; letter-spacing:-.04em; }

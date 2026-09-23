@@ -6,7 +6,7 @@
     <div class="hero-copy">
         <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> THE SAT FACTORY / STUDENT STORIES</p>
         <h1 id="welcome-heading">Small steps.<br>Serious <span>progress.</span></h1>
-        <p class="page-intro">Behind every score is a student who kept showing up. This is where their SAT journeys will take the spotlight.</p>
+        <p class="page-intro">Behind every score is a student who kept showing up. These are their SAT journeys, in their own words.</p>
         <div class="hero-actions">
             <a class="button" href="#results">Explore the results wall <span aria-hidden="true">↗</span></a>
             {% if user %}<a class="text-action" href="/{{ user.role }}">Go to my dashboard</a>
@@ -14,51 +14,41 @@
         </div>
         <p class="hero-footnote">The work matters. So does the story behind it.</p>
     </div>
-    <aside class="result-ticket" aria-label="Preview of a future anonymous result card">
-        <div class="ticket-top"><span>SF / RESULT FILE</span><span>PREVIEW</span></div>
+    <aside class="result-ticket" aria-label="Featured result: Asilbek Shukurov">
+        <div class="ticket-top"><span>SF / RESULT FILE</span><span>STUDENT RESULT</span></div>
         <div class="ticket-body">
-            <p class="ticket-label">A future achievement belongs here.</p>
-            <div class="score-placeholder" aria-label="Score not yet published">— — — —</div>
+            <p class="ticket-label">Asilbek Shukurov</p>
+            <div class="score-placeholder">1300</div>
             <p class="ticket-caption">SAT TOTAL SCORE</p>
-            <div class="ticket-sections"><div><span>READING & WRITING</span><strong>—</strong></div><div><span>MATH</span><strong>—</strong></div></div>
+            <div class="ticket-sections"><div><span>EBRW</span><strong>610</strong></div><div><span>MATH</span><strong>690</strong></div></div>
         </div>
-        <div class="ticket-bottom"><span class="ticket-seal" aria-hidden="true">SF</span><p>Scores in the spotlight.<br><strong>Students stay private.</strong></p></div>
-        <p class="ticket-disclaimer">Layout preview · No student result published</p>
+        <div class="ticket-bottom"><span class="ticket-seal" aria-hidden="true">SF</span><p>Scores in the spotlight.<br><strong>Built through practice.</strong></p></div>
+        <p class="ticket-disclaimer">Started from scratch · SAT Factory student</p>
     </aside>
 </section>
 <div class="factory-strip" aria-label="Our focus"><span>01 / PRACTICE</span><span>02 / PERSISTENCE</span><span>03 / PROGRESS</span></div>
 <section id="results" class="results-section" aria-labelledby="results-heading">
-    {% set student_name = 'Asilbek Shukurov' %}
-    {% set student_quote = 'I never imagined I could feel so comfortable with math. The course guided me through my SAT journey and gave me much more confidence. My teacher, Boburbek aka, made a real difference with his guidance and support.' %}
-    <div class="section-heading"><div><p class="eyebrow">THE RESULTS WALL / DESIGN PREVIEW</p><h2 id="results-heading">One journey. Three ways to tell it.</h2></div><span class="development-label">3 design options</span></div>
-    <p class="section-intro">Meet Asilbek. He started from scratch and reached a 1300 SAT score. Compare three directions for our student stories.</p>
-    <nav class="result-options" aria-label="Result design options"><a href="#result-ticket">01 / Score ticket</a><a href="#result-story">02 / Student story</a><a href="#result-bold">03 / Bold scorecard</a></nav>
-    <p class="preview-note">Design comparison: the same student appears in all three options. Comment lightly edited for clarity.</p>
-
-    <section id="result-ticket" class="result-design" aria-labelledby="ticket-design-heading">
-        <div class="design-caption"><h3 id="ticket-design-heading">01 / The score ticket</h3><span>Precise. Collectible. Made for a results wall.</span></div>
-        <article class="student-ticket">
-            <div class="ticket-score-panel"><p class="result-kicker">SAT FACTORY / RESULT 001</p><h4>{{ student_name }}</h4><div class="result-total">1300<span>/ 1600</span></div><p class="result-kicker">SAT TOTAL SCORE</p><dl class="result-breakdown"><div><dt>EBRW</dt><dd>610</dd></div><div><dt>Math</dt><dd>690</dd></div></dl></div>
-            <div class="ticket-story-panel"><span class="journey-tag">STARTED FROM SCRATCH</span><blockquote>“{{ student_quote }}”</blockquote><p class="quote-credit">{{ student_name }}<span>SAT Factory student</span></p><div class="ticket-stamp" aria-hidden="true">SF / BUILT THROUGH PRACTICE</div></div>
-        </article>
-    </section>
-
-    <section id="result-story" class="result-design" aria-labelledby="story-design-heading">
-        <div class="design-caption"><h3 id="story-design-heading">02 / The student story</h3><span>Warm. Personal. Confidence beyond the score.</span></div>
-        <article class="student-editorial">
-            <div class="editorial-heading"><p class="result-kicker">BEHIND THE SCORE / 001</p><h4>A new score.<br>A new confidence.</h4><p class="editorial-name">{{ student_name }}</p><div class="journey-line"><span>Started from scratch</span><span aria-hidden="true">→</span><strong>1300 SAT</strong></div></div>
-            <div class="editorial-story"><span class="quote-symbol" aria-hidden="true">“</span><blockquote>{{ student_quote }}</blockquote><dl class="editorial-scores"><div><dt>SAT total</dt><dd>1300</dd></div><div><dt>EBRW</dt><dd>610</dd></div><div><dt>Math</dt><dd>690</dd></div></dl></div>
-        </article>
-    </section>
-
-    <section id="result-bold" class="result-design" aria-labelledby="bold-design-heading">
-        <div class="design-caption"><h3 id="bold-design-heading">03 / The bold scorecard</h3><span>High contrast. Score first. Unmistakably SAT Factory.</span></div>
-        <article class="student-bold">
-            <header><p class="result-kicker">SAT FACTORY / STUDENT SPOTLIGHT</p><span class="bold-monogram" aria-hidden="true">SF↗</span></header>
-            <div class="bold-score-row"><div class="bold-total">1300<span>SAT TOTAL / 1600</span></div><div class="bold-identity"><h4>{{ student_name }}</h4><p>Started from scratch.<br>Built through practice.</p><dl class="bold-breakdown"><div><dt>EBRW</dt><dd>610</dd></div><div><dt>Math</dt><dd>690</dd></div></dl></div></div>
-            <div class="bold-quote"><span class="result-kicker">IN HIS OWN WORDS</span><blockquote>“{{ student_quote }}”</blockquote></div>
-        </article>
-    </section>
+    {% set results = [{"name": "Asilbek Shukurov", "ebrw": 610, "math": 690, "tag": "STARTED FROM SCRATCH", "quote": "I never imagined I could feel so comfortable with math. The course guided me through my SAT journey and gave me much more confidence. My teacher, Boburbek aka, made a real difference with his guidance and support."}, {"name": "Axadjon Axmadqulov", "ebrw": 640, "math": 710, "tag": "STARTED FROM SCRATCH", "quote": "When I first started preparing for the SAT, I thought it would be very difficult and take a long time. With my teacher's help, I achieved my score after just four months of individual lessons."}, {"name": "Shoxjaxon Akramov", "ebrw": 610, "math": 600, "tag": "PERSISTENCE PAID OFF", "quote": "The SAT was a real challenge for me, and I didn't reach my target score on my first attempt. But I kept working hard, tried again, and earned a score high enough to qualify for a scholarship at a state university."}] %}
+    <div class="section-heading"><div><p class="eyebrow">THE RESULTS WALL</p><h2 id="results-heading">Their effort. Their stories.</h2></div><span class="development-label">STUDENT RESULTS</span></div>
+    <p class="section-intro">Every score has a story. Meet the students who put in the work and took their next step with SAT Factory.</p>
+    {% for result in results %}
+    <article id="result-{{ loop.index }}" class="student-ticket result-design" aria-labelledby="student-{{ loop.index }}">
+        <div class="ticket-score-panel">
+            <p class="result-kicker">SAT FACTORY / RESULT {{ '%03d' | format(loop.index) }}</p>
+            <h3 id="student-{{ loop.index }}">{{ result.name }}</h3>
+            <div class="result-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
+            <p class="result-kicker">SAT TOTAL SCORE</p>
+            <dl class="result-breakdown"><div><dt>EBRW</dt><dd>{{ result.ebrw }}</dd></div><div><dt>Math</dt><dd>{{ result.math }}</dd></div></dl>
+        </div>
+        <div class="ticket-story-panel">
+            <span class="journey-tag">{{ result.tag }}</span>
+            <blockquote>“{{ result.quote }}”</blockquote>
+            <p class="quote-credit">{{ result.name }}<span>SAT Factory student</span></p>
+            <div class="ticket-stamp" aria-hidden="true">SF / BUILT THROUGH PRACTICE</div>
+        </div>
+    </article>
+    {% endfor %}
+    <p class="preview-note">Student comments lightly edited for clarity.</p>
 </section>
 <section class="portal-banner" aria-labelledby="portal-heading"><div><p class="eyebrow">ALREADY PART OF THE FACTORY?</p><h2 id="portal-heading">Your next lesson is waiting.</h2><p>Check in, review attendance, and keep track of your lessons.</p></div>
 {% if user %}<a class="button" href="/{{ user.role }}">Go to my dashboard</a>{% else %}<a class="button" href="/login">Log in to the course portal <span aria-hidden="true">→</span></a>{% endif %}

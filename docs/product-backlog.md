@@ -220,3 +220,11 @@ Starting from zero is expressed as starting from scratch; no invented baseline,
 score improvement, date or test certification is shown. Comment is lightly edited.
 Desktop and mobile browser checks cover responsive cards and anchor navigation.
 No database changes or external publishing. SF-06/SF-07 remain Backlog.
+
+## Selected results design
+
+Owner selected Score Ticket and supplied Axadjon Axmadqulov (1350: 640 + 710)
+and Shoxjaxon Akramov (1210: 610 + 600). Three distinct students now use the
+same design; comparison options removed. Comments lightly polished. No baseline
+invented for Shoxjaxon; scratch labels apply only to Asilbek and Axadjon.
+This remains static owner-supplied content; SF-06/SF-07 management tools remain Backlog.
