@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -123,3 +123,10 @@ class LessonRoster(Base):
 
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson_roster_snapshots.lesson_id"), primary_key=True)
     enrollment_id: Mapped[int] = mapped_column(ForeignKey("enrollments.id"), primary_key=True)
+
+
+class AttendanceAttemptWindow(Base):
+    __tablename__ = "attendance_attempt_windows"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    timestamps: Mapped[list[float]] = mapped_column(JSON)

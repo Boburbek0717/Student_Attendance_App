@@ -36,7 +36,6 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     app = FastAPI(title="SAT Factory", lifespan=lifespan)
     app.state.database_engine = database_engine
     app.state.login_limiter = AttemptLimiter()
-    app.state.checkin_limiter = AttemptLimiter("Too many check-in attempts. Wait a minute and try again.")
     app.state.code_minutes = code_minutes
     app.add_middleware(
         SessionMiddleware,

@@ -43,7 +43,7 @@ class DatabaseTests(unittest.TestCase):
     def test_tables_and_foreign_keys(self):
         self.assertEqual(set(inspect(self.engine).get_table_names()), {
             "users", "groups", "enrollments", "lesson_packages", "lessons", "attendance", "login_sessions",
-            "balance_adjustments", "lesson_roster_snapshots", "lesson_roster"
+            "balance_adjustments", "lesson_roster_snapshots", "lesson_roster", "attendance_attempt_windows"
         })
         self.assertEqual(self.session.scalar(text("PRAGMA foreign_keys")), 1)
         self.assert_rejected(Lesson(group_id=999))

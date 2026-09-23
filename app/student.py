@@ -5,7 +5,7 @@ from starlette.exceptions import HTTPException
 
 from app.attendance import check_in, student_records
 from app.models import User
-from app.security import current_user, verify_csrf
+from app.security import current_user, verify_csrf, limit_attendance_attempt
 from app.web import get_db, render
 
 
@@ -38,9 +38,9 @@ def submit_attendance(
     db: Session = Depends(get_db), user: User = Depends(require_student),
 ):
     verify_csrf(request, csrf)
-    request.app.state.checkin_limiter.check(str(user.id))
     try:
-        balance = check_in(request.app.state.database_engine, user.id, code)
+        limit_attendance_attempt(request.app.state.database_engine, user.id)
+        balance = check_in(request.app.state.database_engine, user.id, code, request=request)
     except ValueError as error:
         return dashboard(request, db, user, error=str(error))
     request.session["attendance_notice"] = (

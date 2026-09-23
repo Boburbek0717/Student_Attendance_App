@@ -4,10 +4,12 @@ import secrets
 
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
+from fastapi import Request, HTTPException
 
 from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, LessonRoster, LessonRosterSnapshot, BalanceAdjustment, User, utc_now
 from app.database import write_transaction
 from app.packages import package_balance, enrollment_balance
+from app.security import current_user
 
 
 def new_attendance_code(db: Session, now, previous_code=None) -> str:
@@ -52,11 +54,15 @@ def start_lesson(engine: Engine, teacher_id: int, group_id: int, minutes: int = 
         return lesson.id
 
 
-def check_in(engine: Engine, student_id: int, code: str) -> int:
+def check_in(engine: Engine, student_id: int, code: str, *, request: Request | None = None) -> int:
     code = code.strip()
     if not re.fullmatch(r"[0-9]{6}", code):
         raise ValueError("Enter the six-digit code from your teacher.")
     with write_transaction(engine) as db:
+        if request is not None:
+            actor = current_user(request, db)
+            if actor is None or actor.id != student_id:
+                raise HTTPException(303, headers={"Location": "/login"})
         student = db.get(User, student_id)
         if student is None or student.role != "student":
             raise ValueError("Only a student can check in.")
@@ -72,7 +78,7 @@ def check_in(engine: Engine, student_id: int, code: str) -> int:
             Enrollment.active.is_(True),
         ))
         if enrollment is None:
-            raise ValueError("You do not have an active enrollment in this lesson's group.")
+            raise ValueError("That code is invalid or has expired. Ask your teacher for the current code.")
         duplicate = db.scalar(select(Attendance.id).where(
             Attendance.enrollment_id == enrollment.id, Attendance.lesson_id == lesson.id,
         ))

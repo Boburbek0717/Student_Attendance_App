@@ -6,6 +6,8 @@ from datetime import timedelta
 from pathlib import Path
 from threading import Lock
 from time import monotonic
+from time import time
+from math import ceil
 
 from fastapi import HTTPException, Request
 from pwdlib import PasswordHash
@@ -13,7 +15,8 @@ from pwdlib.exceptions import UnknownHashError
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app.models import LoginSession, User, utc_now
+from app.models import AttendanceAttemptWindow, LoginSession, User, utc_now
+from app.database import write_transaction
 
 
 password_hasher = PasswordHash.recommended()
@@ -45,6 +48,27 @@ class AttemptLimiter:
 
 def fingerprint(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
+
+
+def limit_attendance_attempt(engine, user_id: int) -> None:
+    """Persist at most ten timestamps per account across workers and restarts."""
+    retry_after = 0
+    with write_transaction(engine) as db:
+        now = time()
+        window = db.get(AttendanceAttemptWindow, user_id)
+        recent = [stamp for stamp in window.timestamps if stamp > now - 60] if window else []
+        if len(recent) >= 10:
+            retry_after = max(1, ceil(min(recent) + 60 - now))
+        else:
+            recent.append(now)
+            if window is None:
+                db.add(AttendanceAttemptWindow(user_id=user_id, timestamps=recent))
+            else:
+                window.timestamps = recent
+    # Commit the attempt before code validation, so failed check-ins consume it too.
+    if retry_after:
+        raise HTTPException(429, "Too many check-in attempts. Wait a minute and try again.",
+                            headers={"Retry-After": str(retry_after)})
 
 
 def start_session(request: Request, db: Session, user: User) -> None:

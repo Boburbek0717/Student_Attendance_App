@@ -87,13 +87,13 @@ class AttendanceRulesTests(unittest.TestCase):
 
     def test_wrong_group_and_inactive_membership(self):
         self.lesson(group_id=self.other_group_id)
-        with self.assertRaisesRegex(ValueError, "active enrollment"):
+        with self.assertRaisesRegex(ValueError, "invalid or has expired"):
             check_in(self.engine, self.student_id, "000123")
         self.lesson(code="000456")
         with Session(self.engine) as db:
             db.get(Enrollment, self.enrollment_id).active = False
             db.commit()
-        with self.assertRaisesRegex(ValueError, "active enrollment"):
+        with self.assertRaisesRegex(ValueError, "invalid or has expired"):
             check_in(self.engine, self.student_id, "000456")
         self.assertEqual(self.count(), 0)
 
@@ -308,7 +308,7 @@ class AttendancePageTests(unittest.TestCase):
 
     def test_bad_code_message_and_limit(self):
         token = self.token(self.student.get("/student"))
-        with patch("app.security.monotonic", return_value=100):
+        with patch("app.security.time", return_value=100):
             for _ in range(10):
                 response = self.student.post("/student/check-in", data={"csrf": token, "code": "999999"})
                 self.assertEqual(response.status_code, 400)

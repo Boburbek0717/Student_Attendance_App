@@ -66,7 +66,8 @@ $env:ATTENDANCE_CODE_MINUTES = "10"
   class from its detail page; do not use a new lesson to extend the previous
   class's attendance window.
 - Students get ten submission attempts per minute per account, shared across
-  sessions in this server process. A code identifies a lesson, not the student.
+  sessions and processes through a persistent SQLite window. See
+  [attendance security](attendance-security.md) for the follow-up review. A code identifies a lesson, not the student.
 - Codes are shown only on teacher pages, not student dashboards/history or URLs.
   There is no automatic refresh or live countdown; refresh the teacher page to
   update its code status and balances.

@@ -138,6 +138,14 @@ credit is shown as lessons owed. Earlier excess attendance uses credit from late
 renewals without moving historical attendance records. No separate mutable counter
 can fall out of sync with the history.
 
+## Attendance security
+
+Check-in allows ten attempts per student in a rolling minute, shared across
+server processes and preserved through restarts and new logins. Failed attempts
+count. Invalid and unauthorized codes return the same message, and sessions are
+rechecked inside the attendance write transaction. Startup adds a small attempt
+window table. See [attendance security review](docs/attendance-security.md).
+
 ## Security corrections
 
 Signed cookies detect editing, but a copied cookie previously remained usable
@@ -196,7 +204,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 100 tests use isolated databases, not real student data. Read the
+All 105 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 

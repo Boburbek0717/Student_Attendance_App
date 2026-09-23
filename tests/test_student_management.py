@@ -126,7 +126,7 @@ class StudentManagementTests(unittest.TestCase):
         path = f"/enrollments/{self.enrollment_id}/status"
         for _ in range(2):
             self.assertEqual(self.submit(path, active="false").status_code, 303)
-        with self.assertRaisesRegex(ValueError, "active enrollment"):
+        with self.assertRaisesRegex(ValueError, "invalid or has expired"):
             check_in(self.engine, self.student_id, code)
         with self.assertRaisesRegex(ValueError, "active enrollment"):
             renew_package(self.engine, self.teacher_id, self.enrollment_id, balance["latest_package_id"], balance["attended"])
