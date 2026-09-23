@@ -233,3 +233,23 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
 
 /* Selected score-ticket gallery. */
 .ticket-score-panel h3 { margin:1rem 0; font-size:1.6rem; letter-spacing:-.04em; }
+
+/* Teacher introduction: deliberately labeled content and portrait placeholders. */
+.teacher-jump { display:inline-block; margin-top:1.4rem; }
+.teacher-feature { display:grid; grid-template-columns:.8fr 1.2fr; gap:clamp(2rem,5vw,4rem); align-items:center; padding:4rem 0; border-bottom:1px solid var(--line); scroll-margin-top:1.5rem; }
+.teacher-portrait { aspect-ratio:4/5; min-width:0; position:relative; display:flex; flex-direction:column; justify-content:space-between; align-items:center; padding:1.5rem; background:#e8eddf; border:1px solid #b6c2a8; box-shadow:7px 7px 0 #d8e1c9; }
+.portrait-index { font:.6rem/1.7 ui-monospace,monospace; letter-spacing:.1em; align-self:flex-start; color:#4c5c3e; }
+.portrait-outline { width:65%; aspect-ratio:1/1; position:relative; overflow:hidden; border-bottom:1px solid #9ead90; }
+.portrait-outline:before { content:""; position:absolute; border:2px solid #9ead90; width:35%; height:35%; border-radius:50%; top:10%; left:32%; }
+.portrait-outline:after { content:""; position:absolute; border:2px solid #9ead90; width:85%; height:60%; border-radius:50% 50% 0 0; top:53%; left:7%; }
+.portrait-caption { text-align:center; background:#f7faef; width:100%; padding:1rem; border:1px dashed #adbc9a; }
+.portrait-caption strong,.portrait-caption span { display:block; }
+.portrait-caption span { font-size:.75rem; color:var(--muted); margin-top:.3rem; }
+.teacher-introduction h2 { font-size:clamp(2rem,3.7vw,3.2rem); line-height:1.1; margin:1rem 0 1.7rem; letter-spacing:-.05em; }
+.teacher-name-placeholder { font-size:1.35rem; font-weight:750; margin-bottom:0; }
+.teacher-role { font-size:.85rem; color:var(--muted); margin-top:.2rem; }
+.teacher-bio-placeholder { margin:1.5rem 0; padding-left:1rem; border-left:3px solid var(--accent); }
+.teacher-bio-placeholder p,.teacher-detail-grid p { color:var(--muted); font-size:.9rem; }
+.teacher-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+.teacher-detail-grid h3 { font-size:.9rem; margin-top:0; }
+@media(max-width:700px) { .teacher-feature { grid-template-columns:1fr; padding:2.5rem 0; } .teacher-portrait { width:min(100%,22rem); justify-self:center; } .teacher-detail-grid { grid-template-columns:1fr; gap:.5rem; } }

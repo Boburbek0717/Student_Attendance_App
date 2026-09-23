@@ -12,6 +12,7 @@
             {% if user %}<a class="text-action" href="/{{ user.role }}">Go to my dashboard</a>
             {% else %}<a class="text-action" href="/login">Course portal <span aria-hidden="true">→</span></a>{% endif %}
         </div>
+        <a class="text-action teacher-jump" href="#teacher">Meet your teacher <span aria-hidden="true">↓</span></a>
         <p class="hero-footnote">The work matters. So does the story behind it.</p>
     </div>
     <aside class="result-ticket" aria-label="Featured result: Asilbek Shukurov">
@@ -27,6 +28,22 @@
     </aside>
 </section>
 <div class="factory-strip" aria-label="Our focus"><span>01 / PRACTICE</span><span>02 / PERSISTENCE</span><span>03 / PROGRESS</span></div>
+<section id="teacher" class="teacher-feature" aria-labelledby="teacher-feature-heading">
+    <div class="teacher-portrait" role="img" aria-label="Placeholder for your teacher's portrait">
+        <span class="portrait-index">THE PERSON BEHIND THE PRACTICE / 01</span>
+        <div class="portrait-outline" aria-hidden="true"><span></span></div>
+        <div class="portrait-caption"><strong>Your photo here</strong><span>A portrait from you, coming soon.</span></div>
+    </div>
+    <div class="teacher-introduction">
+        <p class="eyebrow">MEET YOUR TEACHER</p>
+        <h2 id="teacher-feature-heading">The person behind<br>your next step.</h2>
+        <p class="teacher-name-placeholder">[Your name]</p>
+        <p class="teacher-role">SAT instructor · SAT Factory</p>
+        <div class="teacher-bio-placeholder"><span class="development-label">INTRODUCTION COMING SOON</span><p>[A short introduction about you, why you teach, and how you help students prepare for the SAT.]</p></div>
+        <div class="teacher-detail-grid"><div><h3>My approach</h3><p>[Your teaching style and what students can expect in your lessons.]</p></div><div><h3>My background</h3><p>[Your experience, qualifications, and personal SAT journey.]</p></div></div>
+        <a class="text-action" href="#results">Meet the students and their stories <span aria-hidden="true">↗</span></a>
+    </div>
+</section>
 <section id="results" class="results-section" aria-labelledby="results-heading">
     {% set results = [{"name": "Asilbek Shukurov", "ebrw": 610, "math": 690, "tag": "STARTED FROM SCRATCH", "quote": "I never imagined I could feel so comfortable with math. The course guided me through my SAT journey and gave me much more confidence. My teacher, Boburbek aka, made a real difference with his guidance and support."}, {"name": "Axadjon Axmadqulov", "ebrw": 640, "math": 710, "tag": "STARTED FROM SCRATCH", "quote": "When I first started preparing for the SAT, I thought it would be very difficult and take a long time. With my teacher's help, I achieved my score after just four months of individual lessons."}, {"name": "Shoxjaxon Akramov", "ebrw": 610, "math": 600, "tag": "PERSISTENCE PAID OFF", "quote": "The SAT was a real challenge for me, and I didn't reach my target score on my first attempt. But I kept working hard, tried again, and earned a score high enough to qualify for a scholarship at a state university."}] %}
     <div class="section-heading"><div><p class="eyebrow">THE RESULTS WALL</p><h2 id="results-heading">Their effort. Their stories.</h2></div><span class="development-label">STUDENT RESULTS</span></div>

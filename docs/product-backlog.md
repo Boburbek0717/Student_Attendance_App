@@ -228,3 +228,13 @@ and Shoxjaxon Akramov (1210: 610 + 600). Three distinct students now use the
 same design; comparison options removed. Comments lightly polished. No baseline
 invented for Shoxjaxon; scratch labels apply only to Asilbek and Axadjon.
 This remains static owner-supplied content; SF-06/SF-07 management tools remain Backlog.
+
+## Owner-requested branding exploration
+
+Three generated SAT Factory logo concepts saved under output/branding; no final
+logo selected. Homepage teacher introduction added before results with a labeled
+portrait placeholder and editable name, biography, approach and background text.
+No qualifications or personal history asserted. No changes to sprint story scope.
+
+Branding verification: homepage returned HTTP 200; teacher section visually checked
+at 1280 x 900 and 390 x 844. Existing student results remain below the section.
