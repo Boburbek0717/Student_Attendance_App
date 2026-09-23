@@ -1,5 +1,9 @@
 # SAT Factory — Course attendance app
 
+Future development follows the [Scrum working agreement](docs/scrum-working-agreement.md).
+See the [ordered backlog](docs/product-backlog.md), [usage simulation](docs/usage-simulation.md)
+and [first sprint proposal](docs/sprint-01-proposal.md). The sprint is not yet started.
+
 The portal uses SAT Factory branding, a workshop-inspired graphite, paper and lime theme, responsive
 layouts, and keyboard-visible focus styles. All styling and the SF mark are local;
 no external fonts or image services are required.
