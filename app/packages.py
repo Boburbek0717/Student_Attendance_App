@@ -1,3 +1,4 @@
+from app.attendance_state import attendance_active, attendance_origin, correction_version
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
 
@@ -8,7 +9,7 @@ from app.models import Attendance, BalanceAdjustment, Enrollment, LessonPackage,
 def package_rows(db: Session, enrollment_id: int):
     return db.execute(
         select(LessonPackage, func.count(Attendance.id))
-        .outerjoin(Attendance, Attendance.package_id == LessonPackage.id)
+        .outerjoin(Attendance, (Attendance.package_id == LessonPackage.id) & attendance_active())
         .where(LessonPackage.enrollment_id == enrollment_id)
         .group_by(LessonPackage.id).order_by(LessonPackage.purchased_at, LessonPackage.id)
     ).all()
@@ -46,7 +47,7 @@ def package_balance(rows, adjustments=()):
     queued = sum(item["remaining"] for item in available_packages[1:])
     return {
         "included": included, "attended": attended, "balance": net,
-        "adjustment": adjustment,
+        "adjustment": adjustment, "latest_correction_id": 0,
         "latest_adjustment_id": max((item.id for item in adjustments), default=0),
         "available": max(0, net), "owed": max(0, -net),
         "latest_package_id": max((package.id for package, used in rows), default=0),
@@ -56,7 +57,7 @@ def package_balance(rows, adjustments=()):
 
 
 def renew_package(engine: Engine, teacher_id: int, enrollment_id: int,
-                  expected_package_id: int, expected_attended: int, expected_adjustment_id: int = 0) -> int:
+                  expected_package_id: int, expected_attended: int, expected_adjustment_id: int = 0, expected_correction_id: int = 0) -> int:
     if not 0 < enrollment_id < 2**63:
         raise ValueError("Enrollment not found.")
     with write_transaction(engine) as db:
@@ -70,7 +71,7 @@ def renew_package(engine: Engine, teacher_id: int, enrollment_id: int,
         if student is None or student.role != "student":
             raise ValueError("This enrollment does not belong to a student.")
         balance = enrollment_balance(db, enrollment.id)
-        if (balance["latest_package_id"], balance["attended"], balance["latest_adjustment_id"]) != (expected_package_id, expected_attended, expected_adjustment_id):
+        if (balance["latest_package_id"], balance["attended"], balance["latest_adjustment_id"], balance["latest_correction_id"]) != (expected_package_id, expected_attended, expected_adjustment_id, expected_correction_id):
             raise ValueError("The balance changed or this renewal was already recorded. Review the updated balance before confirming again.")
         package = LessonPackage(enrollment_id=enrollment.id, lesson_limit=12)
         db.add(package)
@@ -85,11 +86,13 @@ def adjustment_rows(db, enrollment_id):
 
 
 def enrollment_balance(db, enrollment_id):
-    return package_balance(package_rows(db, enrollment_id), adjustment_rows(db, enrollment_id))
+    balance = package_balance(package_rows(db, enrollment_id), adjustment_rows(db, enrollment_id))
+    balance["latest_correction_id"] = correction_version(db, enrollment_id)
+    return balance
 
 
 def balance_version(balance):
-    return f"{balance['latest_package_id']}:{balance['attended']}:{balance['latest_adjustment_id']}"
+    return f"{balance['latest_package_id']}:{balance['attended']}:{balance['latest_adjustment_id']}:{balance['latest_correction_id']}"
 
 
 def set_balance(engine, teacher_id, student_id, enrollment_id, target, reason, expected_version):

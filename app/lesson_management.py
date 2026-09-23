@@ -1,3 +1,4 @@
+from app.attendance_state import attendance_active, attendance_origin, correction_version
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, Form, Request
@@ -66,20 +67,16 @@ def lesson_history(group_id: int, request: Request, page: int = 1,
     last_page = max(1, (count + 24) // 25)
     page = max(1, min(page, last_page))
     lessons = db.execute(select(Lesson, func.count(Attendance.id)).outerjoin(
-        Attendance, Attendance.lesson_id == Lesson.id,
+        Attendance, (Attendance.lesson_id == Lesson.id) & attendance_active(),
     ).where(Lesson.group_id == group_id).group_by(Lesson.id)
         .order_by(Lesson.started_at.desc(), Lesson.id.desc()).offset((page - 1) * 25).limit(25)).all()
     absence_counts = {}
     for lesson, _ in lessons:
         snapshot = db.get(LessonRosterSnapshot, lesson.id) is not None
-        roster = select(Enrollment.id).where(Enrollment.group_id == group.id)
-        if snapshot:
-            roster = roster.join(LessonRoster, LessonRoster.enrollment_id == Enrollment.id).where(
-                LessonRoster.lesson_id == lesson.id,
-            )
-        else:
-            roster = roster.where(Enrollment.active.is_(True))
-        attended_ids = select(Attendance.enrollment_id).where(Attendance.lesson_id == lesson.id)
+        all_recorded = select(Attendance.enrollment_id).where(Attendance.lesson_id == lesson.id)
+        expected = Enrollment.id.in_(select(LessonRoster.enrollment_id).where(LessonRoster.lesson_id == lesson.id)) if snapshot else Enrollment.active.is_(True)
+        roster = select(Enrollment.id).where(Enrollment.group_id == group.id, expected | Enrollment.id.in_(all_recorded))
+        attended_ids = select(Attendance.enrollment_id).where(Attendance.lesson_id == lesson.id, attendance_active())
         absent = db.scalar(select(func.count()).select_from(roster.where(
             Enrollment.id.not_in(attended_ids),
         ).subquery()))
@@ -94,7 +91,7 @@ def lesson_page(request, db, user, lesson_id, error=None):
     attended = db.execute(select(User, Attendance).join(
         Enrollment, Enrollment.student_id == User.id,
     ).join(Attendance, Attendance.enrollment_id == Enrollment.id)
-        .where(Attendance.lesson_id == lesson.id).order_by(User.display_name, User.id)).all()
+        .where(Attendance.lesson_id == lesson.id, attendance_active()).order_by(User.display_name, User.id)).all()
     checked_ids = {student.id for student, attendance in attended}
     has_snapshot = db.get(LessonRosterSnapshot, lesson.id) is not None
     roster_query = select(User).join(Enrollment, Enrollment.student_id == User.id)
@@ -105,9 +102,13 @@ def lesson_page(request, db, user, lesson_id, error=None):
     else:
         roster_query = roster_query.where(Enrollment.group_id == group.id, Enrollment.active.is_(True))
     current_students = db.scalars(roster_query.order_by(User.display_name, User.id)).all()
+    historical_students = db.scalars(select(User).join(Enrollment, Enrollment.student_id == User.id)
+        .join(Attendance, Attendance.enrollment_id == Enrollment.id).where(Attendance.lesson_id == lesson.id)).all()
+    current_students = sorted({person.id: person for person in [*current_students, *historical_students]}.values(), key=lambda person: (person.display_name, person.id))
+    enrollment_keys = dict(db.execute(select(Enrollment.student_id, Enrollment.id).where(Enrollment.group_id == group.id)).all())
     return render(request, "lesson.html", 400 if error else 200, user=user, lesson=lesson,
                   group=group, attended=attended, now=utc_now(), error=error,
-                  has_snapshot=has_snapshot, version=code_version(lesson), code_minutes=request.app.state.code_minutes,
+                  enrollment_keys=enrollment_keys, has_snapshot=has_snapshot, version=code_version(lesson), code_minutes=request.app.state.code_minutes,
                   missing=[student for student in current_students if student.id not in checked_ids])
 
 

@@ -1,21 +1,18 @@
 import re
 import secrets
 import hashlib
-from collections import OrderedDict
 from datetime import timedelta
 from pathlib import Path
-from threading import Lock
-from time import monotonic
 from time import time
 from math import ceil
 
 from fastapi import HTTPException, Request
 from pwdlib import PasswordHash
 from pwdlib.exceptions import UnknownHashError
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, func
 from sqlalchemy.orm import Session
 
-from app.models import AttendanceAttemptWindow, LoginSession, User, utc_now
+from app.models import AttendanceAttemptWindow, LoginAttemptWindow, LoginSession, User, utc_now
 from app.database import write_transaction
 
 
@@ -23,27 +20,6 @@ password_hasher = PasswordHash.recommended()
 # Unknown accounts still perform verification to reduce timing clues.
 DUMMY_HASH = password_hasher.hash(secrets.token_urlsafe(32))
 SECRET_PATH = Path(__file__).resolve().parent.parent / ".session-secret"
-
-
-class AttemptLimiter:
-    """A bounded, per-process limit for this local single-server app."""
-
-    def __init__(self, message="Too many login attempts. Wait a minute and try again."):
-        self.attempts = OrderedDict()
-        self.lock = Lock()
-        self.message = message
-
-    def check(self, address: str) -> None:
-        now = monotonic()
-        with self.lock:
-            recent = [stamp for stamp in self.attempts.pop(address, []) if now - stamp < 60]
-            self.attempts[address] = recent
-            if len(self.attempts) > 2048:
-                self.attempts.popitem(last=False)
-            if len(recent) >= 10:
-                raise HTTPException(429, self.message,
-                                    headers={"Retry-After": "60"})
-            recent.append(now)
 
 
 def fingerprint(value: str) -> str:
@@ -157,3 +133,38 @@ def verify_csrf(request: Request, submitted: str) -> None:
     expected = request.session.get("csrf_token")
     if not expected or not secrets.compare_digest(expected.encode(), submitted.encode()):
         raise HTTPException(status_code=403, detail="This form has expired. Reload the page and try again.")
+
+
+def limit_login_attempt(engine, username, address):
+    # Count all attempts, not only failures: reservations precede expensive hashes.
+    try:
+        normalized = normalize_username(username)
+    except ValueError:
+        normalized = '<invalid>'
+    account_key = 'a:' + fingerprint(normalized)
+    connection_key = 'i:' + fingerprint(address)
+    retry = 0
+    with write_transaction(engine) as db:
+        now = time()
+        db.execute(delete(LoginAttemptWindow).where(LoginAttemptWindow.updated_at <= now - 60))
+        windows = []
+        for key, limit in ((connection_key, 120), (account_key, 10)):
+            row = db.get(LoginAttemptWindow, key)
+            recent = [stamp for stamp in row.timestamps if stamp > now - 60] if row else []
+            windows.append((key, limit, row, recent))
+        count = db.scalar(select(func.count()).select_from(LoginAttemptWindow))
+        if count + sum(row is None for _, _, row, _ in windows) > 8192:
+            retry = 60  # Fail closed; never evict an active limit to admit new keys.
+        else:
+            for key, limit, row, recent in windows:
+                if len(recent) >= limit:
+                    retry = max(retry, max(1, ceil(min(recent) + 60 - now)))
+                    continue
+                recent.append(now)
+                if row is None:
+                    db.add(LoginAttemptWindow(key=key, timestamps=recent, updated_at=now))
+                else:
+                    row.timestamps, row.updated_at = recent, now
+    if retry:
+        raise HTTPException(429, 'Too many login attempts. Please wait and try again.',
+                            headers={'Retry-After': str(retry)})

@@ -2,7 +2,7 @@
 
 Future development follows the [Scrum working agreement](docs/scrum-working-agreement.md).
 See the [ordered backlog](docs/product-backlog.md), [usage simulation](docs/usage-simulation.md)
-and [first sprint proposal](docs/sprint-01-proposal.md). The sprint is not yet started.
+and [active Sprint 1](docs/sprint-01-proposal.md) and [implementation evidence](docs/sprint-01-review.md).
 
 The portal uses SAT Factory branding, a workshop-inspired graphite, paper and lime theme, responsive
 layouts, and keyboard-visible focus styles. All styling and the SF mark are local;
@@ -46,7 +46,8 @@ results or faces are displayed. The brand header
 and login page link back to it. Signed-in users can open their dashboard from home. Stop an older server if the port is occupied.
 The proxy flag makes local login limiting use the connection address rather than
 forwarded headers. Existing accounts are preserved. No default accounts are added.
-The attendance and renewal stages need no database-schema changes or new dependencies.
+Sprint 1 adds two tables on startup without changing existing columns or dependencies.
+See the sprint review for upgrade and recovery notes.
 
 ## Teacher workflow
 
@@ -111,11 +112,28 @@ attendees and check-in times. History is newest first, with 25 lessons per page.
 it preserves the original date and prevents duplicate attendance charges.
 Close any other open lesson in that group before reopening an earlier one.
 
-New lessons save their starting roster. Students without a code check-in show
+New lessons save their starting roster. Students without recorded attendance show
 as **Absent**, and become **Present** on check-in. Absence does not deduct lessons.
 Older lessons use the current roster with an explicit historical-data warning. All times are UTC. Refresh to see new check-ins.
 See [the lesson-management guide](docs/lesson-management.md) for the flow,
 relationships, transactions and code explanation.
+
+## Attendance corrections
+
+Open **Manage lessons**, choose a lesson, then **Mark present / review history**
+or **Review / correct attendance** beside the student. Review the balance preview,
+enter a reason and confirm. Marking present uses one lesson; reversing restores one;
+restoring a reversed entry uses one again. This also works when the balance is owed.
+Original records and every teacher correction remain in history. Reasons are teacher-only.
+A reversed entry can only be restored by a teacher, not by resubmitting a code.
+Saved lesson-roster members remain eligible after deactivation. Existing attendees
+remain correctable; older lessons without snapshots use active membership as a
+fallback and display a warning. Future lessons and other-group memberships are rejected.
+
+`app/attendance_corrections.py` handles previews and atomic audited writes;
+`app/attendance_state.py` provides the shared effective-attendance rule used by
+balances, dashboards and history. `tests/test_attendance_corrections.py` and
+`tests/test_classroom_login.py` cover the Sprint 1 behavior.
 
 ## Balance corrections
 
@@ -137,7 +155,7 @@ committing it; `commit()` saves both records. If package creation fails, `rollba
 undoes the pending membership. A test deliberately forces that failure.
 
 A **query** derives balances from history: `net balance = total package lessons + corrections -
-total attendance`, within one enrollment. Positive credit is available; negative
+effective (non-reversed) attendance`, within one enrollment. Positive credit is available; negative
 credit is shown as lessons owed. Earlier excess attendance uses credit from later
 renewals without moving historical attendance records. No separate mutable counter
 can fall out of sync with the history.
@@ -164,8 +182,10 @@ Passwords still use salted Argon2. SHA-256 fingerprints are used only for alread
 random session tokens and comparison against password hashes, not for passwords.
 Startup adds the session table without altering the six existing business tables.
 
-Login permits ten attempts per connection address per minute. This local,
-per-process limit resets on restart. Incoming bodies are capped at 16 KiB before
+Login permits ten attempts per normalized username and 120 per connection address
+in a rolling minute. These SQLite limits survive restarts and are shared by workers.
+All attempts count; unknown usernames follow the same rules. Expired entries are
+pruned and storage is capped at 8,192 rows, failing closed when full. Incoming bodies are capped at 16 KiB before
 parsing, including streamed bodies. HTML responses restrict embedding and form
 submissions and are not cached. HTTPS deployment remains outside this local stage.
 
@@ -208,7 +228,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 105 tests use isolated databases, not real student data. Read the
+All 119 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 

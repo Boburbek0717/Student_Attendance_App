@@ -1,3 +1,4 @@
+from app.attendance_state import attendance_active, attendance_origin, correction_version
 from datetime import timedelta
 import re
 import secrets
@@ -83,6 +84,9 @@ def check_in(engine: Engine, student_id: int, code: str, *, request: Request | N
             Attendance.enrollment_id == enrollment.id, Attendance.lesson_id == lesson.id,
         ))
         if duplicate is not None:
+            active = db.scalar(select(attendance_active()).where(Attendance.id == duplicate))
+            if not active:
+                raise ValueError("Your teacher reversed this attendance. Ask your teacher to review it; another code cannot restore it.")
             raise ValueError("You have already checked in to this lesson. No extra lesson was used.")
         balance = enrollment_balance(db, enrollment.id)
         if not balance["packages"]:
@@ -103,7 +107,7 @@ def student_records(db: Session, student_id: int):
     packages = db.execute(
         select(LessonPackage, func.count(Attendance.id))
         .join(Enrollment, Enrollment.id == LessonPackage.enrollment_id)
-        .outerjoin(Attendance, Attendance.package_id == LessonPackage.id)
+        .outerjoin(Attendance, (Attendance.package_id == LessonPackage.id) & attendance_active())
         .where(Enrollment.student_id == student_id)
         .group_by(LessonPackage.id).order_by(LessonPackage.purchased_at, LessonPackage.id)
     ).all()
@@ -119,9 +123,11 @@ def student_records(db: Session, student_id: int):
     balances = {enrollment.id: package_balance(rows_by_enrollment.get(enrollment.id, []),
                 adjustments_by_enrollment.get(enrollment.id, []))
                 for enrollment, group in memberships}
+    for enrollment_id, balance in balances.items():
+        balance["latest_correction_id"] = correction_version(db, enrollment_id)
     by_enrollment = {key: balance["packages"] for key, balance in balances.items()}
     history = db.execute(
-        select(Attendance.checked_in_at, Attendance.package_id, Lesson.id.label("lesson_id"),
+        select(Attendance.checked_in_at, Attendance.package_id, attendance_active().label("is_present"), attendance_origin().label("is_manual"), Lesson.id.label("lesson_id"),
                Lesson.started_at, Group.name.label("group_name"))
         .join(Lesson, Lesson.id == Attendance.lesson_id)
         .join(Group, Group.id == Lesson.group_id)

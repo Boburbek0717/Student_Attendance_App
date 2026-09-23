@@ -1,3 +1,4 @@
+from app.attendance_state import attendance_active, attendance_origin, correction_version
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import func, select
@@ -40,7 +41,7 @@ def dashboard(request: Request, db: Session, user: User, *, error=None, section=
     ).all()
     packages = db.execute(
         select(LessonPackage, func.count(Attendance.id))
-        .outerjoin(Attendance, Attendance.package_id == LessonPackage.id)
+        .outerjoin(Attendance, (Attendance.package_id == LessonPackage.id) & attendance_active())
         .group_by(LessonPackage.id)
         .order_by(LessonPackage.purchased_at, LessonPackage.id)
     ).all()
@@ -98,7 +99,7 @@ def review_renewal(enrollment_id: int, request: Request, db: Session = Depends(g
 def record_renewal(
     enrollment_id: int, request: Request, csrf: str = Form(default=""),
     expected_package_id: str = Form(default=""), expected_attended: str = Form(default=""),
-    expected_adjustment_id: str = Form(default="0"),
+    expected_adjustment_id: str = Form(default="0"), expected_correction_id: str = Form(default="0"),
     db: Session = Depends(get_db), user: User = Depends(require_teacher),
 ):
     verify_csrf(request, csrf)
@@ -106,11 +107,12 @@ def record_renewal(
         try:
             package_id, attended = int(expected_package_id), int(expected_attended)
             adjustment_id = int(expected_adjustment_id)
-            if package_id < 0 or attended < 0 or adjustment_id < 0:
+            correction_id = int(expected_correction_id)
+            if package_id < 0 or attended < 0 or adjustment_id < 0 or correction_id < 0:
                 raise ValueError
         except ValueError:
             raise ValueError("Reload the renewal page and review the balance before confirming.") from None
-        renew_package(request.app.state.database_engine, user.id, enrollment_id, package_id, attended, adjustment_id)
+        renew_package(request.app.state.database_engine, user.id, enrollment_id, package_id, attended, adjustment_id, correction_id)
     except ValueError as error:
         return renewal_page(request, db, user, enrollment_id, error=str(error))
     return RedirectResponse("/teacher?created=renewal#groups", status_code=303)

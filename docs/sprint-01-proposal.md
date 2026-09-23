@@ -1,9 +1,9 @@
-# Sprint 1 — Proposed, not started
+# Sprint 1 — Active
 
 Goal: a teacher can record a real class accurately even when students share Wi-Fi
 or cannot use their phone.
 
-Suggested duration: two weeks; dates and capacity to be chosen during Planning.
+Started 2026-09-23. Planning horizon: two weeks, through 2026-10-06; review proposed for 2026-10-07.
 No velocity established. Selection is a forecast, not a delivery promise.
 
 | Candidate | Scope | Provisional points |
@@ -13,9 +13,12 @@ No velocity established. Selection is a forecast, not a delivery promise.
 
 Total 13 relative points. Split SF-02 during Planning if it does not fit capacity;
 do not sacrifice audit history or duplicate protection. SF-03 is next in order,
-not an implied stretch commitment. All candidates remain Backlog until selected.
+not an implied stretch commitment. SF-01: Done. SF-02: Done. User authorized this sprint on 2026-09-23.
 
-## Implementation plan for refinement
+Implementation and verification finished 2026-09-23; stakeholder review and retrospective
+remain pending. See [evidence and review notes](sprint-01-review.md).
+
+## Selected implementation plan
 
 SF-01: reproduce shared-IP burst; agree thresholds and storage bounds; implement
 account-aware and connection-abuse protection; test 30 valid accounts, guessing,

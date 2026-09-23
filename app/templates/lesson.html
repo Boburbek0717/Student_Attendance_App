@@ -31,16 +31,16 @@
 <h2>Present · {{ attended|length }}</h2>
 <ul>
 {% for student, attendance in attended %}
-<li><a href="/teacher/students/{{ student.id }}/history">{{ student.display_name }} ({{ student.username }})</a> · {{ attendance.checked_in_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</li>
+<li><a href="/teacher/students/{{ student.id }}/history">{{ student.display_name }} ({{ student.username }})</a> · {{ attendance.checked_in_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · <a href="/teacher/lessons/{{ lesson.id }}/enrollments/{{ attendance.enrollment_id }}/attendance">Review / correct attendance</a></li>
 {% else %}<li>No check-ins recorded.</li>{% endfor %}
 </ul>
 <h2>Absent · {{ missing|length }}</h2>
 {% if has_snapshot %}
-<p class="hint">Students enrolled when this lesson started who have not checked in using its code. Absence does not deduct lessons. A later check-in changes their status to present.</p>
+<p class="hint">Students enrolled when this lesson started who have no recorded attendance. Absence does not deduct lessons. A valid check-in or teacher correction changes their status to present. Reversed entries require teacher review.</p>
 {% else %}
 <p class="hint">This older lesson has no saved roster. Absences below use today's active enrollment and may not reflect who was enrolled at the time.</p>
 {% endif %}
-<ul>{% for student in missing %}<li><a href="/teacher/students/{{ student.id }}/manage#memberships">{{ student.display_name }} ({{ student.username }})</a> · <strong>Absent</strong></li>
+<ul>{% for student in missing %}<li><a href="/teacher/students/{{ student.id }}/manage#memberships">{{ student.display_name }} ({{ student.username }})</a> · <strong>Absent</strong> · <a href="/teacher/lessons/{{ lesson.id }}/enrollments/{{ enrollment_keys[student.id] }}/attendance">Mark present / review history</a></li>
 {% else %}<li>None.</li>{% endfor %}</ul>
 <p><a href="/teacher/lessons/{{ lesson.id }}">Refresh attendance and status</a></p>
 {% endblock %}

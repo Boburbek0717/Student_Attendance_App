@@ -243,7 +243,7 @@ class AuthenticationTests(unittest.TestCase):
 
     def test_login_limit_and_recovery(self):
         token = self.token(self.client.get("/login"))
-        with patch("app.security.monotonic", return_value=100):
+        with patch("app.security.time", return_value=100):
             for _ in range(10):
                 response = self.client.post("/login", data={
                     "username": "madina", "password": "wrong", "csrf": token,
@@ -256,7 +256,7 @@ class AuthenticationTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 429)
                 self.assertEqual(response.headers["retry-after"], "60")
                 authenticate.assert_not_called()
-        with patch("app.security.monotonic", return_value=161):
+        with patch("app.security.time", return_value=161):
             self.assertEqual(self.login().status_code, 303)
 
     def test_oversized_and_streamed_body_rejected(self):

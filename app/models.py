@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, String, UniqueConstraint
+from sqlalchemy import JSON, Float, Boolean, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -130,3 +130,21 @@ class AttendanceAttemptWindow(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     timestamps: Mapped[list[float]] = mapped_column(JSON)
+
+
+class LoginAttemptWindow(Base):
+    __tablename__ = "login_attempt_windows"
+    key: Mapped[str] = mapped_column(String(66), primary_key=True)
+    timestamps: Mapped[list[float]] = mapped_column(JSON)
+    updated_at: Mapped[float] = mapped_column(Float, index=True)
+
+
+class AttendanceCorrection(Base):
+    __tablename__ = "attendance_corrections"
+    __table_args__ = (CheckConstraint("action IN ('manual', 'reverse', 'restore')", name="valid_attendance_action"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    attendance_id: Mapped[int] = mapped_column(ForeignKey("attendance.id"), index=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    action: Mapped[str] = mapped_column(String(20))
+    reason: Mapped[str] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)

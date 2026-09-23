@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Correct attendance · SAT Factory{% endblock %}
+{% block content %}
+<a href="/teacher/lessons/{{ lesson.id }}">Back to lesson</a>
+<h1>Review attendance correction</h1>
+<h2>{{ student.display_name }} · {{ group.name }}</h2>
+<p>Lesson #{{ lesson.id }} · {{ lesson.started_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>
+<p>Current status: <strong>{{ 'Present' if present else 'Absent' }}</strong></p>
+{% if legacy %}<p class="hint">This older lesson has no saved roster. Eligibility uses an existing attendance record or current active membership.</p>{% endif %}
+{% if not enrollment.active %}<p class="hint">This enrollment is now inactive. You are correcting an existing record or the saved roster of this lesson.</p>{% endif %}
+<section class="group-card" aria-labelledby="preview-heading">
+<h2 id="preview-heading">{{ 'Reverse attendance' if present else 'Mark present' }}</h2>
+{% set after = balance.balance + (1 if present else -1) %}
+<p>{{ 'Restores one lesson credit. The original record stays in history.' if present else 'Uses one lesson credit. If credit is exhausted, this adds one lesson owed.' }}</p>
+<p>Current balance: <strong>{{ balance.balance }}</strong> → After confirmation: <strong>{{ after }}</strong></p>
+<p class="hint">Positive means available lessons; negative means lessons owed. This applies only to this group.</p>
+{% if error %}<p class="error" id="correction-error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="/teacher/lessons/{{ lesson.id }}/enrollments/{{ enrollment.id }}/attendance">
+<input type="hidden" name="csrf" value="{{ csrf_token }}">
+<input type="hidden" name="expected_version" value="{{ version }}">
+<input type="hidden" name="action" value="{{ 'reverse' if present else 'present' }}">
+<label for="reason">Reason (teacher-only)</label>
+<input id="reason" name="reason" value="{{ reason }}" maxlength="500" required {% if error %}aria-describedby="correction-error"{% endif %}>
+<button type="submit">{{ 'Confirm reversal · restore 1 lesson' if present else 'Confirm present · use 1 lesson' }}</button>
+</form>
+</section>
+<section aria-labelledby="audit-heading"><h2 id="audit-heading">Correction history</h2>
+{% if record %}<p>Original entry: {{ record.checked_in_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ 'Teacher entry' if history and history[0][0].action == 'manual' else 'Code check-in' }}.</p>{% endif %}
+<ul>{% for event, teacher_name in history %}<li>{{ event.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC · {{ teacher_name }} (#{{ event.teacher_id }}) · {{ event.action }} · {{ event.reason }}</li>{% else %}<li>No corrections recorded.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

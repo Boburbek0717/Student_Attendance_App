@@ -11,12 +11,13 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.database import engine, initialize_database
 from app.security import authenticate, current_user, load_session_secret, verify_csrf
-from app.security import AttemptLimiter, start_session, revoke_session
+from app.security import limit_login_attempt, start_session, revoke_session
 from app.middleware import RequestBodyLimit
 from app.teacher import router as teacher_router
 from app.student import router as student_router
 from app.student_management import router as management_router
 from app.lesson_management import router as lesson_router
+from app.attendance_corrections import router as correction_router
 from app.web import APP_DIRECTORY, get_db, render
 
 
@@ -35,7 +36,6 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
 
     app = FastAPI(title="SAT Factory", lifespan=lifespan)
     app.state.database_engine = database_engine
-    app.state.login_limiter = AttemptLimiter()
     app.state.code_minutes = code_minutes
     app.add_middleware(
         SessionMiddleware,
@@ -51,6 +51,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     app.include_router(student_router)
     app.include_router(management_router)
     app.include_router(lesson_router)
+    app.include_router(correction_router)
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException):
@@ -81,7 +82,10 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         db: Session = Depends(get_db),
     ):
         verify_csrf(request, csrf)
-        app.state.login_limiter.check(request.client.host if request.client else "unknown")
+        try:
+            limit_login_attempt(database_engine, username, request.client.host if request.client else "unknown")
+        except ValueError as error:
+            return render(request, "login.html", 503, error=str(error), username=username[:100])
         user = authenticate(db, username, password)
         if user is None:
             return render(
