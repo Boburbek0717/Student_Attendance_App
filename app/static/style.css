@@ -253,3 +253,13 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
 .teacher-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
 .teacher-detail-grid h3 { font-size:.9rem; margin-top:0; }
 @media(max-width:700px) { .teacher-feature { grid-template-columns:1fr; padding:2.5rem 0; } .teacher-portrait { width:min(100%,22rem); justify-self:center; } .teacher-detail-grid { grid-template-columns:1fr; gap:.5rem; } }
+
+/* Selected identity and teacher profile. */
+.brand-logo { display:block; width:6.5rem; height:6.5rem; object-fit:contain; flex-shrink:0; }
+.brand-tagline { font-size:.62rem; font-weight:700; letter-spacing:.13em; line-height:1.8; color:var(--muted); }
+.teacher-credentials { display:flex; flex-wrap:wrap; gap:2rem; margin:1.5rem 0; padding:1rem 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.teacher-credentials dt { font:.7rem ui-monospace,monospace; letter-spacing:.1em; color:var(--muted); }
+.teacher-credentials dd { margin:0; font-size:2.2rem; font-weight:800; letter-spacing:-.05em; }
+.teacher-credentials dd span { font-size:.8rem; font-weight:400; letter-spacing:0; color:var(--muted); margin-left:.4rem; }
+.teacher-bio-placeholder .teaching-statement { color:var(--ink); font-size:1.1rem; font-weight:700; }
+@media(max-width:480px) { .brand-tagline { display:none; } .brand-logo { width:5.5rem; height:5.5rem; } }

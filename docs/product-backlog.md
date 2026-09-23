@@ -238,3 +238,8 @@ No qualifications or personal history asserted. No changes to sprint story scope
 
 Branding verification: homepage returned HTTP 200; teacher section visually checked
 at 1280 x 900 and 390 x 844. Existing student results remain below the section.
+
+Owner selected logo 1 (industrial SF monogram), now used in the shared header.
+Teacher profile uses owner-supplied name Noraliev Boburbek, SAT 1430, IELTS 8.5,
+teaching since 2024 and university description. Teaching copy polished around
+practical understanding. Portrait remains a labeled placeholder awaiting a photo.
