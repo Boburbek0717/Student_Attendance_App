@@ -10,7 +10,8 @@ from fastapi import Request, HTTPException
 from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, LessonRoster, LessonRosterSnapshot, BalanceAdjustment, User, utc_now
 from app.database import write_transaction
 from app.packages import package_balance, enrollment_balance
-from app.security import current_user
+from app.security import current_user, fingerprint
+from app.models import CheckInReceipt, LessonClosure
 
 
 def new_attendance_code(db: Session, now, previous_code=None) -> str:
@@ -55,10 +56,13 @@ def start_lesson(engine: Engine, teacher_id: int, group_id: int, minutes: int = 
         return lesson.id
 
 
-def check_in(engine: Engine, student_id: int, code: str, *, request: Request | None = None) -> int:
+def check_in(engine: Engine, student_id: int, code: str, *, request: Request | None = None, retry_key: str = "") -> int | dict:
     code = code.strip()
     if not re.fullmatch(r"[0-9]{6}", code):
         raise ValueError("Enter the six-digit code from your teacher.")
+    if retry_key and not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", retry_key):
+        raise ValueError("Reload the check-in page and try again.")
+    key_hash = fingerprint(f"{student_id}:{retry_key}") if retry_key else None
     with write_transaction(engine) as db:
         if request is not None:
             actor = current_user(request, db)
@@ -67,6 +71,12 @@ def check_in(engine: Engine, student_id: int, code: str, *, request: Request | N
         student = db.get(User, student_id)
         if student is None or student.role != "student":
             raise ValueError("Only a student can check in.")
+        if key_hash:
+            receipt = db.get(CheckInReceipt, key_hash)
+            if receipt:
+                if receipt.student_id != student_id or receipt.code_hash != fingerprint(code):
+                    raise ValueError("This form already recorded a check-in. Reload before entering a different code.")
+                return attendance_receipt(db, receipt.attendance_id, already=True)
         now = utc_now()
         lessons = db.scalars(select(Lesson).where(
             Lesson.attendance_code == code, Lesson.started_at <= now, Lesson.code_expires_at > now,
@@ -74,6 +84,8 @@ def check_in(engine: Engine, student_id: int, code: str, *, request: Request | N
         if len(lessons) != 1:
             raise ValueError("That code is invalid or has expired. Ask your teacher for the current code.")
         lesson = lessons[0]
+        if db.get(LessonClosure, lesson.id):
+            raise ValueError("This lesson is permanently closed. Ask your teacher to review attendance.")
         enrollment = db.scalar(select(Enrollment).where(
             Enrollment.student_id == student_id, Enrollment.group_id == lesson.group_id,
             Enrollment.active.is_(True),
@@ -87,6 +99,9 @@ def check_in(engine: Engine, student_id: int, code: str, *, request: Request | N
             active = db.scalar(select(attendance_active()).where(Attendance.id == duplicate))
             if not active:
                 raise ValueError("Your teacher reversed this attendance. Ask your teacher to review it; another code cannot restore it.")
+            if key_hash:
+                db.add(CheckInReceipt(key_hash=key_hash, code_hash=fingerprint(code), student_id=student_id, attendance_id=duplicate))
+                return attendance_receipt(db, duplicate, already=True)
             raise ValueError("You have already checked in to this lesson. No extra lesson was used.")
         balance = enrollment_balance(db, enrollment.id)
         if not balance["packages"]:
@@ -95,8 +110,13 @@ def check_in(engine: Engine, student_id: int, code: str, *, request: Request | N
         # Its excess carries into later renewals; historical rows never move.
         package = next((item for item in balance["packages"] if item["remaining"] > 0),
                        balance["packages"][-1])
-        db.add(Attendance(enrollment_id=enrollment.id, lesson_id=lesson.id,
-                          package_id=package["id"], checked_in_at=now))
+        attendance = Attendance(enrollment_id=enrollment.id, lesson_id=lesson.id,
+                                package_id=package["id"], checked_in_at=now)
+        db.add(attendance)
+        if key_hash:
+            db.flush()
+            db.add(CheckInReceipt(key_hash=key_hash, code_hash=fingerprint(code), student_id=student_id, attendance_id=attendance.id))
+            return attendance_receipt(db, attendance.id, already=False)
         return balance["balance"] - 1
 
 
@@ -137,3 +157,13 @@ def student_records(db: Session, student_id: int):
     ).all()
     return {"memberships": memberships, "packages_by_enrollment": by_enrollment,
             "balances": balances, "history": history, "adjustments_by_enrollment": adjustments_by_enrollment}
+
+
+def attendance_receipt(db, attendance_id, *, already):
+    attendance = db.get(Attendance, attendance_id)
+    if not db.scalar(select(attendance_active()).where(Attendance.id == attendance_id)):
+        raise ValueError("Your teacher reversed this attendance. Ask your teacher to review it; another code cannot restore it.")
+    lesson = db.get(Lesson, attendance.lesson_id)
+    return {"lesson_id": lesson.id, "group": db.get(Group, lesson.group_id).name,
+            "started_at": lesson.started_at, "already": already,
+            "balance": enrollment_balance(db, attendance.enrollment_id)["balance"]}

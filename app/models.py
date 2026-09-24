@@ -159,3 +159,12 @@ class LessonClosure(Base):
     status: Mapped[str] = mapped_column(String(20))
     reason: Mapped[str] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class CheckInReceipt(Base):
+    """Atomic retry receipt; stores no raw attendance code or browser token."""
+    __tablename__ = "check_in_receipts"
+    key_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    code_hash: Mapped[str] = mapped_column(String(64))
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    attendance_id: Mapped[int] = mapped_column(ForeignKey("attendance.id"))

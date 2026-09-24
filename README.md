@@ -230,7 +230,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 134 tests use isolated databases, not real student data. Read the
+All 142 Python tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 
@@ -280,3 +280,33 @@ columns are changed. Back up SQLite before upgrade; an isolated additive-upgrade
 restore check verifies permanent closure survives recovery. Do not run old code on
 new closure data: old code could reopen a finished class. Restore matching code and
 database backups together if rolling back. Live refresh remains future SF-09 work.
+
+
+## Live lesson feedback (SF-09)
+
+The teacher lesson detail page refreshes attendance and check-in status every ten
+seconds. It displays the last successful update and warns when the connection
+fails. Updates pause while hidden, offline or using lesson controls with keyboard
+focus; failures back off to a maximum of one minute. The manual refresh link works
+without JavaScript. The main teacher dashboard still uses manual refresh.
+
+Student confirmations identify the group and lesson. Each check-in form has a
+random retry token. A receipt is saved atomically with attendance, so resubmitting
+the same form after a lost response confirms the existing attendance, even after
+code expiry or permanent finish. Reversed entries still require teacher review.
+Opening a fresh form discards that retry token; use attendance history to confirm
+an older submission if its code has closed. Rate limits remain in force and now
+show a retry time alongside the student's history.
+
+Startup adds the `check_in_receipts` table without modifying existing tables.
+Back up SQLite before upgrading, then restart the server. Isolated tests cover
+upgrade, receipt rollback and backup/restore. Keep database files, backups and
+`.session-secret` local; Git excludes them.
+
+Run the browser polling logic checks with Node.js (no npm dependencies):
+
+```powershell
+node --test tests/test_lesson_live.cjs
+```
+
+See [Stage 1 verification](docs/stage-1-class-workflow.md) for the review scope.

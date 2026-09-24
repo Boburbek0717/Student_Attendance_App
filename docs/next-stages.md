@@ -154,3 +154,14 @@ Stage 1's earlier proposed reopening of finished lessons. SF-04 now implements
 recent-lesson visibility, code-state clarity, confirmation, permanent finish and
 empty cancellation. SF-09 live feedback/retry clarity remains the next Stage 1
 slice; Stage 1 as a whole is not marked complete.
+
+
+## Stage 1 delivery update — 2026-09-25
+
+SF-09 now implements live lesson detail updates, connection feedback, safe form
+retries and readable rate-limit recovery. SF-04 and SF-09 complete the selected
+Stage 1 implementation. Owner classroom review remains pending; no ceremony or
+production pilot is implied. See stage-1-class-workflow.md for verification and
+limits. The next proposed implementation is SF-05, backup and recovery, after the
+owner chooses storage and retention. Earlier proposed next actions above are
+historical and superseded by these delivery updates.

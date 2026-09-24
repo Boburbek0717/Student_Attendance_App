@@ -4,7 +4,7 @@ Created: 2026-09-23. Baseline: commit 92089e0. Sprint 1 started 2026-09-23. SF-0
 see [Sprint 1 evidence](sprint-01-review.md). Remaining items await selection.
 
 Roadmap: [next stages](next-stages.md), revised 2026-09-24. Stages are proposals;
-existing story statuses remain unchanged. SF-04 is implemented; SF-09 is the next Stage 1 slice.
+existing story statuses remain unchanged. SF-04 and SF-09 are implemented; see Stage 1 verification.
 
 Product Goal: make SAT Factory dependable for everyday classes and a credible,
 privacy-conscious showcase of student results.
@@ -16,7 +16,7 @@ corrections, lesson reopening and persistent check-in limits already exist.
 Priority: P1 = essential next work; P2 = important next increments; P3 = later or
 conditional. Order within a priority is intentional. Estimates are provisional
 relative story points (2/3/5/8), not hours or promised delivery dates. Split an
-8-point item further if it cannot fit the selected sprint. SF-01 and SF-02: Done. SF-03 and SF-04: Done. All other statuses: Backlog.
+8-point item further if it cannot fit the selected sprint. SF-01 and SF-02: Done. SF-03, SF-04 and SF-09: Done. All other statuses: Backlog.
 Evidence IDs refer to [the usage simulation](usage-simulation.md).
 
 | Order / ID | Priority | Backlog item | Points | Evidence | Dependencies |

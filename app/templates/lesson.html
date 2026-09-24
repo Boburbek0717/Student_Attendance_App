@@ -5,6 +5,8 @@
 <h1>{{ group.name }} · Lesson #{{ lesson.id }}</h1>
 <p>Started {{ lesson.started_at | school_time }}</p>
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p id="attendance-sync" role="status" aria-live="polite">Last updated {{ now | school_time }}. Use the refresh link below for the latest attendance.</p>
+<div id="lesson-live" data-url="/teacher/lessons/{{ lesson.id }}" data-updated="{{ now | school_time }}">
 {% if closure %}
 <section class="group-card"><h2>{{ closure.status|capitalize }} permanently</h2>
 <p>{{ closure.created_at | school_time }} · Teacher #{{ closure.teacher_id }}</p><p>{{ closure.reason }}</p>
@@ -53,5 +55,8 @@
 <ul>{% for student in missing %}<li><a href="/teacher/students/{{ student.id }}/manage#memberships">{{ student.display_name }} ({{ student.username }})</a> · <strong>Absent</strong> · <a href="/teacher/lessons/{{ lesson.id }}/enrollments/{{ enrollment_keys[student.id] }}/attendance">Mark present / review history</a></li>
 {% else %}<li>None.</li>{% endfor %}</ul>
 {% else %}<p>This cancelled class has no attendance or lesson charges. Students are not marked absent for it.</p>{% endif %}
+</div>
 <p><a href="/teacher/lessons/{{ lesson.id }}">Refresh attendance and status</a></p>
 {% endblock %}
+
+{% block scripts %}<script src="/static/lesson-live.js" defer></script>{% endblock %}

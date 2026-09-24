@@ -59,7 +59,7 @@ class AttendanceSecurityTests(unittest.TestCase):
         self.login(self.student, 'other')
         token = self.token(self.student.get('/student'))
         guessed = '999999' if code != '999999' else '888888'
-        responses = [self.student.post('/student/check-in', data={'csrf': token, 'code': value}) for value in (code, guessed)]
+        responses = [self.student.post('/student/check-in', data={'csrf': token, 'code': value, 'retry_key': 'r' * 32}) for value in (code, guessed)]
         self.assertEqual(responses[0].status_code, 400)
         self.assertEqual(responses[0].text, responses[1].text)
         with Session(self.engine) as db:
