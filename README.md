@@ -260,3 +260,6 @@ app/static/motion.js is a small local progressive enhancement loaded only on the
 homepage. Content stays readable without JavaScript. Reduced-motion preferences
 disable effects, including cancellation when the preference changes. No libraries,
 looping effects, timers or changes to attendance forms.
+
+Future work: [next-stage roadmap](docs/next-stages.md), with proposed sprint goals,
+review scenarios, dependencies and decisions required before selection.

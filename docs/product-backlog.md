@@ -3,6 +3,9 @@
 Created: 2026-09-23. Baseline: commit 92089e0. Sprint 1 started 2026-09-23. SF-01 and SF-02 are implemented and verified;
 see [Sprint 1 evidence](sprint-01-review.md). Remaining items await selection.
 
+Roadmap: [next stages](next-stages.md), revised 2026-09-24. Stages are proposals;
+existing story statuses remain unchanged. SF-04 is the next item to refine.
+
 Product Goal: make SAT Factory dependable for everyday classes and a credible,
 privacy-conscious showcase of student results.
 
