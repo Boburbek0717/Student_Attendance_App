@@ -263,3 +263,23 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
 .teacher-credentials dd span { font-size:.8rem; font-weight:400; letter-spacing:0; color:var(--muted); margin-left:.4rem; }
 .teacher-bio-placeholder .teaching-statement { color:var(--ink); font-size:1.1rem; font-weight:700; }
 @media(max-width:480px) { .brand-tagline { display:none; } .brand-logo { width:5.5rem; height:5.5rem; } }
+
+/* Quiet brand motion: brief, one-time entrances and deliberate interaction. */
+@media (prefers-reduced-motion: no-preference) {
+ html { scroll-behavior:smooth; }
+ .welcome-page .student-ticket { transition:transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+ .welcome-page .text-action { text-decoration-color:#819565; transition:text-decoration-color 180ms ease; }
+ .welcome-page .text-action span,.welcome-page .button span { display:inline-block; transition:transform 180ms ease; }
+ .welcome-page .brand-logo { transition:transform 180ms ease; }
+ button,.button { transition:background-color 160ms ease,box-shadow 160ms ease; }
+ .welcome-page .text-action:focus-visible span,.welcome-page .button:focus-visible span { transform:translateX(3px); }
+ @media (hover:hover) and (pointer:fine) {
+  .welcome-page .student-ticket:hover { transform:translateY(-3px); box-shadow:8px 10px 0 #dce5ce; border-color:#879c68; }
+  .welcome-page .text-action:hover span,.welcome-page .button:hover span { transform:translateX(3px); }
+  .welcome-page .brand:hover .brand-logo { transform:translateY(-2px); }
+ }
+}
+@media (prefers-reduced-motion: reduce) {
+ html { scroll-behavior:auto; }
+ .welcome-page *,button,.button { animation:none !important; transition:none !important; }
+}

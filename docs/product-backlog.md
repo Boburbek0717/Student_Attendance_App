@@ -243,3 +243,16 @@ Owner selected logo 1 (industrial SF monogram), now used in the shared header.
 Teacher profile uses owner-supplied name Noraliev Boburbek, SAT 1430, IELTS 8.5,
 teaching since 2024 and university description. Teaching copy polished around
 practical understanding. Portrait remains a labeled placeholder awaiting a photo.
+
+## Owner-requested brand motion — 2026-09-24
+
+Homepage sections receive short one-time viewport entrances, result tickets lift
+on fine-pointer hover, and action arrows respond to hover/keyboard focus. Native
+anchor navigation is smooth only without a reduced-motion preference. No looping
+animations or score counters. Content remains visible without JavaScript; preference
+changes cancel running animations. No attendance workflow or sprint scope changes.
+
+Verification: homepage, local script and login return HTTP 200; login does not
+load the entrance script. Browser confirmed script loading, visible content and
+smooth anchor styling with no console errors; mobile layout checked at 390 x 844.
+Reduced-motion branches reviewed in CSS/JS; OS preference switching was not exercised.

@@ -251,3 +251,12 @@ Asia/Tashkent IANA rules. Every formatted time includes the timezone and offset.
 Code expiry, ordering and saved form versions remain UTC-based. No schema or data
 migration is needed. Install requirements before restarting: tzdata provides the
 IANA database on Windows. Midnight rollover and exact expiry are regression-tested.
+
+## Brand motion
+
+Homepage sections animate once as they enter view (480 ms). Score tickets and
+links have restrained hover feedback; anchor navigation uses native smooth scrolling.
+app/static/motion.js is a small local progressive enhancement loaded only on the
+homepage. Content stays readable without JavaScript. Reduced-motion preferences
+disable effects, including cancellation when the preference changes. No libraries,
+looping effects, timers or changes to attendance forms.
