@@ -256,3 +256,8 @@ Verification: homepage, local script and login return HTTP 200; login does not
 load the entrance script. Browser confirmed script loading, visible content and
 smooth anchor styling with no console errors; mobile layout checked at 390 x 844.
 Reduced-motion branches reviewed in CSS/JS; OS preference switching was not exercised.
+
+Homepage copy cleanup requested by owner: removed the work/story footnote,
+Practice/Persistence/Progress strip, edited-comments caption, repeated ticket
+slogans, portrait index and footer slogan. Teacher biography and student
+testimonials preserved.
