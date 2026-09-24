@@ -7,9 +7,9 @@
 {% for lesson, count in lessons %}
 <article class="group-card">
     <h2><a href="/teacher/lessons/{{ lesson.id }}">Lesson #{{ lesson.id }}</a></h2>
-    <p>{{ lesson.started_at | school_time }} · {{ count }} checked in · {{ absence_counts[lesson.id][0] }} absent</p>
+    <p>{{ lesson.started_at | school_time }} · {{ count }} checked in · {% if lesson.id in closures and closures[lesson.id].status == 'cancelled' %}Cancelled — no absences{% else %}{{ absence_counts[lesson.id][0] }} absent{% endif %}</p>
     {% if not absence_counts[lesson.id][1] %}<p class="hint">Absence count uses the current roster; original enrollment was not saved.</p>{% endif %}
-    <p>Check-in: {{ 'Open' if lesson.code_expires_at and lesson.started_at <= now < lesson.code_expires_at else 'Closed' }}</p>
+    {% if lesson.id in closures %}<p>{{ closures[lesson.id].status|capitalize }} permanently · {{ closures[lesson.id].created_at | school_time }}</p>{% else %}<p>In progress · Check-in: {{ 'Open' if lesson.code_expires_at and lesson.started_at <= now < lesson.code_expires_at else 'Closed' }}</p>{% endif %}
 </article>
 {% else %}<p>No lessons yet. Start your first lesson from the group card.</p>{% endfor %}
 <nav aria-label="Lesson history pages">

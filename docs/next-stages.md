@@ -146,3 +146,11 @@ Refine the three lesson-lifecycle decisions above, then select the first SF-04
 slice. Start with recent-lesson visibility and clear reopen/new-class actions;
 add finish/cancel states after their behavior is agreed. Keep backups next in order.
 Do not add online payments, facial recognition, GPS attendance or unrelated portals.
+
+## Stage 1 decision and delivery update — 2026-09-24
+
+Owner selected permanent Finish, with corrections only afterward. This supersedes
+Stage 1's earlier proposed reopening of finished lessons. SF-04 now implements
+recent-lesson visibility, code-state clarity, confirmation, permanent finish and
+empty cancellation. SF-09 live feedback/retry clarity remains the next Stage 1
+slice; Stage 1 as a whole is not marked complete.

@@ -148,3 +148,14 @@ class AttendanceCorrection(Base):
     action: Mapped[str] = mapped_column(String(20))
     reason: Mapped[str] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class LessonClosure(Base):
+    """Permanent finish/cancel event; no event means legacy/in-progress lesson."""
+    __tablename__ = "lesson_closures"
+    __table_args__ = (CheckConstraint("status IN ('finished', 'cancelled')", name="valid_lesson_closure"),)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), primary_key=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    status: Mapped[str] = mapped_column(String(20))
+    reason: Mapped[str] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)

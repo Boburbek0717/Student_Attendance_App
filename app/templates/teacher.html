@@ -79,11 +79,21 @@
             <p class="hint">Share this code with your group. Refresh to see updated attendance and code status.</p>
         </div>
         {% else %}
+        {% set recent = recent_lessons.get(group.id) %}
+        {% if recent %}
+        <div class="lesson-code">
+            <h4>Recent lesson #{{ recent.id }}</h4>
+            <p>{{ recent.started_at | school_time }}</p>
+            <p><strong>{{ closures[recent.id].status|capitalize if recent.id in closures else ('Code expired' if recent.code_expires_at else 'Check-in closed') }}</strong></p>
+            <p><a class="button" href="/teacher/lessons/{{ recent.id }}">{% if recent.id in closures %}Review lesson history{% else %}Review / reopen this lesson{% endif %}</a></p>
+            {% if recent.id not in closures %}<p class="hint">Continuing the same class? Reopen this lesson to keep its attendance and roster together.</p>{% else %}<p class="hint">This lesson is permanently {{ closures[recent.id].status }}. Start a new lesson for the next class.</p>{% endif %}
+        </div>
+        {% endif %}
         <form method="post" action="/teacher/groups/{{ group.id }}/lessons">
             <input type="hidden" name="csrf" value="{{ csrf_token }}">
             <button type="submit">Start a new lesson</button>
         </form>
-        <p class="hint">Creates a new lesson with a code valid for {{ code_minutes }} minutes. Use once per class.</p>
+        <p class="hint">Creates a separate class with a new roster and a code valid for {{ code_minutes }} minutes. To extend an existing class, use Review / reopen this lesson.</p>
         {% endif %}
         {% for member in members_by_group.get(group.id, []) %}
         <div class="member">

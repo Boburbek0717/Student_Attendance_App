@@ -230,7 +230,7 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-All 122 tests use isolated databases, not real student data. Read the
+All 134 tests use isolated databases, not real student data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 
@@ -263,3 +263,20 @@ looping effects, timers or changes to attendance forms.
 
 Future work: [next-stage roadmap](docs/next-stages.md), with proposed sprint goals,
 review scenarios, dependencies and decisions required before selection.
+
+## Permanent lesson completion (SF-04)
+
+The teacher group card retains the recent lesson after its code closes or expires.
+Review/reopen continues that same unfinished lesson; Start a new lesson creates a
+separate class. Open the lesson and choose Finish or cancel lesson to review the
+permanent action and enter a note. Finishing closes check-in permanently; attendance
+corrections remain available. Cancel is only available for a class with no attendance
+history (reversed entries still count as history). Cancelled classes have no absences
+or charges. Old lessons without saved rosters freeze their current active roster on
+finish, with a warning in the preview. No existing lesson is automatically finished.
+
+Startup adds lesson_closures with teacher, timestamp, status and note. No existing
+columns are changed. Back up SQLite before upgrade; an isolated additive-upgrade and
+restore check verifies permanent closure survives recovery. Do not run old code on
+new closure data: old code could reopen a finished class. Restore matching code and
+database backups together if rolling back. Live refresh remains future SF-09 work.

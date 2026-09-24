@@ -9,7 +9,7 @@ from starlette.exceptions import HTTPException
 from app.create_user import create_user
 from app.attendance import start_lesson, student_records
 from app.packages import package_balance, enrollment_balance, renew_package
-from app.models import Attendance, BalanceAdjustment, Enrollment, Group, Lesson, LessonPackage, User, utc_now
+from app.models import LessonClosure, Attendance, BalanceAdjustment, Enrollment, Group, Lesson, LessonPackage, User, utc_now
 from app.security import current_user, verify_csrf
 from app.web import get_db, render
 
@@ -58,8 +58,17 @@ def dashboard(request: Request, db: Session, user: User, *, error=None, section=
             "student": student, "active": enrollment.active, "enrollment_id": enrollment.id,
             "packages": balance["packages"], "balance": balance,
         })
+    now = utc_now()
+    # One latest started lesson per group, including expired and closed windows.
+    ranked = select(Lesson.id.label("id"), func.row_number().over(
+        partition_by=Lesson.group_id,
+        order_by=(Lesson.started_at.desc(), Lesson.id.desc()),
+    ).label("position")).where(Lesson.started_at <= now).subquery()
+    recent_lessons = {lesson.group_id: lesson for lesson in db.scalars(
+        select(Lesson).join(ranked, ranked.c.id == Lesson.id).where(ranked.c.position == 1)
+    ).all()}
     open_lessons = db.scalars(select(Lesson).where(
-        Lesson.started_at <= utc_now(), Lesson.code_expires_at > utc_now(),
+        Lesson.started_at <= now, Lesson.code_expires_at > now,
     ).order_by(Lesson.id)).all()
     active_lessons = {lesson.group_id: lesson for lesson in open_lessons}
     return render(
@@ -67,7 +76,7 @@ def dashboard(request: Request, db: Session, user: User, *, error=None, section=
         groups=groups, students=students, members_by_group=members_by_group,
         error=error, section=section, values=values or {},
         notice=NOTICES.get(request.query_params.get("created")) if not error else None,
-        active_lessons=active_lessons, code_minutes=request.app.state.code_minutes,
+        closures={row.lesson_id: row for row in db.scalars(select(LessonClosure)).all()}, active_lessons=active_lessons, recent_lessons=recent_lessons, now=now, code_minutes=request.app.state.code_minutes,
     )
 
 

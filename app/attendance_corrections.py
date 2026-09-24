@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.attendance_state import attendance_active
 from app.database import write_transaction
-from app.models import Attendance, AttendanceCorrection, Enrollment, Group, Lesson, LessonRoster, LessonRosterSnapshot, User, utc_now
+from app.models import LessonClosure, Attendance, AttendanceCorrection, Enrollment, Group, Lesson, LessonRoster, LessonRosterSnapshot, User, utc_now
 from app.packages import balance_version, enrollment_balance
 from app.security import current_user, verify_csrf
 from app.teacher import require_teacher
@@ -20,6 +20,9 @@ def correction_context(db, lesson_id, enrollment_id):
     lesson, enrollment = db.get(Lesson, lesson_id), db.get(Enrollment, enrollment_id)
     if lesson is None or enrollment is None or lesson.group_id != enrollment.group_id:
         raise HTTPException(404, 'Lesson enrollment not found.')
+    closure = db.get(LessonClosure, lesson_id)
+    if closure and closure.status == 'cancelled':
+        raise HTTPException(403, 'Cancelled lessons cannot receive attendance.')
     student = db.get(User, enrollment.student_id)
     if student is None or student.role != 'student':
         raise HTTPException(404, 'Student not found.')

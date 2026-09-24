@@ -5,7 +5,11 @@
 <h1>{{ group.name }} · Lesson #{{ lesson.id }}</h1>
 <p>Started {{ lesson.started_at | school_time }}</p>
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
-{% if lesson.code_expires_at and lesson.started_at <= now < lesson.code_expires_at %}
+{% if closure %}
+<section class="group-card"><h2>{{ closure.status|capitalize }} permanently</h2>
+<p>{{ closure.created_at | school_time }} · Teacher #{{ closure.teacher_id }}</p><p>{{ closure.reason }}</p>
+<p>This lesson cannot be reopened.{% if closure.status == 'finished' %} Attendance corrections remain available below.{% endif %}</p></section>
+{% elif lesson.code_expires_at and lesson.started_at <= now < lesson.code_expires_at %}
 <section class="group-card">
     <h2>Check-in open</h2>
     <strong class="code">{{ lesson.attendance_code }}</strong>
@@ -19,7 +23,7 @@
 </section>
 {% else %}
 <section class="group-card">
-    <h2>Check-in closed</h2>
+    <h2>Check-in closed{% if lesson.code_expires_at and lesson.code_expires_at <= now %} · Code expired{% endif %}</h2>
     <p>Reopen this same lesson for {{ code_minutes }} minutes with a newly generated code. The lesson date and existing check-ins stay unchanged; students who already checked in cannot be charged again.</p>
     <form method="post" action="/teacher/lessons/{{ lesson.id }}/reopen">
         <input type="hidden" name="csrf" value="{{ csrf_token }}">
@@ -28,6 +32,8 @@
     </form>
 </section>
 {% endif %}
+{% if not closure %}<p><a class="button secondary" href="/teacher/lessons/{{ lesson.id }}/finish">Finish or cancel lesson</a></p>{% endif %}
+{% if not closure or closure.status != 'cancelled' %}
 <h2>Present · {{ attended|length }}</h2>
 <ul>
 {% for student, attendance in attended %}
@@ -35,12 +41,17 @@
 {% else %}<li>No check-ins recorded.</li>{% endfor %}
 </ul>
 <h2>Absent · {{ missing|length }}</h2>
+{% if lesson.code_expires_at and lesson.started_at <= now < lesson.code_expires_at %}
+<p class="hint">Not checked in yet: attendance can still change while check-in is open.</p>
+{% elif closure %}<p class="hint">Absence finalized when the lesson was finished. Teacher corrections can still update these records.</p>
+{% else %}<p class="hint">Check-in is closed. A teacher can still review attendance or reopen this lesson.</p>{% endif %}
 {% if has_snapshot %}
-<p class="hint">Students enrolled when this lesson started who have no recorded attendance. Absence does not deduct lessons. A valid check-in or teacher correction changes their status to present. Reversed entries require teacher review.</p>
+<p class="hint">Students on the saved lesson roster who have no recorded attendance. Absence does not deduct lessons. {% if closure %}A teacher correction can change their status to present.{% else %}A valid check-in or teacher correction changes their status to present.{% endif %} Reversed entries require teacher review.</p>
 {% else %}
 <p class="hint">This older lesson has no saved roster. Absences below use today's active enrollment and may not reflect who was enrolled at the time.</p>
 {% endif %}
 <ul>{% for student in missing %}<li><a href="/teacher/students/{{ student.id }}/manage#memberships">{{ student.display_name }} ({{ student.username }})</a> · <strong>Absent</strong> · <a href="/teacher/lessons/{{ lesson.id }}/enrollments/{{ enrollment_keys[student.id] }}/attendance">Mark present / review history</a></li>
 {% else %}<li>None.</li>{% endfor %}</ul>
+{% else %}<p>This cancelled class has no attendance or lesson charges. Students are not marked absent for it.</p>{% endif %}
 <p><a href="/teacher/lessons/{{ lesson.id }}">Refresh attendance and status</a></p>
 {% endblock %}

@@ -9,8 +9,8 @@ from starlette.exceptions import HTTPException
 
 from app.database import write_transaction
 from app.attendance import new_attendance_code
-from app.models import Attendance, Enrollment, Group, Lesson, LessonRoster, LessonRosterSnapshot, User, utc_now
-from app.security import verify_csrf
+from app.models import LessonClosure, AttendanceCorrection, Attendance, Enrollment, Group, Lesson, LessonRoster, LessonRosterSnapshot, User, utc_now
+from app.security import current_user, verify_csrf
 from app.teacher import require_teacher
 from app.web import get_db, render
 
@@ -35,6 +35,8 @@ def change_check_in(engine, teacher_id, lesson_id, expected_version, *, reopen=F
         if teacher is None or teacher.role != "teacher":
             raise HTTPException(403, "Only a teacher can manage check-in.")
         lesson = find_record(db, Lesson, lesson_id)
+        if db.get(LessonClosure, lesson_id):
+            raise ValueError("This lesson is permanently finished or cancelled and cannot be reopened.")
         if not reopen and lesson.attendance_code is None:
             return
         if expected_version != code_version(lesson):
@@ -82,7 +84,7 @@ def lesson_history(group_id: int, request: Request, page: int = 1,
         ).subquery()))
         absence_counts[lesson.id] = (absent, snapshot)
     return render(request, "lessons.html", user=user, group=group, lessons=lessons,
-                  absence_counts=absence_counts, now=utc_now(), page=page, last_page=last_page)
+                  closures={row.lesson_id: row for row in db.scalars(select(LessonClosure)).all()}, absence_counts=absence_counts, now=utc_now(), page=page, last_page=last_page)
 
 
 def lesson_page(request, db, user, lesson_id, error=None):
@@ -107,7 +109,7 @@ def lesson_page(request, db, user, lesson_id, error=None):
     current_students = sorted({person.id: person for person in [*current_students, *historical_students]}.values(), key=lambda person: (person.display_name, person.id))
     enrollment_keys = dict(db.execute(select(Enrollment.student_id, Enrollment.id).where(Enrollment.group_id == group.id)).all())
     return render(request, "lesson.html", 400 if error else 200, user=user, lesson=lesson,
-                  group=group, attended=attended, now=utc_now(), error=error,
+                  closure=db.get(LessonClosure, lesson_id), group=group, attended=attended, now=utc_now(), error=error,
                   enrollment_keys=enrollment_keys, has_snapshot=has_snapshot, version=code_version(lesson), code_minutes=request.app.state.code_minutes,
                   missing=[student for student in current_students if student.id not in checked_ids])
 
@@ -141,3 +143,68 @@ def reopen_lesson(lesson_id: int, request: Request, csrf: str = Form(default="")
     except ValueError as error:
         return lesson_page(request, db, user, lesson_id, error=str(error))
     return RedirectResponse(f"/teacher/lessons/{lesson_id}", status_code=303)
+
+
+def closure_version(db, lesson):
+    attendance_id = db.scalar(select(func.max(Attendance.id)).where(Attendance.lesson_id == lesson.id)) or 0
+    correction_id = db.scalar(select(func.max(AttendanceCorrection.id)).join(
+        Attendance, Attendance.id == AttendanceCorrection.attendance_id
+    ).where(Attendance.lesson_id == lesson.id)) or 0
+    return f"{code_version(lesson)}:{attendance_id}:{correction_id}"
+
+
+def close_permanently(engine, teacher_id, lesson_id, action, reason, expected_version, request=None):
+    if action not in ('finished', 'cancelled') or not 1 <= len(reason.strip()) <= 500:
+        raise ValueError("Choose a valid action and enter a reason of 1–500 characters.")
+    with write_transaction(engine) as db:
+        actor = current_user(request, db) if request is not None else db.get(User, teacher_id)
+        if actor is None or actor.id != teacher_id or actor.role != 'teacher':
+            raise HTTPException(403, "Only a signed-in teacher can finish a lesson.")
+        lesson = find_record(db, Lesson, lesson_id)
+        if db.get(LessonClosure, lesson_id):
+            raise ValueError("This lesson is already permanently finished or cancelled.")
+        if lesson.started_at > utc_now():
+            raise ValueError("This lesson has not started yet.")
+        if expected_version != closure_version(db, lesson):
+            raise ValueError("Lesson attendance or check-in changed. Review the updated preview.")
+        if action == 'cancelled' and db.scalar(select(Attendance.id).where(Attendance.lesson_id == lesson_id).limit(1)):
+            raise ValueError("Only lessons with no attendance history can be cancelled, even if entries were reversed.")
+        # Freeze the documented current-roster fallback for legacy lessons.
+        if action == 'finished' and db.get(LessonRosterSnapshot, lesson_id) is None:
+            db.add(LessonRosterSnapshot(lesson_id=lesson_id))
+            db.flush()
+            for enrollment_id in db.scalars(select(Enrollment.id).where(
+                Enrollment.group_id == lesson.group_id, Enrollment.active.is_(True)
+            )).all():
+                db.add(LessonRoster(lesson_id=lesson_id, enrollment_id=enrollment_id))
+        lesson.attendance_code = None
+        lesson.code_expires_at = None
+        db.add(LessonClosure(lesson_id=lesson_id, teacher_id=teacher_id, status=action, reason=reason.strip()))
+
+
+def closure_preview(request, db, user, lesson_id, error=None):
+    lesson = find_record(db, Lesson, lesson_id)
+    recorded = db.scalar(select(func.count()).select_from(Attendance).where(Attendance.lesson_id == lesson_id))
+    present = db.scalar(select(func.count()).select_from(Attendance).where(Attendance.lesson_id == lesson_id, attendance_active()))
+    return render(request, 'finish_lesson.html', 400 if error else 200, user=user,
+                  lesson=lesson, group=db.get(Group, lesson.group_id), recorded=recorded,
+                  present=present, version=closure_version(db, lesson),
+                  legacy=db.get(LessonRosterSnapshot, lesson_id) is None, closure=db.get(LessonClosure, lesson_id), error=error)
+
+
+@router.get('/lessons/{lesson_id}/finish', response_class=HTMLResponse)
+def finish_preview(lesson_id: int, request: Request, db: Session = Depends(get_db), user: User = Depends(require_teacher)):
+    return closure_preview(request, db, user, lesson_id)
+
+
+@router.post('/lessons/{lesson_id}/finish', response_class=HTMLResponse)
+def finish_save(lesson_id: int, request: Request, action: str = Form(default=''),
+                reason: str = Form(default=''), expected_version: str = Form(default=''),
+                csrf: str = Form(default=''), db: Session = Depends(get_db), user: User = Depends(require_teacher)):
+    verify_csrf(request, csrf)
+    try:
+        close_permanently(request.app.state.database_engine, user.id, lesson_id,
+                          action, reason, expected_version, request)
+    except ValueError as error:
+        return closure_preview(request, db, user, lesson_id, str(error))
+    return RedirectResponse(f'/teacher/lessons/{lesson_id}', status_code=303)

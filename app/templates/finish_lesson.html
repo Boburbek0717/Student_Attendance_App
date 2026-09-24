@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Finish lesson · SAT Factory{% endblock %}
+{% block content %}
+<a href="/teacher/lessons/{{ lesson.id }}">Back to attendance</a>
+<h1>{{ group.name }} · Lesson #{{ lesson.id }}</h1>
+<p>{{ lesson.started_at | school_time }}</p>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+{% if closure %}<p>This lesson is permanently {{ closure.status }}.</p>
+{% else %}
+<h2>Review before finishing</h2>
+{% if legacy %}<p class="hint">This older lesson has no saved roster. Finishing will freeze the current active roster for its absence list; historical attendance stays retained.</p>{% endif %}
+<p>{{ present }} present. Review the attendance list before confirming.</p>
+<p>Finishing closes check-in permanently and finalizes absences. This lesson cannot be reopened. Teachers can still correct attendance afterward; finishing itself does not change balances.</p>
+<form method="post">
+<input type="hidden" name="csrf" value="{{ csrf_token }}">
+<input type="hidden" name="expected_version" value="{{ version }}">
+<label for="action">Action</label><select id="action" name="action"><option value="finished">Finish permanently</option>{% if not recorded %}<option value="cancelled">Cancel empty lesson permanently</option>{% endif %}</select>
+{% if not recorded %}<p class="hint">Cancel only an accidental class that did not happen. Its history is retained, with no absences or charges.</p>{% endif %}
+<label for="reason">Reason / completion note (teacher-only)</label><input id="reason" name="reason" required maxlength="500">
+<button type="submit">Confirm permanent action</button>
+</form>
+{% endif %}
+{% endblock %}

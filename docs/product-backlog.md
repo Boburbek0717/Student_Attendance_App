@@ -4,7 +4,7 @@ Created: 2026-09-23. Baseline: commit 92089e0. Sprint 1 started 2026-09-23. SF-0
 see [Sprint 1 evidence](sprint-01-review.md). Remaining items await selection.
 
 Roadmap: [next stages](next-stages.md), revised 2026-09-24. Stages are proposals;
-existing story statuses remain unchanged. SF-04 is the next item to refine.
+existing story statuses remain unchanged. SF-04 is implemented; SF-09 is the next Stage 1 slice.
 
 Product Goal: make SAT Factory dependable for everyday classes and a credible,
 privacy-conscious showcase of student results.
@@ -16,7 +16,7 @@ corrections, lesson reopening and persistent check-in limits already exist.
 Priority: P1 = essential next work; P2 = important next increments; P3 = later or
 conditional. Order within a priority is intentional. Estimates are provisional
 relative story points (2/3/5/8), not hours or promised delivery dates. Split an
-8-point item further if it cannot fit the selected sprint. SF-01 and SF-02: Done. SF-03: Done. All other statuses: Backlog.
+8-point item further if it cannot fit the selected sprint. SF-01 and SF-02: Done. SF-03 and SF-04: Done. All other statuses: Backlog.
 Evidence IDs refer to [the usage simulation](usage-simulation.md).
 
 | Order / ID | Priority | Backlog item | Points | Evidence | Dependencies |
@@ -80,7 +80,7 @@ As a teacher, I can distinguish a new class, a closed code window and a finished
   starting another lesson clearly identifies that it creates a separate class.
 - Keep the requested Absent label; while check-in is open, explicitly qualify it
   as provisional. On closure/finalization, show the relevant status and time.
-- Confirm D1 before adding a separate finalization model; no silent behavior change.
+- D1 resolved by owner: finishing is permanent, with attendance corrections allowed afterward.
 - Reopening preserves lesson identity and roster; does not double-charge attendance.
   Accidental empty lessons can be visibly cancelled, preserving their audit record.
 
@@ -201,8 +201,8 @@ As an owner with independent teachers, I can restrict access to assigned groups.
 
 ## Decisions for refinement
 
-- D1: Do you want 'Absent — not checked in yet' while the code is open, and a
-  separate Finish lesson action? Preserve current labels until agreed.
+- D1 resolved 2026-09-24: Finish permanently; corrections only afterward.
+  Absent label retained, with provisional explanation while check-in is open.
 - D2: Who grants and records publication permission, what evidence is retained,
   and what is the withdrawal process? No faces by default.
 - D3: Where should recoverable backups live, and who may access them?
