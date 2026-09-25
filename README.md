@@ -310,3 +310,23 @@ node --test tests/test_lesson_live.cjs
 ```
 
 See [Stage 1 verification](docs/stage-1-class-workflow.md) for the review scope.
+
+
+## Desktop launcher (Windows)
+
+The local desktop shortcut **SAT Factory** runs `scripts/open_sat_factory.py`
+with this project's `pythonw.exe`. Double-click it to start or restart the local
+server and open the results wall in your default browser. No terminal window or
+administrator access is needed. It waits for the homepage to respond before
+opening; rapid repeated clicks share a lock. The shortcut is local to this PC.
+
+It only stops servers identified by this exact checkout's `--app-dir`, module,
+host and port. If a manually started or unrelated server holds port 8000, close
+that server yourself first. It never kills a process simply because it owns the
+port. Server output is kept in `%LOCALAPPDATA%\SAT Factory\<checkout-id>\server.log`;
+startup errors show a dialog. A restart interrupts active requests, so use it
+between lessons. The server remains local to 127.0.0.1; this does not publish it.
+
+Verification: started from stopped, restarted the matching server, checked the
+updated homepage in the browser, and checked ownership rejection with a mocked
+unrelated port listener. No attendance or database content was inspected.
