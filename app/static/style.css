@@ -194,7 +194,8 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
 .result-breakdown dd { font-size:1.9rem; }
 .ticket-story-panel { border-left:2px dashed #bac5ab; background:#f0f4e8; padding:2.5rem; display:flex; flex-direction:column; justify-content:center; }
 .journey-tag { font:600 .65rem ui-monospace,monospace; letter-spacing:.06em; border:1px solid #a8b69a; padding:.5rem .7rem; align-self:flex-start; }
-.ticket-story-panel blockquote { font-size:1.12rem; line-height:1.8; }
+.ticket-story-panel blockquote, .ticket-story-panel .result-summary { font-size:1.12rem; line-height:1.8; }
+.ticket-story-panel .result-summary { margin:1.5rem 0; }
 .quote-credit { font-size:.85rem; font-weight:700; }
 .quote-credit span { display:block; font-weight:400; color:var(--muted); font-size:.75rem; }
 .ticket-stamp { border-top:1px solid #cbd4bf; padding-top:1rem; margin-top:1rem; font: .6rem ui-monospace,monospace; letter-spacing:.1em; color:#58694a; }

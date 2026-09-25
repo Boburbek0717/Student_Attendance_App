@@ -6,7 +6,7 @@
     <div class="hero-copy">
         <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> THE SAT FACTORY / STUDENT STORIES</p>
         <h1 id="welcome-heading">Small steps.<br>Serious <span>progress.</span></h1>
-        <p class="page-intro">Behind every score is a student who kept showing up. These are their SAT journeys, in their own words.</p>
+        <p class="page-intro">Behind every score is a student who kept showing up. Explore their SAT scores and stories from SAT Factory.</p>
         <div class="hero-actions">
             <a class="button" href="#results">Explore the results wall <span aria-hidden="true">↗</span></a>
             {% if user %}<a class="text-action" href="/{{ user.role }}">Go to my dashboard</a>
@@ -42,7 +42,71 @@
     </div>
 </section>
 <section id="results" class="results-section" aria-labelledby="results-heading">
-    {% set results = [{"name": "Asilbek Shukurov", "ebrw": 610, "math": 690, "tag": "STARTED FROM SCRATCH", "quote": "I never imagined I could feel so comfortable with math. The course guided me through my SAT journey and gave me much more confidence. My teacher, Boburbek aka, made a real difference with his guidance and support."}, {"name": "Axadjon Axmadqulov", "ebrw": 640, "math": 710, "tag": "STARTED FROM SCRATCH", "quote": "When I first started preparing for the SAT, I thought it would be very difficult and take a long time. With my teacher's help, I achieved my score after just four months of individual lessons."}, {"name": "Shoxjaxon Akramov", "ebrw": 610, "math": 600, "tag": "PERSISTENCE PAID OFF", "quote": "The SAT was a real challenge for me, and I didn't reach my target score on my first attempt. But I kept working hard, tried again, and earned a score high enough to qualify for a scholarship at a state university."}] %}
+    {% set results = [
+    {
+        "name": "Asilbek Shukurov",
+        "ebrw": 610,
+        "math": 690,
+        "tag": "STARTED FROM SCRATCH",
+        "quote": "I never imagined I could feel so comfortable with math. The course guided me through my SAT journey and gave me much more confidence. My teacher, Boburbek aka, made a real difference with his guidance and support."
+    },
+    {
+        "name": "Axadjon Axmadqulov",
+        "ebrw": 640,
+        "math": 710,
+        "tag": "STARTED FROM SCRATCH",
+        "quote": "When I first started preparing for the SAT, I thought it would be very difficult and take a long time. With my teacher's help, I achieved my score after just four months of individual lessons."
+    },
+    {
+        "name": "Shoxjaxon Akramov",
+        "ebrw": 610,
+        "math": 600,
+        "tag": "PERSISTENCE PAID OFF",
+        "quote": "The SAT was a real challenge for me, and I didn't reach my target score on my first attempt. But I kept working hard, tried again, and earned a score high enough to qualify for a scholarship at a state university."
+    },
+    {
+        "name": "Savronov Kamron",
+        "ebrw": 590,
+        "math": 760,
+        "tag": "MATH HIGHLIGHT",
+        "summary": "A standout 760 in Math leads Kamron's 1350 total."
+    },
+    {
+        "name": "Shukrona Umerova",
+        "ebrw": 580,
+        "math": 790,
+        "tag": "NEAR-PERFECT MATH",
+        "summary": "Just 10 points from a perfect Math score. Shukrona earns 1370 overall."
+    },
+    {
+        "name": "Allonazarov Javohir",
+        "ebrw": 680,
+        "math": 790,
+        "tag": "1470 TOTAL",
+        "summary": "A 790 in Math and 680 in EBRW put Javohir at an impressive 1470."
+    },
+    {
+        "name": "Nurmuhammadov Bekmuhammad",
+        "ebrw": 650,
+        "math": 730,
+        "tag": "1380 TOTAL",
+        "summary": "Bekmuhammad pairs 730 in Math with 650 in EBRW for a 1380 total."
+    },
+    {
+        "name": "Shohruh Tahirjonov",
+        "ebrw": 580,
+        "math": 700,
+        "tag": "700 IN MATH",
+        "summary": "Shohruh reaches 700 in Math, bringing his total to 1280."
+    },
+    {
+        "name": "Go'zal Anvarova",
+        "ebrw": 660,
+        "math": 760,
+        "tag": "1420 TOTAL",
+        "summary": "Go'zal earns 1420 overall, with 760 in Math and 660 in EBRW."
+    }
+] %}
     <div class="section-heading"><div><p class="eyebrow">THE RESULTS WALL</p><h2 id="results-heading">Their effort. Their stories.</h2></div><span class="development-label">STUDENT RESULTS</span></div>
     <p class="section-intro">Every score has a story. Meet the students who put in the work and took their next step with SAT Factory.</p>
     {% for result in results %}
@@ -56,8 +120,13 @@
         </div>
         <div class="ticket-story-panel">
             <span class="journey-tag">{{ result.tag }}</span>
+            {% if result.quote %}
             <blockquote>“{{ result.quote }}”</blockquote>
             <p class="quote-credit">{{ result.name }}<span>SAT Factory student</span></p>
+            {% else %}
+            <p class="result-summary">{{ result.summary }}</p>
+            <p class="quote-credit">SAT Factory<span>Score highlight</span></p>
+            {% endif %}
         </div>
     </article>
     {% endfor %}
