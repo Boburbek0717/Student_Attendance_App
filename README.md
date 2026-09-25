@@ -40,12 +40,13 @@ Start the local server:
 ```
 
 Open http://127.0.0.1:8000/ for the welcome page, or /login for the course portal.
-The welcome page uses the selected Score Ticket design for three owner-supplied
-student stories: Asilbek Shukurov (1300), Axadjon Axmadqulov (1350), and
-Shoxjaxon Akramov (1210), with section scores and lightly edited comments.
-Starting from scratch is descriptive, not a numeric baseline score. No faces
-are displayed. Content is static; results-management tools remain future work. The brand header
-and login page link back to it. Signed-in users can open their dashboard from home. Stop an older server if the port is occupied.
+The homepage shows three featured student results, with a swipeable row on phones.
+Visit `/results` for all nine Score Tickets in a two-column desktop gallery or a
+single column on mobile. Original student comments expand with native disclosure
+controls; editorial score highlights are not presented as student quotes.
+Public content and the featured selection live in `app/result_content.py`, separate
+from private attendance records. No dates or chronological ordering are inferred.
+The header links to the gallery and course portal. Stop an older server if the port is occupied.
 The proxy flag makes local login limiting use the connection address rather than
 forwarded headers. Existing accounts are preserved. No default accounts are added.
 Sprint 1 adds two tables on startup without changing existing columns or dependencies.

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.result_content import RESULTS, FEATURED_RESULTS
 from app.database import engine, initialize_database
 from app.security import authenticate, current_user, load_session_secret, verify_csrf
 from app.security import limit_login_attempt, start_session, revoke_session
@@ -64,7 +65,11 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     @app.get("/", response_class=HTMLResponse)
     def home(request: Request, db: Session = Depends(get_db)):
         user = current_user(request, db)
-        return render(request, "index.html", user=user)
+        return render(request, "index.html", user=user, featured=FEATURED_RESULTS, result_count=len(RESULTS))
+
+    @app.get("/results", response_class=HTMLResponse)
+    def results_page(request: Request, db: Session = Depends(get_db)):
+        return render(request, "results.html", user=current_user(request, db), results=RESULTS)
 
     @app.get("/login", response_class=HTMLResponse)
     def login_page(request: Request, db: Session = Depends(get_db)):

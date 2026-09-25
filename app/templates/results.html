@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Student results · SAT Factory{% endblock %}
+{% block main_class %}welcome-page results-page{% endblock %}
+{% block content %}
+<header class="results-intro">
+    <a class="text-action" href="/">← Back to home</a>
+    <p class="eyebrow">THE RESULTS WALL</p>
+    <h1>Student results.</h1>
+    <p class="section-intro">{{ results|length }} results. Individual journeys. Explore the scores and the stories behind them.</p>
+</header>
+<div class="results-grid">
+{% for result in results %}
+<article id="result-{{ result.id }}" class="student-ticket result-design" aria-labelledby="student-{{ result.id }}">
+    <div class="ticket-score-panel">
+        <p class="result-kicker">SAT FACTORY / RESULT {{ '%03d' | format(result.id) }}</p>
+        <h2 id="student-{{ result.id }}">{{ result.name }}</h2>
+        <div class="result-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
+        <p class="result-kicker">SAT TOTAL SCORE</p>
+        <dl class="result-breakdown"><div><dt>EBRW</dt><dd>{{ result.ebrw }}</dd></div><div><dt>Math</dt><dd>{{ result.math }}</dd></div></dl>
+    </div>
+    <div class="ticket-story-panel">
+        <span class="journey-tag">{{ result.tag }}</span>
+        {% if result.quote %}
+        <details><summary>Read {{ result.name }}’s story</summary>
+            <blockquote>“{{ result.quote }}”</blockquote>
+            <p class="quote-credit">{{ result.name }}<span>SAT Factory student</span></p>
+        </details>
+        {% else %}
+        <p class="result-summary">{{ result.summary }}</p>
+        <p class="quote-credit">SAT Factory<span>Score highlight</span></p>
+        {% endif %}
+    </div>
+</article>
+{% endfor %}
+</div>
+<footer class="home-footer"><a href="/">← Back to SAT Factory</a></footer>
+{% endblock %}

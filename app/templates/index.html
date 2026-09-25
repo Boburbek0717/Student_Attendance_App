@@ -1,29 +1,33 @@
 {% extends "base.html" %}
 {% block title %}SAT Factory · Built through practice{% endblock %}
-{% block main_class %}welcome-page{% endblock %}
+{% block main_class %}welcome-page home-page{% endblock %}
 {% block content %}
-<section class="factory-hero" aria-labelledby="welcome-heading">
+<section class="factory-hero home-intro" aria-labelledby="welcome-heading">
     <div class="hero-copy">
         <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> THE SAT FACTORY / STUDENT STORIES</p>
-        <h1 id="welcome-heading">Small steps.<br>Serious <span>progress.</span></h1>
-        <p class="page-intro">Behind every score is a student who kept showing up. Explore their SAT scores and stories from SAT Factory.</p>
+        <h1 id="welcome-heading">Small steps. Serious <span>progress.</span></h1>
+        <p class="page-intro">Student scores and stories from SAT Factory.</p>
         <div class="hero-actions">
-            <a class="button" href="#results">Explore the results wall <span aria-hidden="true">↗</span></a>
+            <a class="button" href="/results">View all student results <span aria-hidden="true">↗</span></a>
             {% if user %}<a class="text-action" href="/{{ user.role }}">Go to my dashboard</a>
             {% else %}<a class="text-action" href="/login">Course portal <span aria-hidden="true">→</span></a>{% endif %}
         </div>
-        <a class="text-action teacher-jump" href="#teacher">Meet your teacher <span aria-hidden="true">↓</span></a>
+
     </div>
-    <aside class="result-ticket" aria-label="Featured result: Asilbek Shukurov">
-        <div class="ticket-top"><span>SF / RESULT FILE</span><span>STUDENT RESULT</span></div>
-        <div class="ticket-body">
-            <p class="ticket-label">Asilbek Shukurov</p>
-            <div class="score-placeholder">1300</div>
-            <p class="ticket-caption">SAT TOTAL SCORE</p>
-            <div class="ticket-sections"><div><span>EBRW</span><strong>610</strong></div><div><span>MATH</span><strong>690</strong></div></div>
-        </div>
-        <p class="ticket-disclaimer">Started from scratch · SAT Factory student</p>
-    </aside>
+</section>
+<section id="results" class="featured-results" aria-labelledby="featured-heading">
+    <div class="section-heading"><h2 id="featured-heading">Featured results</h2><a class="text-action" href="/results">View all {{ result_count }} results ↗</a></div>
+    <p class="swipe-hint" id="swipe-hint">Swipe to explore. Select a result for the full score card.</p>
+    <div class="featured-track" aria-label="Featured student results" aria-describedby="swipe-hint">
+        {% for result in featured %}
+        <a class="featured-card" href="/results#result-{{ result.id }}" aria-label="{{ result.name }}, SAT {{ result.ebrw + result.math }}. View score card.">
+            <span class="result-kicker">SAT FACTORY</span>
+            <h3>{{ result.name }}</h3>
+            <div class="featured-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
+            <dl class="result-breakdown"><div><dt>EBRW</dt><dd>{{ result.ebrw }}</dd></div><div><dt>Math</dt><dd>{{ result.math }}</dd></div></dl>
+        </a>
+        {% endfor %}
+    </div>
 </section>
 <section id="teacher" class="teacher-feature" aria-labelledby="teacher-feature-heading">
     <div class="teacher-portrait" role="img" aria-label="Portrait placeholder for Noraliev Boburbek">
@@ -38,98 +42,8 @@
         <dl class="teacher-credentials" aria-label="Teacher scores"><div><dt>SAT</dt><dd>1430<span>/ 1600</span></dd></div><div><dt>IELTS</dt><dd>8.5<span>/ 9</span></dd></div></dl>
         <div class="teacher-bio-placeholder"><p class="teaching-statement">Practical understanding comes first.</p><p>Build lasting knowledge through focused practice. My lessons help you understand the ideas, apply them to real questions, and grow more confident with every step.</p></div>
         <div class="teacher-detail-grid"><div><h3>My approach</h3><p>Clear explanations, hands-on problem solving, and practice with a purpose.</p></div><div><h3>My background</h3><p>Teaching SAT since 2024 and currently studying at a top European university.</p></div></div>
-        <a class="text-action" href="#results">Meet the students and their stories <span aria-hidden="true">↗</span></a>
+        <a class="text-action" href="/results">Meet the students and their stories <span aria-hidden="true">↗</span></a>
     </div>
-</section>
-<section id="results" class="results-section" aria-labelledby="results-heading">
-    {% set results = [
-    {
-        "name": "Asilbek Shukurov",
-        "ebrw": 610,
-        "math": 690,
-        "tag": "STARTED FROM SCRATCH",
-        "quote": "I never imagined I could feel so comfortable with math. The course guided me through my SAT journey and gave me much more confidence. My teacher, Boburbek aka, made a real difference with his guidance and support."
-    },
-    {
-        "name": "Axadjon Axmadqulov",
-        "ebrw": 640,
-        "math": 710,
-        "tag": "STARTED FROM SCRATCH",
-        "quote": "When I first started preparing for the SAT, I thought it would be very difficult and take a long time. With my teacher's help, I achieved my score after just four months of individual lessons."
-    },
-    {
-        "name": "Shoxjaxon Akramov",
-        "ebrw": 610,
-        "math": 600,
-        "tag": "PERSISTENCE PAID OFF",
-        "quote": "The SAT was a real challenge for me, and I didn't reach my target score on my first attempt. But I kept working hard, tried again, and earned a score high enough to qualify for a scholarship at a state university."
-    },
-    {
-        "name": "Savronov Kamron",
-        "ebrw": 590,
-        "math": 760,
-        "tag": "MATH HIGHLIGHT",
-        "summary": "A standout 760 in Math leads Kamron's 1350 total."
-    },
-    {
-        "name": "Shukrona Umerova",
-        "ebrw": 580,
-        "math": 790,
-        "tag": "NEAR-PERFECT MATH",
-        "summary": "Just 10 points from a perfect Math score. Shukrona earns 1370 overall."
-    },
-    {
-        "name": "Allonazarov Javohir",
-        "ebrw": 680,
-        "math": 790,
-        "tag": "1470 TOTAL",
-        "summary": "A 790 in Math and 680 in EBRW put Javohir at an impressive 1470."
-    },
-    {
-        "name": "Nurmuhammadov Bekmuhammad",
-        "ebrw": 650,
-        "math": 730,
-        "tag": "1380 TOTAL",
-        "summary": "Bekmuhammad pairs 730 in Math with 650 in EBRW for a 1380 total."
-    },
-    {
-        "name": "Shohruh Tahirjonov",
-        "ebrw": 580,
-        "math": 700,
-        "tag": "700 IN MATH",
-        "summary": "Shohruh reaches 700 in Math, bringing his total to 1280."
-    },
-    {
-        "name": "Go'zal Anvarova",
-        "ebrw": 660,
-        "math": 760,
-        "tag": "1420 TOTAL",
-        "summary": "Go'zal earns 1420 overall, with 760 in Math and 660 in EBRW."
-    }
-] %}
-    <div class="section-heading"><div><p class="eyebrow">THE RESULTS WALL</p><h2 id="results-heading">Their effort. Their stories.</h2></div><span class="development-label">STUDENT RESULTS</span></div>
-    <p class="section-intro">Every score has a story. Meet the students who put in the work and took their next step with SAT Factory.</p>
-    {% for result in results %}
-    <article id="result-{{ loop.index }}" class="student-ticket result-design" aria-labelledby="student-{{ loop.index }}">
-        <div class="ticket-score-panel">
-            <p class="result-kicker">SAT FACTORY / RESULT {{ '%03d' | format(loop.index) }}</p>
-            <h3 id="student-{{ loop.index }}">{{ result.name }}</h3>
-            <div class="result-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
-            <p class="result-kicker">SAT TOTAL SCORE</p>
-            <dl class="result-breakdown"><div><dt>EBRW</dt><dd>{{ result.ebrw }}</dd></div><div><dt>Math</dt><dd>{{ result.math }}</dd></div></dl>
-        </div>
-        <div class="ticket-story-panel">
-            <span class="journey-tag">{{ result.tag }}</span>
-            {% if result.quote %}
-            <blockquote>“{{ result.quote }}”</blockquote>
-            <p class="quote-credit">{{ result.name }}<span>SAT Factory student</span></p>
-            {% else %}
-            <p class="result-summary">{{ result.summary }}</p>
-            <p class="quote-credit">SAT Factory<span>Score highlight</span></p>
-            {% endif %}
-        </div>
-    </article>
-    {% endfor %}
 </section>
 <section class="portal-banner" aria-labelledby="portal-heading"><div><p class="eyebrow">ALREADY PART OF THE FACTORY?</p><h2 id="portal-heading">Your next lesson is waiting.</h2><p>Check in, review attendance, and keep track of your lessons.</p></div>
 {% if user %}<a class="button" href="/{{ user.role }}">Go to my dashboard</a>{% else %}<a class="button" href="/login">Log in to the course portal <span aria-hidden="true">→</span></a>{% endif %}
