@@ -1,0 +1,57 @@
+[
+  {
+    "scenario": "01 Login",
+    "result": "PASS",
+    "evidence": "1 teacher and 30 students from one simulated peer: 1.756s; no rejected logins"
+  },
+  {
+    "scenario": "02 Enrollment",
+    "result": "PASS",
+    "evidence": "30 separate 12-lesson packages; missing-enrollment guidance present before setup"
+  },
+  {
+    "scenario": "03 Check-in",
+    "result": "PASS",
+    "evidence": "One successful HTTP submission: 12 → 11; teacher shows present"
+  },
+  {
+    "scenario": "04 Duplicate/lost response",
+    "result": "PASS",
+    "evidence": "Same form replayed without consuming first response: one attendance debit"
+  },
+  {
+    "scenario": "05 Expiry/reopen",
+    "result": "PASS",
+    "evidence": "Expired code rejected with help; same lesson reopened and second student checked in"
+  },
+  {
+    "scenario": "06 Correction",
+    "result": "PASS",
+    "evidence": "Teacher manual present/reversal: 12 → 11 → 12 with retained history"
+  },
+  {
+    "scenario": "07 Renewals",
+    "result": "PASS",
+    "evidence": "Early 11 + 12 = 23; exhausted credit permits attendance, 1 owed + renewal = 11 available"
+  },
+  {
+    "scenario": "07b Concurrent arrival",
+    "result": "PASS",
+    "evidence": "25 concurrent HTTP submissions passed in 0.964s; 30 logged-in students total"
+  },
+  {
+    "scenario": "08 Permanent finish",
+    "result": "PASS",
+    "evidence": "Reopen rejected; original form receipt still works; audited correction after finish works"
+  },
+  {
+    "scenario": "09 Boundaries",
+    "result": "PASS",
+    "evidence": "Student denied teacher read/write; teacher denied student page; missing CSRF rejected; private correction reason hidden"
+  },
+  {
+    "scenario": "10 Message checks",
+    "result": "PASS",
+    "evidence": "Success, duplicate, expired and missing-enrollment messages checked in HTTP responses. Mobile/keyboard review recorded separately; no real-device claim."
+  }
+]

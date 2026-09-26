@@ -1,4 +1,7 @@
 import unittest
+from contextlib import ExitStack
+from pathlib import Path
+import tempfile
 
 from sqlalchemy import delete, func, inspect, select, text
 from sqlalchemy.exc import IntegrityError
@@ -9,6 +12,21 @@ from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, Use
 
 
 class DatabaseTests(unittest.TestCase):
+    def test_classroom_read_connections_do_not_starve_nested_writes(self):
+        from app.database import write_transaction
+        with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
+            engine = make_engine(str(Path(directory) / 'classroom.db'))
+            stack.callback(engine.dispose)
+            Base.metadata.create_all(engine)
+            # Thirty authorization requests may hold connections concurrently.
+            for _ in range(30):
+                reader = stack.enter_context(Session(engine))
+                reader.execute(select(User.id)).all()
+            with write_transaction(engine) as writer:
+                writer.add(Group(name='Fictional concurrent classroom'))
+            with Session(engine) as db:
+                self.assertEqual(db.scalar(select(func.count()).select_from(Group)), 1)
+
     def setUp(self):
         self.engine = make_engine(":memory:")
         Base.metadata.create_all(self.engine)

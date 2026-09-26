@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from sqlalchemy import URL, Engine, create_engine, event, text
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import DeclarativeBase, Session
+from sqlalchemy.pool import NullPool
 
 
 class Base(DeclarativeBase):
@@ -13,9 +14,14 @@ DATABASE_PATH = Path(__file__).resolve().parent.parent / "attendance.db"
 
 
 def make_engine(database: str):
+    # Request authorization may hold a read connection while an atomic write
+    # opens another. A bounded pool can deadlock a whole class at that boundary.
+    # SQLite file connections are cheap; keep the in-memory test pool unchanged.
+    options = {"poolclass": NullPool} if database != ":memory:" else {}
     engine = create_engine(
         URL.create("sqlite", database=database),
         connect_args={"check_same_thread": False},
+        **options,
     )
 
     @event.listens_for(engine, "connect")

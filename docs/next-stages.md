@@ -165,3 +165,13 @@ production pilot is implied. See stage-1-class-workflow.md for verification and
 limits. The next proposed implementation is SF-05, backup and recovery, after the
 owner chooses storage and retention. Earlier proposed next actions above are
 historical and superseded by these delivery updates.
+
+## Pilot plan supersedes earlier next actions — 2026-09-26
+
+Owner selected the five-step pilot plan: classroom rehearsal, recovery tooling,
+onboarding, deployable release preparation, then a supervised pilot. Course is
+expected in about two weeks with about 30 students. Safe fictional preparation
+is authorized now; external deployment and real backup scheduling remain separate.
+SF-04 and SF-09 are complete implementation. Public page now has a separate results
+gallery and compact portrait-free teacher section; preserve it. Track execution
+and outstanding decisions in pilot-handover.md, not historical proposals above.

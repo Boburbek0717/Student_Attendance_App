@@ -264,3 +264,12 @@ Homepage copy cleanup requested by owner: removed the work/story footnote,
 Practice/Persistence/Progress strip, edited-comments caption, repeated ticket
 slogans, portrait index and footer slogan. Teacher biography and student
 testimonials preserved.
+
+## Pilot priority update — 2026-09-26
+
+The owner selected classroom validation (SF-17), backup/recovery (SF-05),
+onboarding (SF-14), and release preparation (SF-13), in that order. These are
+In progress / Selected respectively; no owner acceptance or public release is
+claimed. SF-04/SF-09 stay Done. Results tools and additional branding are deferred.
+Implementation of fictional recovery mechanisms is authorized before final
+storage/retention decisions. See pilot-handover.md for current evidence and limits.

@@ -228,10 +228,12 @@ submissions and are not cached. HTTPS deployment remains outside this local stag
 ## Verify and learn
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe scripts/verify.py
 ```
 
-All 142 Python tests use isolated databases, not real student data. Read the
+Use the guarded runner above: direct unittest discovery imports the normal app
+and can read its local session secret. The runner redirects that secret and
+blocks default-engine connections before discovery. Tests use fictional data. Read the
 [security review](docs/security-review.md) for reproduced issues and remaining
 limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
 
@@ -280,7 +282,7 @@ Startup adds lesson_closures with teacher, timestamp, status and note. No existi
 columns are changed. Back up SQLite before upgrade; an isolated additive-upgrade and
 restore check verifies permanent closure survives recovery. Do not run old code on
 new closure data: old code could reopen a finished class. Restore matching code and
-database backups together if rolling back. Live refresh remains future SF-09 work.
+database backups together if rolling back. Live refresh is implemented; see SF-09 below.
 
 
 ## Live lesson feedback (SF-09)
