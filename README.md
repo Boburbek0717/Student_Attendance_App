@@ -341,3 +341,7 @@ class rehearsal. Run `python scripts/recovery_drill.py` for a temporary backup a
 restore drill. Use [backup/recovery instructions](docs/backup-recovery.md) before
 any operator use; no real backup schedule is enabled. Current delivery status and
 remaining gates are in [the handover](docs/pilot-handover.md).
+
+For a disposable browser walkthrough, run `python scripts/demo_class.py` with the
+project interpreter. Choose a temporary demo password at its hidden prompt, then
+open port 8766. See [mobile classroom review](docs/mobile-classroom-review.md).

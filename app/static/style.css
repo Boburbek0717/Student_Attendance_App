@@ -314,3 +314,9 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
 .home-page .home-intro { padding:1.2rem 0 .8rem; }
 .home-page .home-intro h1 { margin:.7rem 0; }
 .home-page .hero-actions { margin-top:1rem; }
+
+/* Keep narrow-screen header links intact rather than splitting their words. */
+@media (max-width:480px) {
+    .brand-header { flex-wrap:wrap; }
+    .brand-header > a { flex-shrink:0; }
+}

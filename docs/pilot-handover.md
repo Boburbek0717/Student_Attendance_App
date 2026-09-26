@@ -89,3 +89,17 @@ Next chunks, one at a time:
 Open launch gates: real phones/classroom Wi-Fi, owner review, operational backup
 activation/off-laptop protection, tested host configuration and approved deployment.
 No claim that any whole five-step milestone is complete.
+
+## Mobile/keyboard chunk — 2026-09-26
+
+Started from b6fca9e. Added scripts/demo_class.py: disposable fictional 30-student
+browser environment, separate session cookie and hidden password prompt. Fixed
+320px header word splitting and associated login/check-in errors with their inputs.
+Browser scenarios and owner walkthrough are in mobile-classroom-review.md.
+24 focused auth tests passed (7.976s), 2 demo tests passed (0.457s), diff check passed.
+Review server stopped normally; no real data or normal server restart. Existing
+untracked assets preserved; added fictional screenshot/review-prompt artifacts.
+Owner walkthrough, 200% text zoom, assistive-technology and real-device/Wi-Fi
+validation remain pending. SF-17 is not marked Done. Next implementation chunk is
+SF-14 first-login/recovery guidance with existing teacher-issued passwords/resets.
+Do not automatically begin that next chunk in this turn.

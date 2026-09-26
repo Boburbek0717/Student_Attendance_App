@@ -283,3 +283,11 @@ and fixed classroom connection starvation (abc0212); mobile/keyboard and owner
 walkthrough remain pending. SF-14 and SF-13 remain Selected, not delivered.
 Owner chose existing teacher-issued passwords and teacher resets, and requested
 one small chunk at a time. Stop at the recovery checkpoint before new feature work.
+
+## SF-17 browser review slice — 2026-09-26
+
+Mobile/keyboard rehearsal completed on fictional data at 320/390 viewport widths.
+Header wrapping and error-field associations repaired; disposable owner demo and
+launch checklist delivered in mobile-classroom-review.md. SF-17 remains In progress:
+owner, real-device/network, 200% text zoom and assistive-technology checks pending.
+No new deployment or onboarding scope included in this slice.

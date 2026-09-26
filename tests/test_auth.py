@@ -25,6 +25,36 @@ COOKIE = "attendance_session"
 
 
 class AuthenticationTests(unittest.TestCase):
+    def test_rejected_forms_link_fields_to_visible_error(self):
+        from html.parser import HTMLParser
+
+        class Elements(HTMLParser):
+            def __init__(self, html):
+                super().__init__()
+                self.by_id = {}
+                self.feed(html)
+
+            def handle_starttag(self, tag, attrs):
+                attributes = dict(attrs)
+                if 'id' in attributes:
+                    self.by_id[attributes['id']] = attributes
+
+        failed = self.login(password='incorrect fictional password')
+        self.assertEqual(failed.status_code, 401)
+        elements = Elements(failed.text).by_id
+        for field in ('username', 'password'):
+            self.assertEqual(elements[field]['aria-invalid'], 'true')
+            self.assertEqual(elements[elements[field]['aria-describedby']]['role'], 'alert')
+        self.login()
+        page = self.client.get('/student')
+        failed = self.client.post('/student/check-in', data={'csrf': self.token(page), 'code': '000000'})
+        self.assertEqual(failed.status_code, 400)
+        elements = Elements(failed.text).by_id
+        field = elements['attendance-code']
+        self.assertEqual(field['aria-invalid'], 'true')
+        self.assertEqual(elements[field['aria-describedby']]['role'], 'alert')
+        self.assertNotIn('aria-invalid="true"', self.client.get('/student').text)
+
     def setUp(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
