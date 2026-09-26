@@ -116,3 +116,15 @@ SF-14 implementation is ready for review, not Done until real novice review occu
 Next selected chunk: SF-13 release configuration and deployment procedure, without
 publishing. No real data, real backup activation, remote push or deployment in this
 chunk. Owner walkthrough, real-device/Wi-Fi and operational launch gates remain open.
+
+## Design priority update — 2026-09-26
+
+Owner deferred deployment and selected research-led visual/UI/UX refinement for
+the next few sessions, in small chunks. This supersedes the SF-13 next action
+above. Baseline 0c2ad75; tracked tree initially clean, unrelated output artifacts
+preserved. See design-refinement.md for code/saved-preview findings, researched
+references, page directions, dependency decisions and review criteria. No app
+code, live data, dependencies or tests changed in this research checkpoint.
+Next bounded implementation proposal: public header/homepage hierarchy and the
+minimum shared design tokens, with isolated responsive and cross-page review.
+SF-10 and focused SF-17 follow; no new implementation story is marked complete.

@@ -175,3 +175,13 @@ is authorized now; external deployment and real backup scheduling remain separat
 SF-04 and SF-09 are complete implementation. Public page now has a separate results
 gallery and compact portrait-free teacher section; preserve it. Track execution
 and outstanding decisions in pilot-handover.md, not historical proposals above.
+
+## Design refinement priority — 2026-09-26
+
+Owner deferred deployment work and selected visual/UI/UX refinement for the next
+few sessions. Follow design-refinement.md: research and explain each page's
+direction before implementation, keep the original identity, and deliver small
+reviewed increments. The first proposed slice is homepage/header hierarchy with
+shared design foundations; teacher workflow refinement (SF-10) and focused SF-17
+checks follow. This ordering supersedes earlier release-preparation next actions;
+the launch requirements remain open, not cancelled or completed.
