@@ -99,3 +99,12 @@ forms, media query and regression test: no concrete defects found. It did not
 execute tests or validate real devices. Its cookie/cleanup limitations are covered
 only to the extent of the two local demo tests above; forced termination remains
 unverified. Primary developer reviewed the diff and browser evidence independently.
+
+## Header wrapping follow-up — 2026-09-26
+
+Owner screenshot exposed word splitting at intermediate widths above the old
+480px fix. Header items now wrap at every width; navigation labels and portal
+arrow use nowrap, and the mobile badge width cap is removed. Static Jinja preview
+(no database/app import) checked at 588px and 320px: content/scroll widths match
+573/573 and 305/305 respectively. Labels remained intact. CSS cache version updated.
+No backend change or additional full-suite run. Screenshot: output/header-wrap-fixed.png.
