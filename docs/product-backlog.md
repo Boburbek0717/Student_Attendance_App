@@ -291,3 +291,11 @@ Header wrapping and error-field associations repaired; disposable owner demo and
 launch checklist delivered in mobile-classroom-review.md. SF-17 remains In progress:
 owner, real-device/network, 200% text zoom and assistive-technology checks pending.
 No new deployment or onboarding scope included in this slice.
+
+## SF-14 implementation review — 2026-09-26
+
+Owner selected teacher-issued passwords and teacher resets. Guidance implemented;
+SF-14 moves to Review. Evidence: onboarding-review.md. Real first-time user/mobile
+validation remains outstanding; no self-service reset or forced-change flow added.
+SF-13 remains Selected for the next bounded chunk, with deployment authorization
+and provider-specific decisions separate.

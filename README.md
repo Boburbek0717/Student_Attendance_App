@@ -345,3 +345,11 @@ remaining gates are in [the handover](docs/pilot-handover.md).
 For a disposable browser walkthrough, run `python scripts/demo_class.py` with the
 project interpreter. Choose a temporary demo password at its hidden prompt, then
 open port 8766. See [mobile classroom review](docs/mobile-classroom-review.md).
+
+## First-class help (SF-14)
+
+Login offers expandable first-login and forgotten-account help. Teachers continue
+to issue/reset passwords privately after confirming identity. Students see guidance
+for missing/inactive enrollment and uncertain or rejected check-ins. See
+[onboarding review](docs/onboarding-review.md) for delivery evidence and the pending
+real-user check.

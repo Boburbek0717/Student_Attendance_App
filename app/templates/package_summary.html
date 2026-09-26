@@ -8,7 +8,7 @@
         {% if user.role == 'teacher' and enrollment.active %}
         <p><a class="button" href="/teacher/enrollments/{{ enrollment.id }}/renew">Renew package</a></p>
         {% endif %}
-        {% if not enrollment.active %}<p class="hint">Inactive enrollment</p>{% endif %}
+        {% if not enrollment.active %}<p class="hint">Inactive enrollment. Ask your teacher to check your membership before you try to attend this group.</p>{% endif %}
         {% for package in packages_by_enrollment.get(enrollment.id, []) %}
         <p>Package #{{ package.id }}: {{ package.used }} / {{ package.limit }} lessons used · <strong>{{ package.remaining }} remaining</strong></p>
         {% if package.carried_in and not balance.adjustment %}<p class="hint">{{ package.carried_in }} owed lessons brought forward into this package.</p>{% endif %}

@@ -22,7 +22,7 @@
 <section class="group-card" aria-labelledby="password-heading">
     <h2 id="password-heading">Reset password</h2>
     {% if section == 'password' %}<p class="error" role="alert">{{ error }}</p>{% endif %}
-    <p>Resetting signs the student out of all existing logins. Share the new password privately.</p>
+    <p>Confirm the student's identity before reminding them of their username or resetting their password. Resetting signs the student out of all existing logins. Share the new password privately, never in a group chat.</p>
     <form method="post" action="/teacher/students/{{ student.id }}/password">
         <input type="hidden" name="csrf" value="{{ csrf_token }}">
         <label for="new-password">New password (12–128 characters)</label>

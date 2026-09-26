@@ -103,3 +103,16 @@ Owner walkthrough, 200% text zoom, assistive-technology and real-device/Wi-Fi
 validation remain pending. SF-17 is not marked Done. Next implementation chunk is
 SF-14 first-login/recovery guidance with existing teacher-issued passwords/resets.
 Do not automatically begin that next chunk in this turn.
+
+## SF-14 guidance chunk — 2026-09-26
+
+Starting HEAD 45af814; no pre-existing tracked edits. Added first-login/recovery,
+missing/inactive enrollment and check-in troubleshooting copy, preserving the
+owner's teacher-issued password/reset process. No authentication/accounting writes
+changed. See onboarding-review.md: 2 new tests and 9 student-management tests passed;
+320/390px static browser checks and Enter expansion passed. Unrelated outputs
+preserved; output/onboarding-help.png added as a fictional preview artifact.
+SF-14 implementation is ready for review, not Done until real novice review occurs.
+Next selected chunk: SF-13 release configuration and deployment procedure, without
+publishing. No real data, real backup activation, remote push or deployment in this
+chunk. Owner walkthrough, real-device/Wi-Fi and operational launch gates remain open.

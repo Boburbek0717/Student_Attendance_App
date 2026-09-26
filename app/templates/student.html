@@ -3,9 +3,11 @@
 {% block content %}
 <h1>Welcome, {{ user.display_name }}</h1>
 <p>You are logged in as a student.</p>
+{% if not memberships %}<p class="notice" role="status">Your account is ready, but you are not enrolled in a group yet. Ask your teacher to add you to the correct group before checking in.</p>{% endif %}
 {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
 <section aria-labelledby="check-in-heading">
     <h2 id="check-in-heading">Check in to your lesson</h2>
+    <p class="hint">Check your group under Lesson packages, then enter the current code your teacher shares during class.</p>
     {% if error %}<p id="check-in-error" class="error" role="alert">{{ error }}</p>{% endif %}
     <form method="post" action="/student/check-in">
         <input type="hidden" name="retry_key" value="{{ retry_key }}">
@@ -17,6 +19,12 @@
     </form>
     <p class="hint">One successful check-in uses one lesson. Submitting twice will not use another.</p>
     <p class="hint">If your lessons run out, you can still check in. Extra lessons are counted as owed until your teacher records a renewal.</p>
+    <details>
+        <summary>Code rejected or unsure your check-in saved?</summary>
+        <p>For an invalid or expired code, ask your teacher to confirm your group enrollment and reopen check-in for the same unfinished lesson if needed.</p>
+        <p>If the connection drops, retry the same form. If you refreshed or reopened the page, check Attendance history below to see whether the lesson was recorded.</p>
+        <p>An already-recorded confirmation means no extra lesson was used. If the lesson is finished or a record needs correcting, ask your teacher to review attendance.</p>
+    </details>
 </section>
 {% include "package_summary.html" %}
 {% include "attendance_history.html" %}

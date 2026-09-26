@@ -16,6 +16,11 @@
            autocomplete="current-password" {% if error %}aria-invalid="true" aria-describedby="login-error"{% endif %} required>
     <button type="submit">Log in</button>
 </form>
-<p class="hint">Students: ask your teacher for your account details.</p>
+<details class="account-help" {% if error %}open{% endif %}>
+    <summary>First login or forgotten account details?</summary>
+    <p>Your teacher gives you your username and password privately. Use those details here; there is no student sign-up form.</p>
+    <p>If you forgot your username or password, contact your teacher directly. After confirming who you are, they can remind you of your username or reset your password.</p>
+    <p>After a reset, use the new password to log in again. Never share your password or send it in a group chat.</p>
+</details>
 <p><a href="/">Back to SAT Factory home</a></p>
 {% endblock %}
