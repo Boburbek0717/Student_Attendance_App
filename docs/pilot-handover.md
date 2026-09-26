@@ -56,3 +56,36 @@ Owner experience review, real phones/Wi-Fi and supervised pilot not performed.
 Next: finish recovery review/failure tests, record a recovery drill, prepare the
 isolated browser demo, then complete unblocked onboarding/release work. Commit
 completed slices separately; keep this document current after each checkpoint.
+
+## Smaller-chunk instruction and checkpoint
+
+Owner requested smaller chunks on 2026-09-26. Stop after this recovery tooling
+checkpoint. Do not automatically start onboarding or release work in this turn.
+Unfinished onboarding/template and production configuration edits were removed;
+existing behavior remains intact. Completed rehearsal/fix commit: abc0212.
+
+Recovery: scripts/backup.py, scripts/recovery_drill.py, tests/test_backup.py and
+backup-recovery.md. Full post-pool-fix suite: 151 tests passed in 44.223s. After
+OpenClaw backup review, 11 focused backup tests passed in 5.992s, including three
+new regressions. Review findings repaired: validate timestamps before publication,
+retain per source identity, reject destination symlinks, hash balances in manifest.
+See recovery-evidence.json for the final drill measurement. No live data touched.
+
+Decisions received: keep teacher-issued passwords and teacher resets. Hosting
+budget preference: as low as practical; no provider/address chosen or purchase
+approved. Backups remain fictional-only with operational destination, access,
+off-laptop protection and final retention/schedule awaiting a concrete review.
+
+Next chunks, one at a time:
+1. Finish SF-17 browser/mobile/keyboard rehearsal and owner walkthrough; prepare
+   the launch-blocker checklist and pilot script. Automated rehearsal is complete,
+   but real-user review and device/network evidence are still missing.
+2. SF-14 focused first-login/recovery guidance under the chosen existing password
+   process, with mobile/error-message checks.
+3. SF-13 deployment configuration and upgrade/rollback rehearsal; present a
+   concrete low-cost host proposal. No public deployment until explicitly approved.
+4. Supervised small pilot only after deployment and participants are ready.
+
+Open launch gates: real phones/classroom Wi-Fi, owner review, operational backup
+activation/off-laptop protection, tested host configuration and approved deployment.
+No claim that any whole five-step milestone is complete.

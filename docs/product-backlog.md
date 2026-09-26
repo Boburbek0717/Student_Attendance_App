@@ -273,3 +273,13 @@ In progress / Selected respectively; no owner acceptance or public release is
 claimed. SF-04/SF-09 stay Done. Results tools and additional branding are deferred.
 Implementation of fictional recovery mechanisms is authorized before final
 storage/retention decisions. See pilot-handover.md for current evidence and limits.
+
+## Bounded recovery tooling checkpoint — 2026-09-26
+
+SF-05 local mechanisms implemented and fictional recovery verified; operational
+storage/access/retention and off-laptop copy remain pending. It is not Done.
+See backup-recovery.md and recovery-evidence.json. SF-17 automated rehearsal found
+and fixed classroom connection starvation (abc0212); mobile/keyboard and owner
+walkthrough remain pending. SF-14 and SF-13 remain Selected, not delivered.
+Owner chose existing teacher-issued passwords and teacher resets, and requested
+one small chunk at a time. Stop at the recovery checkpoint before new feature work.

@@ -333,3 +333,11 @@ between lessons. The server remains local to 127.0.0.1; this does not publish it
 Verification: started from stopped, restarted the matching server, checked the
 updated homepage in the browser, and checked ownership rejection with a mocked
 unrelated port listener. No attendance or database content was inspected.
+
+## Isolated pilot and recovery tools
+
+Run `python scripts/rehearse.py` with the project interpreter for the fictional
+class rehearsal. Run `python scripts/recovery_drill.py` for a temporary backup and
+restore drill. Use [backup/recovery instructions](docs/backup-recovery.md) before
+any operator use; no real backup schedule is enabled. Current delivery status and
+remaining gates are in [the handover](docs/pilot-handover.md).

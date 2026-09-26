@@ -1,0 +1,24 @@
+{
+  "dataset": "fictional; 30 students; generated and deleted in temporary storage",
+  "recovery_seconds": 0.083,
+  "snapshot_age_seconds": 0.169,
+  "revoked_sessions": 31,
+  "counts": {
+    "attendance": 29,
+    "attendance_attempt_windows": 29,
+    "attendance_corrections": 3,
+    "balance_adjustments": 1,
+    "check_in_receipts": 28,
+    "enrollments": 30,
+    "groups": 1,
+    "lesson_closures": 1,
+    "lesson_packages": 32,
+    "lesson_roster": 30,
+    "lesson_roster_snapshots": 1,
+    "lessons": 1,
+    "login_attempt_windows": 32,
+    "login_sessions": 0,
+    "users": 31
+  },
+  "balances_reconciled": 30
+}
