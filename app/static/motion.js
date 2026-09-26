@@ -3,7 +3,7 @@
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (!('IntersectionObserver' in window) || !Element.prototype.animate) return;
     const targets = document.querySelectorAll(
-        '.welcome-page .hero-copy, .welcome-page .teacher-portrait, ' +
+        '.welcome-page .hero-copy, ' +
         '.welcome-page .teacher-introduction, .welcome-page .section-heading, ' +
         '.welcome-page .student-ticket, .welcome-page .portal-banner'
     );

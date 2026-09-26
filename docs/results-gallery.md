@@ -21,3 +21,16 @@ passed in 40.109 seconds with live database access blocked. Browser inspection
 covered desktop cards, 390px mobile horizontal layout without page overflow,
 keyboard card navigation and Enter expanding a story. Preview server restarted
 using the owner's desktop launcher. No remote push or public deployment.
+
+## Compact teacher introduction — 2026-09-26
+
+Owner retained the original visual identity and requested a smaller teacher
+section without a portrait. Removed the placeholder, repeated biography blocks
+and duplicate results link. Name, teaching start year, university background,
+SAT/IELTS credentials and one short teaching statement remain. Credentials sit
+beside the introduction on wider screens and below it on phones.
+
+Verification: direct Jinja rendering retained all teacher credentials and three
+featured results with no portrait markup. Browser inspection covered the normal
+viewport and a 390px phone viewport, with no page overflow. Diff whitespace check
+passed. Backend behavior is unchanged; no live database was accessed by tests.

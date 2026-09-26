@@ -30,20 +30,16 @@
     </div>
 </section>
 <section id="teacher" class="teacher-feature" aria-labelledby="teacher-feature-heading">
-    <div class="teacher-portrait" role="img" aria-label="Portrait placeholder for Noraliev Boburbek">
-        <div class="portrait-outline" aria-hidden="true"><span></span></div>
-        <div class="portrait-caption"><strong>Noraliev Boburbek</strong><span>Teacher portrait coming soon.</span></div>
-    </div>
     <div class="teacher-introduction">
-        <p class="eyebrow">MEET YOUR TEACHER</p>
-        <h2 id="teacher-feature-heading">The person behind<br>your next step.</h2>
-        <p class="teacher-name-placeholder">Noraliev Boburbek</p>
-        <p class="teacher-role">SAT instructor · Teaching since 2024</p>
-        <dl class="teacher-credentials" aria-label="Teacher scores"><div><dt>SAT</dt><dd>1430<span>/ 1600</span></dd></div><div><dt>IELTS</dt><dd>8.5<span>/ 9</span></dd></div></dl>
-        <div class="teacher-bio-placeholder"><p class="teaching-statement">Practical understanding comes first.</p><p>Build lasting knowledge through focused practice. My lessons help you understand the ideas, apply them to real questions, and grow more confident with every step.</p></div>
-        <div class="teacher-detail-grid"><div><h3>My approach</h3><p>Clear explanations, hands-on problem solving, and practice with a purpose.</p></div><div><h3>My background</h3><p>Teaching SAT since 2024 and currently studying at a top European university.</p></div></div>
-        <a class="text-action" href="/results">Meet the students and their stories <span aria-hidden="true">↗</span></a>
+        <p class="eyebrow">YOUR TEACHER</p>
+        <h2 id="teacher-feature-heading">Noraliev Boburbek</h2>
+        <p class="teacher-role">Teaching SAT since 2024 · Student at a top European university.</p>
+        <p class="teacher-approach">Practical understanding comes first. Build your knowledge through focused practice and clear explanations.</p>
     </div>
+    <dl class="teacher-credentials" aria-label="Teacher scores">
+        <div><dt>SAT</dt><dd>1430<span>/ 1600</span></dd></div>
+        <div><dt>IELTS</dt><dd>8.5<span>/ 9</span></dd></div>
+    </dl>
 </section>
 <section class="portal-banner" aria-labelledby="portal-heading"><div><p class="eyebrow">ALREADY PART OF THE FACTORY?</p><h2 id="portal-heading">Your next lesson is waiting.</h2><p>Check in, review attendance, and keep track of your lessons.</p></div>
 {% if user %}<a class="button" href="/{{ user.role }}">Go to my dashboard</a>{% else %}<a class="button" href="/login">Log in to the course portal <span aria-hidden="true">→</span></a>{% endif %}
