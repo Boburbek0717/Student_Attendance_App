@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}SAT Factory{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}?v=header-wrap-2">
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}?v=public-refinement-1">
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <main id="main-content" class="{% block main_class %}{% endblock %}">
-        <header class="brand-header">
+        {% block brand_header %}<header class="brand-header">
             <a class="brand" href="/" aria-label="SAT Factory home">
                 <img class="brand-logo" src="{{ url_for('static', path='/branding/sat-factory-logo.png') }}" alt="SAT Factory" width="128" height="128">
                 <span class="brand-tagline">BUILT THROUGH<br>PRACTICE</span>
             </a>
             <a class="text-action" href="/results">Results</a>
             {% if user %}<a class="role-badge" href="/{{ user.role }}">{{ user.role|capitalize }} dashboard</a>{% else %}<a class="role-badge" href="/login">Course portal ↗</a>{% endif %}
-        </header>
+        </header>{% endblock %}
         {% block content %}{% endblock %}
         {% if user %}
         <form method="post" action="/logout" class="logout">

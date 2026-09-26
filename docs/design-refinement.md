@@ -81,3 +81,36 @@ Figma is optional for side-by-side layout studies; browser prototypes are the fi
 For each slice record before/after evidence, rationale, relevant regression checks and unresolved findings. Use fictional data: zero/one/30 students, long names, empty/error/success states, debt, expired/finished lessons and interrupted polling. Check keyboard order and focus, 200% text zoom/reflow, contrast, touch targets, reduced motion and no page-level horizontal overflow. Horizontal scrolling must be intentional and discoverable. Do not remove required warnings or alter authorization, CSRF, retry identities, immutable completion or balance calculations for layout convenience.
 
 No real-device, assistive-technology or owner acceptance claim is made by this audit. No UI implementation or new test run occurred. Existing unrelated untracked artifacts remain untouched.
+
+## Slice 1 implementation — 2026-09-26
+
+Starting commit 555d739. Implemented public header/homepage hierarchy; ready for
+owner review. Public header is a shared Jinja partial with labelled navigation and
+Results current-page indication. Home/results share scoped foundation tokens and
+a quieter page surface. Working-page layout and login remain unchanged.
+
+Homepage removes duplicate hero actions and decorative eyebrow, retains supplied
+headline/results/teacher content, aligns score cards and replaces the dominant
+dark portal banner with a compact utility section. No dependency or backend changes.
+Keyboard review found off-screen focus in the mobile card strip; focus now scrolls
+the card into view immediately without animation. Reduced-motion handling remains.
+
+Verification:
+- `.venv/Scripts/python.exe scripts/verify.py --pattern test_auth.py`: 24 passed,
+  7.030s, isolated session secret and live engine guard.
+- `node --check app/static/motion.js`: passed.
+- Static Jinja-only preview on loopback 8767, no app/database/security imports;
+  owner-supplied public content and fictional signed-in context only.
+- Homepage inspected at 320/390/768/1280px with no page-level horizontal overflow;
+  mobile strip intentionally scrolls. Results/login/signed-in header also checked
+  at responsive sizes, with a separate 768px Results visual review.
+- 320px home with root text size doubled: reflows without page overflow. This is
+  a controlled text-enlargement fixture, not a completed cross-browser zoom audit.
+- Keyboard card focus visible after fix (third card x=51.6..284.6 at 320px),
+  Enter on the second result opens `/results#result-9`. New nav targets 44px high.
+- Contrast: graphite on public background 13.61:1; muted text 5.93:1 on background,
+  6.21:1 on cards; existing focus color on white 5.40:1.
+
+No real-phone or screen-reader acceptance claimed. No live server restarted or
+database read. Next slice: Results card/story rhythm and Login form hierarchy,
+using this foundation. SF-10 dashboard restructuring remains a later increment.

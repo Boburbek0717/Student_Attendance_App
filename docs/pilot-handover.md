@@ -128,3 +128,14 @@ code, live data, dependencies or tests changed in this research checkpoint.
 Next bounded implementation proposal: public header/homepage hierarchy and the
 minimum shared design tokens, with isolated responsive and cross-page review.
 SF-10 and focused SF-17 follow; no new implementation story is marked complete.
+
+## Public design slice 1 delivered — 2026-09-26
+
+Starting HEAD 555d739; no pre-existing tracked edits. Shared public header, scoped
+foundation tokens, homepage hierarchy and compact portal entry implemented.
+Existing public scores/comments/teacher biography preserved. No new dependencies.
+Keyboard review repaired off-screen card focus. See design-refinement.md for
+responsive/contrast checks and isolated auth test command (24 passed, 7.030s).
+Static preview script in output/design-preview.py imports only Jinja/public data;
+unrelated output artifacts preserved. No live DB, remote push or deployment.
+Ready for owner visual review; next: Results/Login refinement, then SF-10.

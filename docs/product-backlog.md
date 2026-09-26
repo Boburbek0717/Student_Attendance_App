@@ -299,3 +299,12 @@ SF-14 moves to Review. Evidence: onboarding-review.md. Real first-time user/mobi
 validation remains outstanding; no self-service reset or forced-change flow added.
 SF-13 remains Selected for the next bounded chunk, with deployment authorization
 and provider-specific decisions separate.
+
+## Visual refinement slice 1 — 2026-09-26
+
+Owner deferred SF-13 and selected research-led design refinement. Homepage and
+public header slice implemented, in Review; see design-refinement.md for exact
+evidence and scope. Focused SF-17 responsive/keyboard checks included a mobile
+off-screen focus fix. SF-17 as a whole remains In progress. No SF-08 contact route
+or SF-10 teacher dashboard completion is implied. Next bounded design slice:
+Results and Login, before broader portal changes.

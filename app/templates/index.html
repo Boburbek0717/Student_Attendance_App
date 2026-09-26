@@ -1,17 +1,13 @@
 {% extends "base.html" %}
 {% block title %}SAT Factory · Built through practice{% endblock %}
 {% block main_class %}welcome-page home-page{% endblock %}
+{% block body_class %}public-site{% endblock %}
+{% block brand_header %}{% set public_page = 'home' %}{% include "public_header.html" %}{% endblock %}
 {% block content %}
 <section class="factory-hero home-intro" aria-labelledby="welcome-heading">
     <div class="hero-copy">
-        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> THE SAT FACTORY / STUDENT STORIES</p>
         <h1 id="welcome-heading">Small steps. Serious <span>progress.</span></h1>
         <p class="page-intro">Student scores and stories from SAT Factory.</p>
-        <div class="hero-actions">
-            <a class="button" href="/results">View all student results <span aria-hidden="true">↗</span></a>
-            {% if user %}<a class="text-action" href="/{{ user.role }}">Go to my dashboard</a>
-            {% else %}<a class="text-action" href="/login">Course portal <span aria-hidden="true">→</span></a>{% endif %}
-        </div>
 
     </div>
 </section>
@@ -21,7 +17,7 @@
     <div class="featured-track" aria-label="Featured student results" aria-describedby="swipe-hint">
         {% for result in featured %}
         <a class="featured-card" href="/results#result-{{ result.id }}" aria-label="{{ result.name }}, SAT {{ result.ebrw + result.math }}. View score card.">
-            <span class="result-kicker">SAT FACTORY</span>
+            <span class="featured-label">SAT score <span aria-hidden="true">↗</span></span>
             <h3>{{ result.name }}</h3>
             <div class="featured-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
             <dl class="result-breakdown"><div><dt>EBRW</dt><dd>{{ result.ebrw }}</dd></div><div><dt>Math</dt><dd>{{ result.math }}</dd></div></dl>
@@ -41,10 +37,10 @@
         <div><dt>IELTS</dt><dd>8.5<span>/ 9</span></dd></div>
     </dl>
 </section>
-<section class="portal-banner" aria-labelledby="portal-heading"><div><p class="eyebrow">ALREADY PART OF THE FACTORY?</p><h2 id="portal-heading">Your next lesson is waiting.</h2><p>Check in, review attendance, and keep track of your lessons.</p></div>
-{% if user %}<a class="button" href="/{{ user.role }}">Go to my dashboard</a>{% else %}<a class="button" href="/login">Log in to the course portal <span aria-hidden="true">→</span></a>{% endif %}
+<section class="portal-entry" aria-labelledby="portal-heading"><div><h2 id="portal-heading">Already a student?</h2><p>Check in, review attendance, and keep track of your lessons.</p></div>
+{% if user %}<a class="button secondary" href="/{{ user.role }}">Go to my dashboard</a>{% else %}<a class="button secondary" href="/login">Open course portal <span aria-hidden="true">→</span></a>{% endif %}
 </section>
 <footer class="home-footer"><strong>SAT Factory.</strong></footer>
 {% endblock %}
 
-{% block scripts %}<script src="{{ url_for('static', path='/motion.js') }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/motion.js') }}?v=public-refinement-1" defer></script>{% endblock %}

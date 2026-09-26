@@ -317,3 +317,115 @@ nav[aria-label="Lesson history pages"] { display: flex; flex-wrap: wrap; align-i
 
 /* Wrap whole header items at any width; never split navigation labels. */
 .brand-header > a { flex-shrink:0; white-space:nowrap; }
+
+/* Public foundation: shared by home/results; working pages retain their layout. */
+.public-site {
+    --space-1: .25rem;
+    --space-2: .5rem;
+    --space-3: .75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --surface: #ffffff;
+    --surface-soft: #f3f4ee;
+    --radius-control: .375rem;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    background: #fafaf6;
+    border-top: 3px solid var(--ink);
+    font-family: "Segoe UI", system-ui, sans-serif;
+}
+.public-site .welcome-page {
+    max-width: 72rem;
+    padding: 0;
+    margin: 0 auto;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+.public-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-8);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--line);
+}
+.public-logo { display: block; width: 5rem; height: 5rem; object-fit: contain; }
+.public-nav { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
+.public-nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-2) 0;
+    color: var(--ink);
+    font-size: .875rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.public-nav a:hover, .public-nav a[aria-current] { text-decoration: underline; text-underline-offset: .4em; }
+.public-nav .public-portal { padding-inline: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-control); }
+.public-nav .public-portal:hover { background: var(--surface-soft); }
+.public-site .button { border-radius: var(--radius-control); }
+.public-site .secondary { background: var(--surface); color: var(--ink); }
+.public-site .secondary:hover { background: var(--surface-soft); }
+.public-site .text-action { display: inline-flex; align-items: center; min-height: 44px; }
+.home-page .home-intro.factory-hero { padding: var(--space-12) 0 var(--space-8); }
+.home-page .home-intro h1 {
+    max-width: 15ch;
+    font-size: clamp(2rem, 1.5rem + 3vw, 4rem);
+    font-weight: 750;
+    line-height: 1.08;
+    letter-spacing: -.045em;
+    margin: 0 0 var(--space-4);
+}
+.home-page .home-intro h1 span { background: none; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: .12em; text-underline-offset: .1em; }
+.home-page .home-intro .page-intro { font-size: 1rem; margin: 0; }
+.home-page .featured-results { padding-bottom: var(--space-12); }
+.home-page .featured-results .section-heading { margin: 0 0 var(--space-4); }
+.home-page .featured-results h2 { font-size: 1.125rem; font-weight: 650; letter-spacing: -.02em; }
+.home-page .featured-track { gap: var(--space-6); padding: var(--space-1) var(--space-1) var(--space-2); }
+.home-page .featured-card {
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-color: var(--line);
+    border-radius: .25rem;
+    box-shadow: 0 3px 0 #e1e7d7;
+}
+.home-page .featured-card:hover { border-color: #64744b; background: #fcfdf8; color: var(--ink); }
+.featured-label { display: flex; justify-content: space-between; gap: var(--space-2); color: var(--muted); font-size: .875rem; }
+.home-page .featured-card h3 { min-height: 2.8em; font-size: 1.125rem; line-height: 1.4; font-weight: 600; margin: var(--space-4) 0 var(--space-2); }
+.home-page .featured-total { font-size: clamp(2.75rem, 5vw, 4rem); line-height: 1.1; font-weight: 750; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.home-page .featured-total span { color: var(--muted); font-size: .875rem; }
+.home-page .featured-card .result-breakdown { border-top-style: dashed; margin: var(--space-6) 0 0 !important; padding-top: var(--space-4); gap: var(--space-4); }
+.home-page .featured-card dt { color: var(--muted); font-size: .75rem; letter-spacing: .03em; }
+.home-page .featured-card dd { font-size: 1.375rem; font-variant-numeric: tabular-nums; }
+.home-page .teacher-feature { padding: var(--space-8) 0; gap: var(--space-8); }
+.home-page .teacher-introduction h2 { font-size: 1.5rem; }
+.home-page .teacher-credentials { gap: var(--space-8); }
+.home-page .teacher-credentials dd { font-variant-numeric: tabular-nums; }
+.portal-entry { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4) var(--space-8); padding: var(--space-8) 0; }
+.portal-entry h2 { font-size: 1.125rem; margin: 0; }
+.portal-entry p { color: var(--muted); font-size: .875rem; margin: var(--space-1) 0 0; }
+.public-site .home-footer { border-top: 1px solid var(--line); padding: var(--space-6) 0; }
+@media (max-width: 700px) {
+    .public-nav { gap: var(--space-2) var(--space-4); }
+    .home-page .featured-track { gap: var(--space-4); scroll-padding-inline: var(--space-1); }
+    .home-page .featured-card { flex-basis: 88%; }
+    .home-page .home-intro.factory-hero { padding-top: var(--space-8); }
+}
+@media (max-width: 480px) {
+    .public-header { gap: var(--space-2); }
+    .public-logo { width: 4rem; height: 4rem; }
+    .public-nav { width: 100%; justify-content: space-between; gap: var(--space-2); }
+    .public-nav .public-portal { padding-inline: var(--space-2); }
+    .home-page .featured-results .section-heading { gap: var(--space-1); }
+    .portal-entry .button { width: 100%; }
+}

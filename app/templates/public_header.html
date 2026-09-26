@@ -1,0 +1,11 @@
+<header class="public-header">
+    <a class="brand" href="/" aria-label="SAT Factory home">
+        <img class="public-logo" src="{{ url_for('static', path='/branding/sat-factory-logo.png') }}" alt="SAT Factory" width="80" height="80">
+    </a>
+    <nav class="public-nav" aria-label="Main navigation">
+        <a href="/results" {% if public_page == 'results' %}aria-current="page"{% endif %}>Results</a>
+        <a href="/#teacher">Your teacher</a>
+        {% if user %}<a class="public-portal" href="/{{ user.role }}">Dashboard <span aria-hidden="true">↗</span></a>
+        {% else %}<a class="public-portal" href="/login">Course portal <span aria-hidden="true">↗</span></a>{% endif %}
+    </nav>
+</header>

@@ -1,5 +1,10 @@
 // Progressive enhancement: content stays visible if scripts or animation fail.
 (() => {
+    // Keep keyboard focus visible inside the mobile results strip, without motion.
+    document.addEventListener('focusin', event => {
+        const card = event.target.closest('.featured-card');
+        if (card) card.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
+    });
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (!('IntersectionObserver' in window) || !Element.prototype.animate) return;
     const targets = document.querySelectorAll(
