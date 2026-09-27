@@ -63,8 +63,12 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
 
 
 @router.get('/{question_id}')
-def show(question_id: int, request: Request, attempt: int | None = None, db: Session = Depends(get_db)):
+def show(question_id: int, request: Request, attempt: int | None = None, retry: bool = False, db: Session = Depends(get_db)):
     user = require_access(request, db)
+    if attempt is None and not retry:
+        q=published(db,question_id)
+        attempt=db.scalar(select(Attempt.id).where(Attempt.student_id==user.id,Attempt.question_id==q.id,
+            Attempt.revision_id==q.published_revision_id).order_by(Attempt.number.desc()).limit(1))
     return question_page(request, db, user, question_id, attempt)
 
 

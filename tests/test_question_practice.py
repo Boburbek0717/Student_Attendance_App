@@ -52,6 +52,8 @@ class QuestionPracticeTests(unittest.TestCase):
         result=self.client.get(first.headers['location'])
         self.assertIn('Two pairs make four.',result.text)
         self.assertIn('Correct answer: B',result.text)
+        self.assertIn('Attempt 1 saved.',self.client.get(f'/student/questions/{q}').text)
+        self.assertNotIn('Two pairs make four.',self.client.get(f'/student/questions/{q}?retry=1').text)
         with Session(self.engine) as db:
             self.assertEqual(db.scalar(select(func.count()).select_from(Attempt)),1)
         self.assertEqual(self.client.get(f'/student/questions/{q}?attempt=999').status_code,404)

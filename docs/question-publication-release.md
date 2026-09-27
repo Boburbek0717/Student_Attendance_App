@@ -50,3 +50,23 @@ only the locally generated, reviewed candidate file.
 
 Official operation outcome is appended to the handover after it actually succeeds.
 The reviewed source and generated question artifacts are kept outside Git.
+
+## Operational outcome
+
+Code checkpoint: 288f6b1. Owner-authorized command completed: published 30, already
+published 0, actor `Teacher`. Consistent pre-upgrade backup saved under
+`%LOCALAPPDATA%/SAT Factory/backups/question-bank-release/`
+`sat-backup-20260927T182808-943814f564e3440b8ab441c6e2b6cf15`.
+No backup contents or unrelated student records exposed. Matching local server
+restarted using `scripts/open_sat_factory.py --no-browser`.
+Anonymous `/teacher/questions` and `/student/questions` both redirect to login.
+Authenticated owner browser showed 20 published questions on page 1 and 10 on page 2;
+question 30 preview confirmed PSAT 8/9 / Boundaries and its original choices/key.
+
+Final usability corrections: passage snippets distinguish the repeated grammar
+prompt in the teacher library; obsolete unavailable-practice copy removed. Latest
+saved student answer persists when revisiting a question, with explicit new-attempt
+link. Ten authoring tests passed (3.931s); seven focused practice tests passed again
+(3.451s). These are the final scoped checks after the earlier full 191-test run.
+No real student attempts were created during operational verification; grading
+and permission scenarios used fictional data. No remote push/public hosting.

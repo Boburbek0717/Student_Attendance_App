@@ -75,8 +75,8 @@ its bottom navigation remain QB-03 work.
 | ID | Increment | Acceptance / status |
 | --- | --- | --- |
 | QB-01 | Schema, taxonomy, migration and recovery compatibility | Implemented; isolated evidence below. No user-facing feature yet. |
-| QB-02 | Teacher authoring | Create/edit/preview; validated choices/key; publish/unpublish/archive; revision/audit preservation; teacher/CSRF tests. Next. |
-| QB-03 | Student browsing and answering | Active-enrollment gate; pagination from day one; reference-inspired responsive screen; atomic attempts and safe retries; no answer-key leak. |
+| QB-02 | Teacher authoring | Implemented: drafts, preview, publication/unpublication/archive and immutable publication audit. Unpublish before editing. |
+| QB-03 | Student browsing and answering | Core implemented: active-enrollment gate, pagination, responsive split, server grading, atomic attempts/retries and own-result review. Broader practice-session UX remains QB-08. |
 | QB-04 | History, saved questions and mistakes | Student-owned records, revision-aware review and dependable empty/error states. |
 | QB-05 | Filters and progress | Taxonomy/difficulty filters, indexed queries, explainable attempt-based summaries; scale tests. |
 | QB-06 | Structured imports | JSON/CSV draft staging, validation, duplicate warnings, provenance and human approval. No auto-publication. |
@@ -156,3 +156,8 @@ writes, validation, rollback, escaping, duplicates and pagination. No live data 
 Owner subsequently selected a bounded PDF-import test with a supplied PSAT 8/9
 Boundaries document. This is an isolated rehearsal ahead of full QB-06/QB-07, not
 authorization to auto-publish or a claim that a general PDF importer exists.
+
+Later owner instruction explicitly authorized official publication under `Teacher`.
+That batch has now been published after protected practice and audited publication
+were implemented; see question-publication-release.md and the latest handover.
+Historical statements above about unavailable routes apply to their dated slices.

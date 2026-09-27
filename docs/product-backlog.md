@@ -345,5 +345,6 @@ import or publication; owner review and the production import workflow remain op
 Owner subsequently authorized official publication under `Teacher`. QB-02 audited
 publication lifecycle and QB-03 core server-graded practice are implemented and
 verified; see question-publication-release.md. Operational publication outcome
-will be recorded separately. General import UI, saved/history directories and
+is recorded in the release note: 30 published under Teacher after pre-upgrade backup.
+General import UI, saved/history directories and
 analytics remain open; the one-profile operator importer does not complete QB-07.

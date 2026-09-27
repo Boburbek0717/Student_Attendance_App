@@ -233,3 +233,16 @@ repeat added zero, restored records matched. No production operation claimed yet
 Next concrete action: checkpoint code, then run the explicitly authorized importer
 with a pre-upgrade backup under LOCALAPPDATA/SAT Factory/backups/question-bank-release,
 restart the matching local server and verify anonymous access remains protected.
+
+## Official batch published — 2026-09-27
+
+Owner-authorized publication completed under Teacher: 30 PSAT 8/9 Boundaries
+questions, schema v2, immutable publication events. Backup and smoke evidence in
+question-publication-release.md. Server on port 8000 restarted; anonymous routes
+redirect to login; owner browser verified 20+10 published rows and one exact preview.
+Post-publication small UI fixes: distinguish library entries by passage; revisiting
+a student question restores their latest result; new attempts remain explicit.
+Focused authoring 10 and practice 7 tests passed after these fixes. No real student
+practice submissions were made. No remote push. Unrelated outputs remain untouched.
+Next: owner tries the official teacher/student experience; address observed defects,
+then add saved-question/history directories and staged PDF import UI in bounded steps.

@@ -129,8 +129,8 @@ class QuestionAuthoringTests(unittest.TestCase):
         self.assertEqual(self.client.get('/teacher/questions?page=999999999999999999999').status_code, 400)
 
     def test_html_escaped_and_duplicate_warning(self):
-        q = self.create(stem='<script>alert(1)</script>')
-        other = self.create(stem='<script>alert(1)</script>')
+        q = self.create(stem='<script>alert(1)</script>', passage='<script>alert(1)</script>')
+        other = self.create(stem='<script>alert(1)</script>', passage='<script>alert(1)</script>')
         for path in ['/teacher/questions', f'/teacher/questions/{q}/edit', f'/teacher/questions/{q}/preview']:
             page = self.client.get(path)
             self.assertNotIn('<script>alert(1)</script>', page.text)
