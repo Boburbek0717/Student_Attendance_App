@@ -148,3 +148,13 @@ No backend changes. Prior completed commits through 8d4f0e0 pushed to origin/mas
 at owner's explicit request. Local scratch previews and unrelated output preserved.
 Next implementation: bounded SF-10 teacher-dashboard hierarchy. Do not treat SF-10,
 SF-17 or owner design acceptance as completed by the public-page changes.
+
+## SF-10 dashboard hierarchy slice — 2026-09-27
+
+Classes and recent lesson actions now precede setup forms. Rosters collapse per
+group; setup opens on empty state or rejected input with an error navigation link.
+Eight isolated teacher tests passed (2.841s); fictional 30-student responsive and
+keyboard checks recorded in design-refinement.md. No backend changes. SF-10 remains
+In progress: group search/pagination/scale checks are not delivered by this slice.
+Next bounded action: group discovery, then lesson-roster design. Unrelated output
+files remain local; no live database or real accounts used.

@@ -80,7 +80,11 @@ class TeacherTests(unittest.TestCase):
         self.assertNotIn(PASSWORD, response.text)
 
     def test_invalid_group_and_student_validation_are_visible(self):
-        self.assertIn("Enter a group name", self.post("/teacher/groups", group_name=" ").text)
+        invalid_group = self.post("/teacher/groups", group_name=" ")
+        self.assertIn("Enter a group name", invalid_group.text)
+        # A rejected setup submission must not hide its fields behind a disclosure.
+        self.assertRegex(invalid_group.text, r'<details id="setup"[^>]*\bopen')
+        self.assertIn('href="#setup">Review the highlighted form below.', invalid_group.text)
         response = self.post("/teacher/students", username="ali", display_name="Ali",
                              password=PASSWORD, confirm_password="different")
         self.assertEqual(response.status_code, 400)

@@ -314,3 +314,10 @@ Results and Login, before broader portal changes.
 Results/Login refinement implemented and in Review; evidence in design-refinement.md.
 Existing content and authentication behavior retained. SF-10 dashboard is the next
 bounded implementation. SF-17 overall and real-device/owner review remain open.
+
+## SF-10 first design slice — 2026-09-27
+
+SF-10 In progress: daily-class controls first, group roster disclosures and secondary
+setup implemented. Validation errors remain visible and setup opens automatically
+on rejection/empty state. Evidence: design-refinement.md. Search/pagination and
+larger-scale acceptance remain outstanding. This does not complete SF-17.

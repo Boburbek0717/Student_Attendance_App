@@ -134,3 +134,23 @@ story. Both pages at 320px with root text doubled remained within page width
 No real records or live server used. Owner visual review remains pending.
 Next bounded slice: SF-10 teacher dashboard, classes before setup, compact group
 information and explicit access to setup; preserve visible validation errors.
+
+## Slice 3a — Teacher dashboard hierarchy, 2026-09-27
+
+Baseline c30dbd9. First bounded SF-10 slice: classes/recent lesson controls precede
+setup, each group's students/packages use a native disclosure with enrollment
+count, and setup is a separate bottom section. Empty dashboards and setup errors
+open setup automatically. A top error link directs the teacher to the rejected
+form; all existing fields, values, CSRF tokens and write endpoints remain intact.
+Header/logo and heading/action spacing are compact and scoped to this dashboard.
+No business rules, queries, group order or public-page content changed.
+
+`.venv/Scripts/python.exe scripts/verify.py --pattern test_teacher.py`: 8 passed,
+2.841s, including added assertions that a rejected group form stays expanded and
+has an error navigation link. Static fictional preview with three groups and 30
+members: 1280px desktop, 320px mobile no page overflow; roster expands with Enter;
+empty dashboard and error fixtures open setup. Preview has no app/database imports.
+No real-phone or owner acceptance claim. SF-10 is partial: group search, pagination
+and realistic larger-scale review remain. Next: group discovery/navigation before
+lesson-roster visual refinement. Avoid treating collapsed content as a database
+performance improvement; all existing dashboard data is still loaded.
