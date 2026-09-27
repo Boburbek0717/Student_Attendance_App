@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if question else 'Create' }} question · SAT Factory{% endblock %}
+{% block main_class %}qb-workspace{% endblock %}
+{% block content %}
+<a class="text-action" href="/teacher/questions">← Question library</a>
+<h1>{{ 'Edit question #' ~ question.id if question else 'Create a question' }}</h1>
+<p class="hint">Save a private draft, then preview it. Only question text, skill and difficulty are required. This editor currently supports plain-text multiple-choice questions.</p>
+{% if error %}<section class="error" role="alert" aria-labelledby="form-error"><h2 id="form-error">Draft not saved</h2><p><a href="#{{ error_field }}">{{ error }}</a></p>{% if question %}<a href="/teacher/questions/{{ question.id }}/preview" target="_blank" rel="noopener">Open latest preview in a new tab</a>{% endif %}</section>{% endif %}
+{% macro invalid(name) %}{% if error and error_field == name %}aria-invalid="true" aria-describedby="form-error"{% endif %}{% endmacro %}
+{% macro area(name, label, rows=3) %}
+<label for="{{ name }}">{{ label }}</label><textarea id="{{ name }}" name="{{ name }}" rows="{{ rows }}" maxlength="{{ limits[name] }}" {{ invalid(name) }} {% if name == 'stem' %}required{% endif %}>{{ values.get(name, '') }}</textarea>
+{% endmacro %}
+<form method="post" action="{{ '/teacher/questions/' ~ question.id ~ '/edit' if question else '/teacher/questions/new' }}" class="qb-editor">
+<input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="expected_revision" value="{{ expected }}">
+<fieldset><legend>Classification</legend><div class="qb-classification"><div><label for="skill_id">SAT skill</label><select name="skill_id" id="skill_id" required {{ invalid('skill_id') }}><option value="">Choose a skill</option>{% for group in skills|groupby('section') %}<optgroup label="{{ group.grouper }}">{% for skill in group.list %}<option value="{{ skill.id }}" {% if values.get('skill_id') == skill.id|string %}selected{% endif %}>{{ skill.domain }} — {{ skill.name }}</option>{% endfor %}</optgroup>{% endfor %}</select></div><div><label for="difficulty">Difficulty</label><select id="difficulty" name="difficulty" required {{ invalid('difficulty') }}><option value="">Choose difficulty</option>{% for level in ['easy', 'medium', 'hard'] %}<option {% if values.get('difficulty') == level %}selected{% endif %} value="{{ level }}">{{ level|capitalize }}</option>{% endfor %}</select></div></div></fieldset>
+<fieldset><legend>Question</legend>{{ area('passage', 'Passage (optional)', 7) }}{{ area('stem', 'Question text', 4) }}</fieldset>
+<fieldset><legend>Answer choices</legend><p class="hint">Use two to six choices. Leave unused choices blank. You can finish the answer key later.</p>
+{% for i in range(6) %}<label for="choice_{{ i }}">Choice {{ 'ABCDEF'[i] }}{% if i > 1 %} (optional){% endif %}</label><textarea id="choice_{{ i }}" name="choice_{{ i }}" maxlength="600" rows="2" {{ invalid('choice_' ~ i) }}>{{ values.get('choice_' ~ i, '') }}</textarea>{% endfor %}
+<label for="answer">Correct answer</label><select id="answer" name="answer" {{ invalid('answer') }}><option value="">Not chosen yet</option>{% for i in range(6) %}<option value="{{ i }}" {% if values.get('answer') == i|string %}selected{% endif %}>Choice {{ 'ABCDEF'[i] }}</option>{% endfor %}</select>{{ area('explanation', 'Explanation', 4) }}</fieldset>
+<fieldset><legend>Source and permission</legend><p class="hint">Record where this question came from and why you may use it. For your own work, enter “Original” and note that you wrote it.</p>{{ area('source_name', 'Source name (optional)', 2) }}{{ area('rights_note', 'Ownership or permission note', 2) }}{{ area('source_reference', 'Page or reference (optional)', 2) }}</fieldset>
+<div class="qb-actions"><button type="submit">Save draft &amp; preview</button><a href="/teacher/questions">Cancel</a></div>
+</form>
+{% endblock %}

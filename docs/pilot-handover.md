@@ -191,3 +191,15 @@ work is explicit in QB-02 onward, not a production-ready Question Bank claim.
 Next bounded action: QB-02 teacher create/edit/preview and publish lifecycle with
 safe revision creation, validation, audit and authorization tests. Then implement
 QB-03 answering using the owner's reference layout and active-enrollment policy.
+
+## Draft authoring checkpoint — 2026-09-27
+
+Starting HEAD 16e49f0. Delivered QB-02 first slice: teacher draft creation/editing,
+20-row library, preview with source/answer key and historical revisions. Publication
+and student practice remain unfinished. No schema/dependency change. Full isolated
+command `.\.venv\Scripts\python.exe scripts/verify.py`: 179 passed, 58.240s.
+Temporary fictional static preview checked desktop split and mobile stacking,
+labels and keyboard focus, then stopped. See question-bank-plan.md for limits.
+Unrelated output preserved. Commit subject: `Add teacher question draft authoring and preview`.
+Owner steered ongoing work to testing the supplied PDF; next is a bounded extraction
+and isolated draft-import rehearsal, retaining PSAT 8/9 provenance and punctuation.

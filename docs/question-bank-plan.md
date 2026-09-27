@@ -66,6 +66,10 @@ Use the owner's supplied screenshot as a structural reference, not a visual copy
 
 This layout is recorded, not yet implemented or visually tested.
 
+Update: QB-02 first slice now uses the split layout in teacher preview, with a
+single column without a passage and stacked mobile layout. Student answering and
+its bottom navigation remain QB-03 work.
+
 ## Bounded delivery sequence
 
 | ID | Increment | Acceptance / status |
@@ -126,3 +130,29 @@ code against a newer schema. Subsequent schema changes need a new migration vers
 - Full isolated suite outcome is recorded in the handover after completion.
 - No Question Bank UI, real-device validation, owner acceptance, OpenClaw review,
   live migration, uploaded content or production readiness is claimed.
+
+## QB-02 draft-authoring slice — 2026-09-27
+
+Delivered private `/teacher/questions` library (20 per page), create/edit drafts,
+preview and latest-20 revision history. Saves append revisions, preserve source
+notes, reject stale/concurrent edits, recheck the session within the write lock and
+roll back failed writes. Incomplete drafts are allowed; complete revisions seal.
+No publication endpoints, uploads, math rendering or student access yet. QB-02 is
+still in progress; audited publish/unpublish/archive is the next lifecycle slice.
+Plain-text editor supports up to six choices and retains the existing 16 KB request
+limit. A retried new-question creation can create another draft; matching current
+content is flagged in preview, not silently merged.
+
+Form design reuses existing tokens and semantic fieldsets, informed by
+[W3C grouping controls](https://www.w3.org/WAI/tutorials/forms/grouping/) and
+[GOV.UK error summaries](https://design-system.service.gov.uk/components/error-summary/).
+Isolated static browser review: 1365px desktop split, 390px mobile stacked preview;
+narrow editor had no horizontal overflow, labelled controls and visible keyboard
+focus. This is simulated browser verification, not real-device/user acceptance.
+Full isolated verification: 179 tests passed in 58.240s, including ten authoring
+tests for permissions/CSRF, revocation race, revision preservation, stale/concurrent
+writes, validation, rollback, escaping, duplicates and pagination. No live data used.
+
+Owner subsequently selected a bounded PDF-import test with a supplied PSAT 8/9
+Boundaries document. This is an isolated rehearsal ahead of full QB-06/QB-07, not
+authorization to auto-publish or a claim that a general PDF importer exists.

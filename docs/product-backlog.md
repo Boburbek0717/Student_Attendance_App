@@ -332,3 +332,8 @@ tests and five Node checks passed); QB-02 teacher authoring is next. Student acc
 enrollment. The owner's two-column question-screen reference is recorded for QB-03.
 The schema is not a usable Question Bank increment by itself; do not mark the
 whole feature done or claim authoring/practice has shipped.
+
+QB-02 first slice implemented: private draft library/editor/preview/history; ten
+new tests, 179 total passed. Publishing lifecycle remains open. Owner next selected
+an isolated PDF import rehearsal using supplied PSAT 8/9 Boundaries questions.
+See question-bank-plan.md; QB-06/QB-07 are not marked complete by the rehearsal.
