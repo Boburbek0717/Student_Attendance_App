@@ -529,3 +529,9 @@ main.qb-workspace { max-width: 76rem; }
     .qb-passage { border-right: 0; border-bottom: 1px solid var(--line); }
     .qb-library > li { align-items: start; flex-direction: column; gap: .5rem; }
 }
+.practice-answers { border:0; padding:0; margin:0 0 1rem; min-width:0; }
+.practice-answers legend { font-size:1.1rem; padding:0; margin-bottom:1rem; }
+.practice-choice { display:flex; gap:.8rem; align-items:baseline; border:1px solid #92998b; border-radius:6px; padding:1rem; margin-bottom:.75rem; cursor:pointer; }
+.practice-choice input { width:auto; flex:0 0 auto; accent-color:var(--ink); }
+.practice-choice:has(input:checked) { background:#f3f8e3; border-color:var(--ink); }
+.practice-choice:focus-within { outline:3px solid var(--ink); outline-offset:2px; }

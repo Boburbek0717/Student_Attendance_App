@@ -3,6 +3,7 @@
 {% block content %}
 <h1>Welcome, {{ user.display_name }}</h1>
 <p>You are logged in as a student.</p>
+<p><a class="button secondary" href="/student/questions">Question practice →</a></p>
 {% if not memberships %}<p class="notice" role="status">Your account is ready, but you are not enrolled in a group yet. Ask your teacher to add you to the correct group before checking in.</p>{% endif %}
 {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
 <section aria-labelledby="check-in-heading">

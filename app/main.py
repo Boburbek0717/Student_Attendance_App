@@ -21,6 +21,7 @@ from app.lesson_management import router as lesson_router
 from app.attendance_corrections import router as correction_router
 from app.web import APP_DIRECTORY, get_db, render
 from app.question_bank.routes import router as question_router
+from app.question_bank.practice import router as practice_router
 
 
 def create_app(database_engine: Engine = engine, session_secret: str | None = None, code_minutes: int | None = None) -> FastAPI:
@@ -55,6 +56,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     app.include_router(lesson_router)
     app.include_router(correction_router)
     app.include_router(question_router)
+    app.include_router(practice_router)
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException):

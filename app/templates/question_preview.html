@@ -5,6 +5,8 @@
 <nav class="qb-actions" aria-label="Question navigation"><a href="/teacher/questions">← Question library</a>{% if question.status == 'draft' %}<a class="button secondary" href="/teacher/questions/{{ question.id }}/edit">Edit latest draft</a>{% endif %}</nav>
 <h1>Question #{{ question.id }}</h1><p class="hint">Teacher preview · {{ question.status|capitalize }} · Revision {{ revision.number }}{% if revision.id != question.current_revision_id %} · Historical revision{% endif %}</p>
 <p class="hint">{{ taxonomy|join(' · ') }} · {{ revision.difficulty|capitalize }}</p>
+{% if publication_notice %}<p class="notice" role="status">{{ publication_notice }}</p>{% endif %}
+{% if revision.id==question.current_revision_id and question.status!='archived' %}<form method="post" action="/teacher/questions/{{ question.id }}/publication" class="qb-actions"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="revision_id" value="{{ revision.id }}"><input type="hidden" name="version" value="{{ publication_version }}">{% if question.status=='published' %}<button name="action" value="unpublish" class="secondary">Unpublish</button>{% else %}<button name="action" value="publish">Publish to enrolled students</button>{% endif %}<button name="action" value="archive" class="secondary">Archive</button></form>{% endif %}
 {% if saved %}<p class="notice" role="status">Draft saved. It is not available to students.</p>{% endif %}
 {% if duplicate %}<p class="notice">This draft matches <a href="/teacher/questions/{{ duplicate }}/preview">question #{{ duplicate }}</a>. Review before adding another copy.</p>{% endif %}
 <div class="qb-preview {% if not revision.passage %}qb-preview-single{% endif %}">

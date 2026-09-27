@@ -358,8 +358,10 @@ real-user check.
 
 The Question Bank is being delivered in bounded phases. The schema/taxonomy and
 recovery-compatible migration and teacher draft editor/preview are implemented.
-Teachers can open Question library from their dashboard. Publishing and student
-practice are not available yet. See [Question Bank plan](docs/question-bank-plan.md) for scope,
+Teachers can open Question library from their dashboard and publish, unpublish or
+archive reviewed questions. Actively enrolled students can open Question practice,
+submit answers, see explanations and bookmark questions. Grading runs on the server;
+retries preserve one attempt. See [Question Bank plan](docs/question-bank-plan.md) for scope,
 the selected question-screen layout, verification and migration/rollback guidance.
-The next normal app startup applies the additive version-1 schema. Back up before
+The next normal app startup applies the additive version-2 schema. Back up before
 an operational upgrade and rehearse on a separate restored copy first.

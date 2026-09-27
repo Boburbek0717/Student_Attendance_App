@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Question practice · SAT Factory{% endblock %}
+{% block main_class %}qb-workspace{% endblock %}
+{% block content %}<h1>Question practice</h1><p class="hint">Choose a question, submit your answer, then review the explanation.</p>
+<ul class="qb-library">{% for question,revision in rows %}<li><div><p class="hint">Question #{{ question.id }} · {{ revision.difficulty|capitalize }}</p><h2><a href="/student/questions/{{ question.id }}">{{ revision.passage[:120] or revision.stem[:120] }}{% if revision.passage|length > 120 %}…{% endif %}</a></h2></div><a href="/student/questions/{{ question.id }}">Practice →</a></li>{% else %}<li>Your teacher has not published any questions yet.</li>{% endfor %}</ul>
+<nav class="qb-actions" aria-label="Library pages">{% if page>1 %}<a href="?page={{ page-1 }}">Previous page</a>{% endif %}<span>Page {{ page }}</span>{% if more %}<a href="?page={{ page+1 }}">Next page</a>{% endif %}</nav>{% endblock %}

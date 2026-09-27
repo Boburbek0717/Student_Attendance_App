@@ -106,8 +106,20 @@ class QuestionBankSchemaTests(unittest.TestCase):
 
     def test_partial_or_future_schema_fails_closed(self):
         upgrade(self.engine)
-        with self.engine.begin() as db: db.execute(text('UPDATE qb_schema_versions SET version=999'))
+        with self.engine.begin() as db: db.execute(text('UPDATE qb_schema_versions SET version=999 WHERE version=1'))
         with self.assertRaisesRegex(ValueError,'Unsupported'): upgrade(self.engine)
+
+    def test_version_one_upgrade_preserves_content_and_backup_compatibility(self):
+        upgrade(self.engine); q,r,c=self.content()
+        with self.engine.begin() as db:
+            db.execute(text('DROP TABLE qb_publication_events'))
+            db.execute(text('DELETE FROM qb_schema_versions WHERE version=2'))
+        before=inspect_database(self.path)
+        upgrade(self.engine)
+        after=inspect_database(self.path)
+        for name in ('qb_questions','qb_revisions','qb_choices','qb_answer_keys'):
+            self.assertEqual(before['fingerprints'][name],after['fingerprints'][name])
+        self.assertEqual(after['counts']['qb_publication_events'],0)
 
     def test_backup_restore_preserves_question_history_and_balances(self):
         upgrade(self.engine)

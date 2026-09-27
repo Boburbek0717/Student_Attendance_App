@@ -220,3 +220,16 @@ Commit subject: `Test bounded PDF question extraction and isolated draft import`
 Next: inspect owner feedback, then implement staged import review and the audited
 publication lifecycle in bounded slices before student answering. Do not present
 this one-profile development rehearsal as the completed PDF import system.
+
+## Publication preparation — 2026-09-27
+
+Owner requested interactivity (local preview committed d7d504c), then explicitly
+authorized official publication after checks, naming Teacher as the actor. Built
+server-side student practice and audited publication, with v2 migration and
+legacy/v1/v2 backup support. See question-publication-release.md for scope, exact
+verification and limitations. Full 191 tests passed; later focused seven practice
+tests and eight Node tests passed. Disposable operator rehearsal published 30,
+repeat added zero, restored records matched. No production operation claimed yet.
+Next concrete action: checkpoint code, then run the explicitly authorized importer
+with a pre-upgrade backup under LOCALAPPDATA/SAT Factory/backups/question-bank-release,
+restart the matching local server and verify anonymous access remains protected.

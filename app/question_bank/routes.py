@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 from starlette.concurrency import run_in_threadpool
 
-from app.models import User
+from app.models import User, utc_now
+from app.database import write_transaction
+from app.question_bank.models import PublicationEvent
+from app.question_bank.publication import publish_revision
 from app.security import verify_csrf
 from app.teacher import require_teacher
 from app.web import get_db, render
@@ -96,4 +99,31 @@ def preview(question_id: int, request: Request, revision_id: int | None = None,
     return render(request, 'question_preview.html', user=user, question=question, revision=revision, taxonomy=taxonomy,
         choices=db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all(),
         answer=db.get(AnswerKey, revision.id), source=db.get(Source, revision.source_id) if revision.source_id else None,
-        history=history, duplicate=duplicate, saved=request.query_params.get('saved') == '1')
+        history=history, duplicate=duplicate, saved=request.query_params.get('saved') == '1',
+        publication_version=db.scalar(select(func.max(PublicationEvent.id)).where(PublicationEvent.question_id==question.id)) or 0,
+        publication_notice=request.session.pop('publication_notice',None))
+
+
+@router.post('/{question_id}/publication')
+def publication(question_id: int, request: Request, action: str=Form(default=''),
+                revision_id: int=Form(default=0), version: int=Form(default=-1), csrf: str=Form(default='')):
+    verify_csrf(request,csrf)
+    try:
+        with write_transaction(request.app.state.database_engine) as db:
+            teacher=require_teacher(request,db)
+            question=question_or_404(db,question_id)
+            current_version=db.scalar(select(func.max(PublicationEvent.id)).where(PublicationEvent.question_id==question.id)) or 0
+            if current_version!=version or question.current_revision_id!=revision_id:
+                raise ValueError('Question state changed. Review the latest preview before trying again.')
+            if action=='publish': publish_revision(db,teacher.id,question_id,revision_id)
+            elif action in ('unpublish','archive'):
+                desired='draft' if action=='unpublish' else 'archived'
+                if question.status=='archived': raise ValueError('This question is already archived.')
+                if question.status!=desired:
+                    question.status=desired;question.published_revision_id=None;question.updated_at=utc_now()
+                    db.add(PublicationEvent(question_id=question.id,revision_id=revision_id,teacher_id=teacher.id,action=action))
+            else: raise ValueError('Invalid publication action.')
+        request.session['publication_notice']='Question publication status updated.'
+    except ValueError as error:
+        request.session['publication_notice']=str(error)
+    return RedirectResponse(f'/teacher/questions/{question_id}/preview',303)

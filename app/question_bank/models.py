@@ -168,3 +168,17 @@ class Bookmark(Base):
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
     question_id: Mapped[int] = mapped_column(ForeignKey("qb_questions.id"), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class PublicationEvent(Base):
+    __tablename__ = 'qb_publication_events'
+    __table_args__ = (
+        ForeignKeyConstraint(['question_id', 'revision_id'], ['qb_revisions.question_id', 'qb_revisions.id']),
+        CheckConstraint("action IN ('publish','unpublish','archive')"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    question_id: Mapped[int] = mapped_column(ForeignKey('qb_questions.id'), index=True)
+    revision_id: Mapped[int]
+    action: Mapped[str] = mapped_column(String(20))
+    teacher_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)

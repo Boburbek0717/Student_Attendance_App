@@ -8,32 +8,33 @@ from app.database import Base
 from app.question_bank import models
 from app.question_bank.taxonomy import seed
 
-VERSION = 1
+VERSION = 2
 
 
-def trigger_names():
-    return {"qb_revision_no_update", "qb_revision_no_delete", "qb_attempt_no_update", "qb_attempt_no_delete",
+def trigger_names(version=VERSION):
+    return ({"qb_publication_no_update", "qb_publication_no_delete"} if version >= 2 else set()) | {"qb_revision_no_update", "qb_revision_no_delete", "qb_attempt_no_update", "qb_attempt_no_delete",
             "qb_attempt_requires_snapshot", "qb_revision_insert_unsealed", "qb_revision_seal_valid",
             "qb_publish_insert", "qb_publish_update"} | {
         f"{table}_no_{event}" for table in ("qb_choices", "qb_answer_keys") for event in ("insert", "update", "delete")}
 
 
-def validate_schema(connection):
+def validate_schema(connection, version=VERSION):
     inspector = inspect(connection)
-    if {n for n in inspector.get_table_names() if n.startswith('qb_')} != {t.name for t in tables()}:
+    if {n for n in inspector.get_table_names() if n.startswith('qb_')} != {t.name for t in tables(version)}:
         raise ValueError("Incomplete Question Bank schema; restore or repair with matching code.")
-    if list(connection.scalars(select(models.SchemaVersion.version).order_by(models.SchemaVersion.version))) != [VERSION]:
+    if list(connection.scalars(select(models.SchemaVersion.version).order_by(models.SchemaVersion.version))) != list(range(1, version+1)):
         raise ValueError("Unsupported Question Bank schema version.")
-    for table in tables():
+    for table in tables(version):
         if {c['name'] for c in inspector.get_columns(table.name)} != set(table.columns.keys()):
             raise ValueError("Question Bank schema columns differ from this release.")
     present = set(connection.scalars(text("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'qb_%'")))
-    if present != trigger_names():
+    if present != trigger_names(version):
         raise ValueError("Question Bank integrity triggers differ from this release.")
 
 
-def tables():
-    return [t for name, t in Base.metadata.tables.items() if name.startswith("qb_")]
+def tables(version=VERSION):
+    return [t for name, t in Base.metadata.tables.items() if name.startswith("qb_")
+            and (version >= 2 or name != "qb_publication_events")]
 
 
 def _triggers(connection):
@@ -82,13 +83,23 @@ def upgrade(engine):
         try:
             actual = {n for n in inspect(connection).get_table_names() if n.startswith("qb_")}
             if actual:
-                validate_schema(connection)
-                connection.commit()
-                return
-            Base.metadata.create_all(connection, tables=tables())
-            seed(connection)
-            _triggers(connection)
-            connection.execute(models.SchemaVersion.__table__.insert().values(version=VERSION))
+                if "qb_schema_versions" not in actual:
+                    raise ValueError("Incomplete Question Bank schema.")
+                versions = list(connection.scalars(select(models.SchemaVersion.version).order_by(models.SchemaVersion.version)))
+                if versions not in ([1], [1,2]):
+                    raise ValueError("Unsupported Question Bank schema version.")
+                validate_schema(connection, versions[-1])
+            else:
+                Base.metadata.create_all(connection, tables=tables(1))
+                seed(connection)
+                _triggers(connection)
+                connection.execute(models.SchemaVersion.__table__.insert().values(version=1))
+                versions = [1]
+            if versions == [1]:
+                models.PublicationEvent.__table__.create(connection)
+                for event in ("UPDATE", "DELETE"):
+                    connection.exec_driver_sql(f"CREATE TRIGGER qb_publication_no_{event.lower()} BEFORE {event} ON qb_publication_events BEGIN SELECT RAISE(ABORT, 'Publication history is immutable'); END")
+                connection.execute(models.SchemaVersion.__table__.insert().values(version=2))
             validate_schema(connection)
             connection.commit()
         except Exception:
@@ -105,14 +116,14 @@ def downgrade_empty(engine):
             if not names:
                 connection.commit()
                 return
-            if names != {t.name for t in tables()} or list(connection.scalars(select(models.SchemaVersion.version))) != [VERSION]:
+            if names != {t.name for t in tables()} or list(connection.scalars(select(models.SchemaVersion.version).order_by(models.SchemaVersion.version))) != [1,2]:
                 raise ValueError("Unsupported Question Bank schema; rollback refused.")
             seed_tables = {"qb_schema_versions", "qb_banks", "qb_sections", "qb_domains", "qb_skills"}
             for name in names - seed_tables:
                 if connection.exec_driver_sql(f'SELECT 1 FROM "{name}" LIMIT 1').first():
                     raise ValueError("Question Bank contains records; use backup recovery instead of destructive rollback.")
             # Dependency order, including the question/revision circular pointers.
-            for name in ("qb_bookmarks", "qb_attempts", "qb_answer_keys", "qb_choices", "qb_questions", "qb_revisions", "qb_media", "qb_sources", "qb_skills", "qb_domains", "qb_sections", "qb_banks", "qb_schema_versions"):
+            for name in ("qb_publication_events", "qb_bookmarks", "qb_attempts", "qb_answer_keys", "qb_choices", "qb_questions", "qb_revisions", "qb_media", "qb_sources", "qb_skills", "qb_domains", "qb_sections", "qb_banks", "qb_schema_versions"):
                 Base.metadata.tables[name].drop(connection)
             connection.commit()
         except Exception:

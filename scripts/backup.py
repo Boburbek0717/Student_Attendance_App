@@ -50,16 +50,21 @@ def inspect_database(path):
         if db.execute('PRAGMA foreign_key_check').fetchall():
             raise ValueError('Foreign key validation failed.')
         actual = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
+        qb_version = 0
+        if 'qb_schema_versions' in actual:
+            versions = db.execute('SELECT version FROM qb_schema_versions ORDER BY version').fetchall()
+            if versions not in ([(1,)], [(1,), (2,)]):
+                raise ValueError('Unsupported Question Bank schema version.')
+            qb_version = versions[-1][0]
         expected = {name: table for name, table in Base.metadata.tables.items()
-                    if any(n.startswith('qb_') for n in actual) or not name.startswith('qb_')}
+                    if (any(n.startswith('qb_') for n in actual) or not name.startswith('qb_'))
+                    and (qb_version >= 2 or name != 'qb_publication_events')}
         if actual != set(expected):
             raise ValueError('Schema differs from this release; restore using matching code.')
         if 'qb_schema_versions' in actual:
             from app.question_bank.migrations import VERSION, trigger_names
-            if db.execute('SELECT version FROM qb_schema_versions ORDER BY version').fetchall() != [(VERSION,)]:
-                raise ValueError('Unsupported Question Bank schema version.')
             triggers = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'qb_%'")}
-            if triggers != trigger_names():
+            if triggers != trigger_names(qb_version):
                 raise ValueError('Question Bank integrity triggers differ from this release.')
         counts, fingerprints = {}, {}
         for name, table in sorted(expected.items()):

@@ -341,3 +341,9 @@ See question-bank-plan.md; QB-06/QB-07 are not marked complete by the rehearsal.
 PDF rehearsal evidence: [pdf-import-rehearsal.md](pdf-import-rehearsal.md). Thirty
 PSAT 8/9 Boundaries drafts imported and recovery-reconciled in isolation. No live
 import or publication; owner review and the production import workflow remain open.
+
+Owner subsequently authorized official publication under `Teacher`. QB-02 audited
+publication lifecycle and QB-03 core server-graded practice are implemented and
+verified; see question-publication-release.md. Operational publication outcome
+will be recorded separately. General import UI, saved/history directories and
+analytics remain open; the one-profile operator importer does not complete QB-07.
