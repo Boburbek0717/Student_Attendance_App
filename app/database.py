@@ -60,5 +60,9 @@ def write_transaction(engine: Engine):
 def initialize_database(database_engine: Engine = engine) -> None:
     # Import models so their tables are registered before creating the schema.
     from app import models
+    from app.question_bank.migrations import upgrade
 
-    Base.metadata.create_all(database_engine)
+    Base.metadata.create_all(database_engine, tables=[
+        table for name, table in Base.metadata.tables.items() if not name.startswith("qb_")
+    ])
+    upgrade(database_engine)

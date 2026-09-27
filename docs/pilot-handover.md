@@ -158,3 +158,36 @@ keyboard checks recorded in design-refinement.md. No backend changes. SF-10 rema
 In progress: group search/pagination/scale checks are not delivered by this slice.
 Next bounded action: group discovery, then lesson-roster design. Unrelated output
 files remain local; no live database or real accounts used.
+
+## Question Bank foundation checkpoint — 2026-09-27
+
+Scope switched by owner from SF-10 to the Question Bank brief. Starting HEAD
+c741fb5 on master; tracked tree initially clean, unrelated output artifacts retained.
+Owner chose access for any active course enrollment and supplied a split-pane
+question layout reference. See [question-bank-plan.md](question-bank-plan.md) for
+the audit, entities, route plan, accepted layout, phases and operational cautions.
+
+QB-01 delivered: normalized schema, seeded SAT taxonomy, sealed question revisions,
+immutable attempts, retry-key uniqueness, additive transactional version-1 migration,
+empty-only rollback, legacy/new backup compatibility and recovery verification.
+The startup migration has only been exercised on fictional temporary databases.
+No live server restart, secret read, working DB connection, remote push or deployment.
+
+Exact verification:
+- `.\.venv\Scripts\python.exe scripts/verify.py --pattern test_question_bank_schema.py`:
+  10 passed, 5.266s.
+- `.\.venv\Scripts\python.exe scripts/verify.py`: final 169 passed, 52.136s.
+  Initial full run exposed two stale expectations: teacher-dashboard copy from
+  before c741fb5 and pre-feature table inventory. Updated to teacher navigation/
+  HTTP success and explicit current tables; database fixtures now run initialization.
+- `node --test tests/test_lesson_live.cjs`: 5 passed (simulated attendance polling).
+- `git diff --check`: passed. Only related source/tests/docs staged for this checkpoint;
+  existing output files remain untracked and unchanged. Identify the resulting
+  commit by subject `Add versioned Question Bank foundation and recovery checks`.
+
+No authoring/student routes or Question Bank UI exist yet. No browser, real-device,
+owner acceptance or new OpenClaw review claimed. No new dependencies. Remaining
+work is explicit in QB-02 onward, not a production-ready Question Bank claim.
+Next bounded action: QB-02 teacher create/edit/preview and publish lifecycle with
+safe revision creation, validation, audit and authorization tests. Then implement
+QB-03 answering using the owner's reference layout and active-enrollment policy.

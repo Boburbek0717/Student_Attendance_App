@@ -353,3 +353,12 @@ to issue/reset passwords privately after confirming identity. Students see guida
 for missing/inactive enrollment and uncertain or rejected check-ins. See
 [onboarding review](docs/onboarding-review.md) for delivery evidence and the pending
 real-user check.
+
+## Question Bank foundation
+
+The Question Bank is being delivered in bounded phases. The schema/taxonomy and
+recovery-compatible migration are implemented; teacher and student screens are
+not available yet. See [Question Bank plan](docs/question-bank-plan.md) for scope,
+the selected question-screen layout, verification and migration/rollback guidance.
+The next normal app startup applies the additive version-1 schema. Back up before
+an operational upgrade and rehearse on a separate restored copy first.

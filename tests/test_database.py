@@ -7,7 +7,7 @@ from sqlalchemy import delete, func, inspect, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.database import Base, make_engine
+from app.database import Base, initialize_database, make_engine
 from app.models import Attendance, Enrollment, Group, Lesson, LessonPackage, User
 
 
@@ -29,7 +29,7 @@ class DatabaseTests(unittest.TestCase):
 
     def setUp(self):
         self.engine = make_engine(":memory:")
-        Base.metadata.create_all(self.engine)
+        initialize_database(self.engine)
         self.session = Session(self.engine)
         self.addCleanup(self.engine.dispose)
         self.addCleanup(self.session.close)
@@ -61,7 +61,10 @@ class DatabaseTests(unittest.TestCase):
     def test_tables_and_foreign_keys(self):
         self.assertEqual(set(inspect(self.engine).get_table_names()), {
             "users", "groups", "enrollments", "lesson_packages", "lessons", "attendance", "login_sessions",
-            "balance_adjustments", "lesson_roster_snapshots", "lesson_roster", "attendance_attempt_windows", "login_attempt_windows", "attendance_corrections", "lesson_closures", "check_in_receipts"
+            "balance_adjustments", "lesson_roster_snapshots", "lesson_roster", "attendance_attempt_windows", "login_attempt_windows", "attendance_corrections", "lesson_closures", "check_in_receipts",
+            "qb_schema_versions", "qb_banks", "qb_sections", "qb_domains", "qb_skills",
+            "qb_sources", "qb_media", "qb_questions", "qb_revisions", "qb_choices",
+            "qb_answer_keys", "qb_attempts", "qb_bookmarks"
         })
         self.assertEqual(self.session.scalar(text("PRAGMA foreign_keys")), 1)
         self.assert_rejected(Lesson(group_id=999))

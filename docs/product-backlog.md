@@ -321,3 +321,14 @@ SF-10 In progress: daily-class controls first, group roster disclosures and seco
 setup implemented. Validation errors remain visible and setup opens automatically
 on rejection/empty state. Evidence: design-refinement.md. Search/pagination and
 larger-scale acceptance remain outstanding. This does not complete SF-17.
+
+## Question Bank selected — 2026-09-27
+
+Owner selected the Question Bank brief as the current priority, superseding the
+next SF-10 slice. SF-10 remains incomplete; deployment remains deferred.
+Use [Question Bank plan](question-bank-plan.md) for QB-01 through QB-08 acceptance
+criteria and sequencing. QB-01 foundation is implemented and verified (169 Python
+tests and five Node checks passed); QB-02 teacher authoring is next. Student access is any active course
+enrollment. The owner's two-column question-screen reference is recorded for QB-03.
+The schema is not a usable Question Bank increment by itself; do not mark the
+whole feature done or claim authoring/practice has shipped.

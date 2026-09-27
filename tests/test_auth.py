@@ -127,7 +127,9 @@ class AuthenticationTests(unittest.TestCase):
     def test_teacher_login_and_role_boundary(self):
         response = self.login("teacher")
         self.assertEqual(response.headers["location"], "/teacher")
-        self.assertIn("logged in as a teacher", self.client.get("/teacher").text)
+        page = self.client.get("/teacher")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn('href="/teacher/students"', page.text)
         self.assertEqual(self.client.get("/student").status_code, 403)
 
     def test_login_errors_are_generic_and_do_not_echo_password(self):

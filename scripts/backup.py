@@ -41,6 +41,7 @@ def inspect_database(path):
     """Validate physical/FK/schema/business integrity without printing records."""
     from app.database import Base, make_engine
     from app import models
+    from app.question_bank import models as question_models
     from app.packages import enrollment_balance
     from sqlalchemy.orm import Session
     with closing(read_only(path)) as db:
@@ -49,10 +50,19 @@ def inspect_database(path):
         if db.execute('PRAGMA foreign_key_check').fetchall():
             raise ValueError('Foreign key validation failed.')
         actual = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
-        if actual != set(Base.metadata.tables):
+        expected = {name: table for name, table in Base.metadata.tables.items()
+                    if any(n.startswith('qb_') for n in actual) or not name.startswith('qb_')}
+        if actual != set(expected):
             raise ValueError('Schema differs from this release; restore using matching code.')
+        if 'qb_schema_versions' in actual:
+            from app.question_bank.migrations import VERSION, trigger_names
+            if db.execute('SELECT version FROM qb_schema_versions ORDER BY version').fetchall() != [(VERSION,)]:
+                raise ValueError('Unsupported Question Bank schema version.')
+            triggers = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'qb_%'")}
+            if triggers != trigger_names():
+                raise ValueError('Question Bank integrity triggers differ from this release.')
         counts, fingerprints = {}, {}
-        for name, table in sorted(Base.metadata.tables.items()):
+        for name, table in sorted(expected.items()):
             columns = {row[1] for row in db.execute(f'PRAGMA table_info("{name}")')}
             if columns != set(table.columns.keys()):
                 raise ValueError('Schema columns differ from this release.')
