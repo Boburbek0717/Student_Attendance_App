@@ -337,3 +337,7 @@ QB-02 first slice implemented: private draft library/editor/preview/history; ten
 new tests, 179 total passed. Publishing lifecycle remains open. Owner next selected
 an isolated PDF import rehearsal using supplied PSAT 8/9 Boundaries questions.
 See question-bank-plan.md; QB-06/QB-07 are not marked complete by the rehearsal.
+
+PDF rehearsal evidence: [pdf-import-rehearsal.md](pdf-import-rehearsal.md). Thirty
+PSAT 8/9 Boundaries drafts imported and recovery-reconciled in isolation. No live
+import or publication; owner review and the production import workflow remain open.

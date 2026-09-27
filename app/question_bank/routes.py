@@ -9,16 +9,16 @@ from app.models import User
 from app.security import verify_csrf
 from app.teacher import require_teacher
 from app.web import get_db, render
-from app.question_bank.models import Question, Revision, Choice, AnswerKey, Section, Domain, Skill, Source
+from app.question_bank.models import Question, Revision, Choice, AnswerKey, Bank, Section, Domain, Skill, Source
 from app.question_bank.authoring import DraftError, FIELDS, editor_values, question_or_404, save_draft
 
 router = APIRouter(prefix='/teacher/questions')
 
 
 def skills(db):
-    return db.execute(select(Skill.id, Skill.name, Domain.name.label('domain'), Section.name.label('section'))
+    return db.execute(select(Skill.id, Skill.name, Domain.name.label('domain'), (Bank.name + ' · ' + Section.name).label('section'))
         .join(Domain, Skill.domain_id == Domain.id).join(Section, Domain.section_id == Section.id)
-        .order_by(Section.id, Domain.id, Skill.id)).all()
+        .join(Bank, Section.bank_id == Bank.id).order_by(Bank.id, Section.id, Domain.id, Skill.id)).all()
 
 
 def editor(request, db, user, question=None, values=None, expected='', error=None):
@@ -89,7 +89,11 @@ def preview(question_id: int, request: Request, revision_id: int | None = None,
         .order_by(Revision.number.desc()).limit(20)).all()
     duplicate = db.scalar(select(Question.id).join(Revision, Question.current_revision_id == Revision.id)
         .where(Revision.content_hash == revision.content_hash, Question.id != question.id).limit(1))
-    return render(request, 'question_preview.html', user=user, question=question, revision=revision,
+    taxonomy = db.execute(select(Bank.name, Section.name, Domain.name, Skill.name)
+        .select_from(Skill).join(Domain, Skill.domain_id == Domain.id)
+        .join(Section, Domain.section_id == Section.id).join(Bank, Section.bank_id == Bank.id)
+        .where(Skill.id == revision.skill_id)).one()
+    return render(request, 'question_preview.html', user=user, question=question, revision=revision, taxonomy=taxonomy,
         choices=db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all(),
         answer=db.get(AnswerKey, revision.id), source=db.get(Source, revision.source_id) if revision.source_id else None,
         history=history, duplicate=duplicate, saved=request.query_params.get('saved') == '1')

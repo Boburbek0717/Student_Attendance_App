@@ -203,3 +203,20 @@ labels and keyboard focus, then stopped. See question-bank-plan.md for limits.
 Unrelated output preserved. Commit subject: `Add teacher question draft authoring and preview`.
 Owner steered ongoing work to testing the supplied PDF; next is a bounded extraction
 and isolated draft-import rehearsal, retaining PSAT 8/9 provenance and punctuation.
+
+## PDF rehearsal checkpoint — 2026-09-27
+
+Draft-authoring commit ee955df completed. Owner-selected supplied PDF test now
+extracts 30 candidates and imports/reconciles all 30 through the teacher routes in
+a disposable database, including backup/recovery. See pdf-import-rehearsal.md for
+exact evidence/commands and limitations. Four PDF tests and ten authoring tests
+passed after the import slice. No app dependency added; bundled pypdf used.
+Original PDF, working data and unrelated output preserved. Review artifacts under
+output/pdf-import-test remain local and excluded from the commit. A loopback-only
+static review server is available on port 8768 for owner inspection; it serves only
+output/pdf-import-test/review-1, not the repo or a database. Stop it when no longer
+needed. No public deployment, actual database import, push or owner acceptance.
+Commit subject: `Test bounded PDF question extraction and isolated draft import`.
+Next: inspect owner feedback, then implement staged import review and the audited
+publication lifecycle in bounded slices before student answering. Do not present
+this one-profile development rehearsal as the completed PDF import system.
