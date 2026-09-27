@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Question practice · SAT Factory{% endblock %}
+{% block main_class %}qb-workspace{% endblock %}
+{% block content %}
+<h1>Question practice</h1><p class="hint">Choose a theme to focus your practice.</p>
+<ul class="qb-library">
+{% for theme in themes %}
+<li><div><p class="hint">{{ theme.bank }} · {{ theme.section }}</p>
+<h2><a href="/student/questions/themes/{{ theme.id }}">{{ theme.name }}</a></h2>
+<p class="hint">{{ theme.count }} {{ 'question' if theme.count == 1 else 'questions' }}</p></div>
+<a class="button secondary" href="/student/questions/themes/{{ theme.id }}" aria-label="Explore {{ theme.name }} in {{ theme.bank }}">Explore theme →</a></li>
+{% else %}<li>Your teacher has not published any questions yet.</li>{% endfor %}
+</ul>{% endblock %}

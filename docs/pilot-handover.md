@@ -246,3 +246,16 @@ Focused authoring 10 and practice 7 tests passed after these fixes. No real stud
 practice submissions were made. No remote push. Unrelated outputs remain untouched.
 Next: owner tries the official teacher/student experience; address observed defects,
 then add saved-question/history directories and staged PDF import UI in bounded steps.
+
+
+## QB-03 theme browsing — 2026-09-27
+
+Owner requested collections instead of a flat student question list. Implemented
+published-question collections by existing skill, with assessment/section labels,
+counts, paginated collection contents, and previous/next restricted to that skill.
+The imported PSAT 8/9 questions appear together under Boundaries. Teacher authoring
+continues to list individual records. No schema or content migration is needed.
+Acceptance evidence: `scripts/verify.py --pattern test_question_practice.py`:
+8 tests passed, including collection counts, unpublished exclusion, cross-theme
+navigation and enrollment enforcement. Shared responsive library styles and native
+links are reused; no new real-device visual check or owner acceptance claimed.

@@ -2,7 +2,7 @@
 {% block title %}Question {{ question.id }} · SAT Factory{% endblock %}
 {% block main_class %}qb-workspace{% endblock %}
 {% block content %}
-<nav class="qb-actions" aria-label="Practice navigation"><a href="/student/questions">← Question library</a></nav>
+<nav class="qb-actions" aria-label="Practice navigation"><a href="/student/questions/themes/{{ theme.id }}">← {{ theme.name }}</a></nav>
 <div class="dashboard-heading"><h1>Question #{{ question.id }}</h1><form method="post" action="/student/questions/{{ question.id }}/bookmark"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="saved" value="{{ 'no' if saved else 'yes' }}"><button class="secondary">{{ 'Remove bookmark' if saved else 'Bookmark question' }}</button></form></div>
 <p class="hint">{{ taxonomy|join(' · ') }} · {{ content.difficulty|capitalize }}</p>
 {% if error %}<p class="error" role="alert">{{ error }} <a href="/student/questions/{{ question.id }}">Reload question</a></p>{% endif %}
@@ -12,5 +12,5 @@
 <fieldset class="practice-answers"><legend class="qb-prose">{{ content.stem }}</legend>{% for choice in choices %}<label class="practice-choice"><input type="radio" name="choice_id" value="{{ choice.id }}" required {% if attempt %}disabled{% if attempt.choice_id==choice.id %} checked{% endif %}{% endif %}><span>{{ 'ABCDEF'[choice.position] if choice.position<6 else choice.position+1 }}. {{ choice.text }}</span></label>{% endfor %}</fieldset>
 {% if not attempt %}<button>Check answer</button>{% else %}<a href="/student/questions/{{ question.id }}?retry=1">Start another attempt</a>{% endif %}</form>
 {% if attempt %}<section class="qb-answer" role="status"><h2>{{ 'Correct' if attempt.is_correct else 'Not quite' }}</h2>{% for choice in choices %}{% if choice.id==answer.choice_id %}<p><strong>Correct answer: {{ 'ABCDEF'[choice.position] if choice.position<6 else choice.position+1 }}</strong></p>{% endif %}{% endfor %}<p class="qb-prose">{{ explanation }}</p><p class="hint">Attempt {{ attempt.number }} saved.</p></section>{% endif %}</section></div>
-<nav class="qb-actions" aria-label="Question navigation">{% if previous %}<a class="button secondary" href="/student/questions/{{ previous }}">← Previous</a>{% endif %}{% if following %}<a class="button" href="/student/questions/{{ following }}">Next →</a>{% else %}<a class="button" href="/student/questions">Back to question library</a>{% endif %}</nav>
+<nav class="qb-actions" aria-label="Question navigation">{% if previous %}<a class="button secondary" href="/student/questions/{{ previous }}">← Previous</a>{% endif %}{% if following %}<a class="button" href="/student/questions/{{ following }}">Next →</a>{% else %}<a class="button" href="/student/questions/themes/{{ theme.id }}">Back to {{ theme.name }}</a>{% endif %}</nav>
 {% endblock %}

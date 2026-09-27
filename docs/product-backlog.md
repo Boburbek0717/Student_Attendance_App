@@ -348,3 +348,16 @@ verified; see question-publication-release.md. Operational publication outcome
 is recorded in the release note: 30 published under Teacher after pre-upgrade backup.
 General import UI, saved/history directories and
 analytics remain open; the one-profile operator importer does not complete QB-07.
+
+
+## QB-03 theme browsing — 2026-09-27
+
+Owner requested collections instead of a flat student question list. Implemented
+published-question collections by existing skill, with assessment/section labels,
+counts, paginated collection contents, and previous/next restricted to that skill.
+The imported PSAT 8/9 questions appear together under Boundaries. Teacher authoring
+continues to list individual records. No schema or content migration is needed.
+Acceptance evidence: `scripts/verify.py --pattern test_question_practice.py`:
+8 tests passed, including collection counts, unpublished exclusion, cross-theme
+navigation and enrollment enforcement. Shared responsive library styles and native
+links are reused; no new real-device visual check or owner acceptance claimed.

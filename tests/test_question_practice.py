@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 import test_question_authoring as fixtures
 from app.models import Enrollment, Group, User
-from app.question_bank.models import Question, Revision, Choice, AnswerKey, Attempt, PublicationEvent
+from app.question_bank.models import Question, Revision, Choice, AnswerKey, Attempt, PublicationEvent, Skill
 from app.question_bank.publication import publish_revision
 from app.create_user import create_user
 
@@ -121,3 +121,38 @@ class QuestionPracticeTests(unittest.TestCase):
         self.login('other')
         self.assertEqual(self.client.get(response.headers['location']).status_code,404)
         self.assertNotIn('Two pairs make four.',self.client.get(f'/student/questions/{q}').text)
+
+    def test_themes_count_only_published_questions_and_scope_navigation(self):
+        first = self.ready()
+        self.login('teacher')
+        second = self.create(passage='Second same-theme passage')
+        with Session(self.engine) as db:
+            other_skill = db.scalar(select(Skill.id).where(Skill.id != self.skill))
+        other = self.create(skill_id=str(other_skill), passage='Different theme passage')
+        hidden = self.create(passage='Unpublished passage')
+        with Session(self.engine) as db:
+            teacher = db.scalar(select(User.id).where(User.role == 'teacher'))
+            for qid in (second, other):
+                publish_revision(db, teacher, qid, db.get(Question, qid).current_revision_id)
+            db.commit()
+            theme_name = db.get(Skill, self.skill).name
+        self.login('student')
+        index = self.client.get('/student/questions')
+        self.assertIn(theme_name, index.text)
+        self.assertIn('2 questions', index.text)
+        self.assertNotIn('Second same-theme passage', index.text)
+        listing = self.client.get(f'/student/questions/themes/{self.skill}')
+        self.assertEqual(listing.status_code, 200)
+        self.assertIn('Second same-theme passage', listing.text)
+        self.assertNotIn('Different theme passage', listing.text)
+        self.assertNotIn('Unpublished passage', listing.text)
+        page = self.client.get(f'/student/questions/{second}')
+        self.assertIn(f'href="/student/questions/{first}"', page.text)
+        self.assertNotIn(f'href="/student/questions/{other}"', page.text)
+        self.assertIn(f'href="/student/questions/themes/{self.skill}"', page.text)
+        self.assertEqual(self.client.get('/student/questions/themes/99999').status_code, 404)
+        self.assertEqual(self.client.get(f'/student/questions/themes/{self.skill}?page=0').status_code, 400)
+        with Session(self.engine) as db:
+            db.scalar(select(Enrollment)).active = False
+            db.commit()
+        self.assertEqual(self.client.get(f'/student/questions/themes/{self.skill}').status_code, 403)

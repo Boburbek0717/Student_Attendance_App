@@ -29,13 +29,34 @@ def published(db, question_id):
     return q
 
 
+def theme_query():
+    return (select(Skill.id, Skill.name, Bank.name.label('bank'), Section.name.label('section'),
+                   func.count(Question.id).label('count'))
+        .select_from(Question).join(Revision, Question.published_revision_id == Revision.id)
+        .join(Skill, Revision.skill_id == Skill.id).join(Domain, Skill.domain_id == Domain.id)
+        .join(Section, Domain.section_id == Section.id).join(Bank, Section.bank_id == Bank.id)
+        .where(Question.status == 'published')
+        .group_by(Skill.id, Skill.name, Bank.name, Section.name))
+
+
 @router.get('')
-def library(request: Request, page: int = 1, db: Session = Depends(get_db)):
+def library(request: Request, db: Session = Depends(get_db)):
+    user = require_access(request, db)
+    themes = db.execute(theme_query().order_by(Bank.name, Section.name, Skill.name, Skill.id)).all()
+    return render(request, 'practice_themes.html', user=user, themes=themes)
+
+
+@router.get('/themes/{skill_id}')
+def theme_library(skill_id: int, request: Request, page: int = 1, db: Session = Depends(get_db)):
     user = require_access(request, db)
     if not 1 <= page <= 100000: raise HTTPException(400, 'Invalid page.')
+    theme = db.execute(theme_query().where(Skill.id == skill_id)).first() if 0 < skill_id < 2**63 else None
+    if not theme: raise HTTPException(404, 'This theme has no available questions.')
     rows = db.execute(select(Question, Revision).join(Revision, Question.published_revision_id == Revision.id)
-        .where(Question.status == 'published').order_by(Question.id).offset((page-1)*20).limit(21)).all()
-    return render(request, 'practice_library.html', user=user, rows=rows[:20], more=len(rows)>20, page=page)
+        .where(Question.status == 'published', Revision.skill_id == skill_id)
+        .order_by(Question.id).offset((page-1)*20).limit(21)).all()
+    return render(request, 'practice_library.html', user=user, theme=theme,
+                  rows=rows[:20], more=len(rows)>20, page=page)
 
 
 def question_page(request, db, user, question_id, attempt_id=None, error=None, retry_key=None):
@@ -53,10 +74,15 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
         .join(Bank,Section.bank_id==Bank.id).where(Skill.id==revision.skill_id)).one()
     choices = db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all()
     key = db.get(AnswerKey, revision.id) if attempt else None
-    previous = db.scalar(select(Question.id).where(Question.status=='published', Question.id<q.id).order_by(Question.id.desc()).limit(1))
-    following = db.scalar(select(Question.id).where(Question.status=='published', Question.id>q.id).order_by(Question.id).limit(1))
+    # Navigation follows the currently published theme, even when viewing an older attempt.
+    current_revision = db.get(Revision, q.published_revision_id)
+    theme = db.get(Skill, current_revision.skill_id)
+    neighbors = (select(Question.id).join(Revision, Question.published_revision_id == Revision.id)
+        .where(Question.status == 'published', Revision.skill_id == theme.id))
+    previous = db.scalar(neighbors.where(Question.id < q.id).order_by(Question.id.desc()).limit(1))
+    following = db.scalar(neighbors.where(Question.id > q.id).order_by(Question.id).limit(1))
     return render(request, 'practice_question.html', 400 if error else 200, user=user, question=q,
-        content=content, taxonomy=taxonomy, choices=choices, attempt=attempt, answer=key,
+        content=content, taxonomy=taxonomy, theme=theme, choices=choices, attempt=attempt, answer=key,
         explanation=revision.explanation if attempt else None, previous=previous, following=following,
         error=error, retry_key=retry_key or secrets.token_urlsafe(32),
         saved=db.get(Bookmark,(user.id,q.id)) is not None)
