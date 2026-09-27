@@ -27,6 +27,9 @@ def skills(db):
 def editor(request, db, user, question=None, values=None, expected='', error=None):
     return render(request, 'question_editor.html', 400 if error else 200,
         user=user, question=question, values=values or {}, expected=expected,
+        domains=db.execute(select(Domain.id, Domain.name, (Bank.name + ' · ' + Section.name).label('section'))
+            .join(Section, Domain.section_id == Section.id).join(Bank, Section.bank_id == Bank.id)
+            .order_by(Bank.name, Section.name, Domain.name)).all(),
         skills=skills(db), error=str(error) if error else None,
         error_field=getattr(error, 'field', 'stem'), limits=FIELDS)
 
@@ -73,7 +76,7 @@ def edit(question_id: int, request: Request, db: Session = Depends(get_db), user
 async def submit(request, db, user, question_id=None):
     form = await request.form()
     verify_csrf(request, str(form.get('csrf', '')))
-    names = list(FIELDS) + ['skill_id', 'difficulty', 'answer'] + [f'choice_{i}' for i in range(6)]
+    names = list(FIELDS) + ['skill_id', 'difficulty', 'answer', 'new_category_name', 'new_category_domain'] + [f'choice_{i}' for i in range(6)]
     values = {name: str(form.get(name, '')) for name in names}
     expected = str(form.get('expected_revision', ''))
     try:

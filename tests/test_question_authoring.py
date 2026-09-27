@@ -186,3 +186,41 @@ class QuestionAuthoringTests(unittest.TestCase):
         self.assertEqual(self.client.get('/teacher/questions?theme_id=99999').status_code, 404)
         self.login('student')
         self.assertEqual(self.client.get(f'/teacher/questions?theme_id={self.skill}').status_code, 403)
+
+    def test_category_is_mandatory_and_new_category_is_saved_and_reused(self):
+        with Session(self.engine) as db:
+            domain = db.get(Skill, self.skill).domain_id
+        missing = self.post(skill_id='')
+        self.assertEqual(missing.status_code, 400)
+        self.assertIn('Choose a category.', missing.text)
+        q = self.create(skill_id='new', new_category_name='  Focused   practice ', new_category_domain=str(domain))
+        second = self.create(skill_id='new', new_category_name='focused practice', new_category_domain=str(domain))
+        with Session(self.engine) as db:
+            first_revision = db.get(Revision, db.get(Question, q).current_revision_id)
+            second_revision = db.get(Revision, db.get(Question, second).current_revision_id)
+            self.assertEqual(first_revision.skill_id, second_revision.skill_id)
+            self.assertEqual(db.get(Skill, first_revision.skill_id).name, 'Focused practice')
+        self.assertIn('Focused practice', self.client.get('/teacher/questions').text)
+        self.assertIn('Focused practice', self.client.get('/teacher/questions/new').text)
+
+    def test_invalid_new_category_keeps_question_text_without_writes(self):
+        for fields in [dict(new_category_name='', new_category_domain='1'),
+                       dict(new_category_name='Test', new_category_domain='999999'),
+                       dict(new_category_name='Test', new_category_domain=''),
+                       dict(new_category_name='x'*201, new_category_domain='1')]:
+            response = self.post(skill_id='new', stem='Keep this question text', **fields)
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('Keep this question text', response.text)
+        with Session(self.engine) as db:
+            self.assertEqual(db.scalar(select(func.count()).select_from(Question)), 0)
+            self.assertIsNone(db.scalar(select(Skill).where(Skill.name == 'Test')))
+
+    def test_new_category_rolls_back_if_draft_save_fails(self):
+        with Session(self.engine) as db:
+            domain = db.get(Skill, self.skill).domain_id
+        with patch('app.question_bank.authoring.Source', side_effect=ValueError('Simulated failure')):
+            response = self.post(skill_id='new', new_category_name='Rollback category', new_category_domain=str(domain))
+        self.assertEqual(response.status_code, 400)
+        with Session(self.engine) as db:
+            self.assertIsNone(db.scalar(select(Skill).where(Skill.name == 'Rollback category')))
+            self.assertEqual(db.scalar(select(func.count()).select_from(Question)), 0)

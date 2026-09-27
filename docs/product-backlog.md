@@ -380,3 +380,19 @@ and `scripts/verify.py --pattern test_question_practice.py` (8 passed), isolated
 from working records. Covers categories, scoped pagination, escaping, authorization
 and existing practice/publication behavior. Shared responsive styles reused; no
 new real-device visual review claimed. Next: owner review of teacher categories.
+
+
+## QB-02 category creation — 2026-09-28
+
+Question editor explicitly requires Category. Teachers can select an existing
+category or choose Create a new category and supply its name and assessment/subject
+area. Category and draft save atomically under the existing write lock with session
+reauthorization and CSRF protection. Normalized matching names within one domain
+reuse the existing category. Missing/invalid fields retain the question text and
+return actionable errors. Existing schema, published content and student access
+are unchanged; categories become student-visible only with published questions.
+Verification: `scripts/verify.py --pattern test_question_authoring.py`: 14 passed;
+` scripts/verify.py --pattern test_question_practice.py`: 8 passed. New checks cover
+mandatory selection, creation/reuse, invalid input preservation and category rollback
+when draft saving fails. `git diff --check` passed. No real-device review claimed.
+Next: owner can try Create question > Category > Create a new category.

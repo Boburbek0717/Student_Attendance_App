@@ -1,6 +1,7 @@
 """Teacher draft authoring. No publication or student answer serialization."""
 import hashlib
 import json
+import secrets
 
 from sqlalchemy import select
 from starlette.exceptions import HTTPException
@@ -8,7 +9,7 @@ from starlette.exceptions import HTTPException
 from app.database import write_transaction
 from app.models import utc_now
 from app.teacher import require_teacher
-from app.question_bank.models import Question, Revision, Choice, AnswerKey, Skill, Source
+from app.question_bank.models import Question, Revision, Choice, AnswerKey, Skill, Source, Domain
 
 FIELDS = {'stem': 2000, 'passage': 4000, 'explanation': 2000,
           'source_name': 200, 'rights_note': 600, 'source_reference': 200}
@@ -36,12 +37,22 @@ def validate(values):
             raise DraftError('Remove unsupported null characters.', name)
     if not clean['stem']:
         raise DraftError('Enter the question text.')
-    try:
-        clean['skill_id'] = int(values.get('skill_id', ''))
-        if not 0 < clean['skill_id'] < 2**63:
-            raise ValueError()
-    except (ValueError, TypeError):
-        raise DraftError('Choose a skill.', 'skill_id') from None
+    if values.get('skill_id') == 'new':
+        name = ' '.join(str(values.get('new_category_name', '')).split())
+        if not name or len(name) > 200 or any(ord(c) < 32 for c in name):
+            raise DraftError('Enter a category name using 1–200 characters.', 'new_category_name')
+        try:
+            domain_id = int(values.get('new_category_domain', ''))
+            if not 0 < domain_id < 2**63: raise ValueError()
+        except (ValueError, TypeError):
+            raise DraftError('Choose the assessment and subject area for your new category.', 'new_category_domain') from None
+        clean.update(skill_id=None, new_category_name=name, new_category_domain=domain_id)
+    else:
+        try:
+            clean['skill_id'] = int(values.get('skill_id', ''))
+            if not 0 < clean['skill_id'] < 2**63: raise ValueError()
+        except (ValueError, TypeError):
+            raise DraftError('Choose a category.', 'skill_id') from None
     clean['difficulty'] = values.get('difficulty', '')
     if clean['difficulty'] not in ('easy', 'medium', 'hard'):
         raise DraftError('Choose a difficulty.', 'difficulty')
@@ -62,13 +73,26 @@ def validate(values):
 
 def save_draft(engine, request, values, question_id=None, expected_revision=''):
     clean = validate(values)
-    digest = hashlib.sha256(json.dumps(clean, sort_keys=True).encode()).hexdigest()
     with write_transaction(engine) as db:
         # Recheck the actual session after acquiring the write lock, not just its role
         # from the earlier route dependency (a reset may revoke it meanwhile).
         teacher = require_teacher(request, db)
+        if clean['skill_id'] is None:
+            domain_id = clean.pop('new_category_domain')
+            name = clean.pop('new_category_name')
+            if db.get(Domain, domain_id) is None:
+                raise DraftError('Choose an available subject area.', 'new_category_domain')
+            # The write lock also serializes duplicate category creation/retries.
+            existing = db.scalars(select(Skill).where(Skill.domain_id == domain_id)).all()
+            category = next((item for item in existing if ' '.join(item.name.split()).casefold() == name.casefold()), None)
+            if category is None:
+                category = Skill(domain_id=domain_id, name=name, code='custom-' + secrets.token_hex(16))
+                db.add(category)
+                db.flush()
+            clean['skill_id'] = category.id
         if db.get(Skill, clean['skill_id']) is None:
-            raise DraftError('Choose an available skill.', 'skill_id')
+            raise DraftError('Choose an available category.', 'skill_id')
+        digest = hashlib.sha256(json.dumps(clean, sort_keys=True).encode()).hexdigest()
         if question_id is None:
             question = Question(created_by=teacher.id)
             db.add(question)
