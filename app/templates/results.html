@@ -6,7 +6,6 @@
 {% block content %}
 <header class="results-intro">
     <a class="text-action" href="/">← Back to home</a>
-    <p class="eyebrow">THE RESULTS WALL</p>
     <h1>Student results.</h1>
     <p class="section-intro">{{ results|length }} results. Individual journeys. Explore the scores and the stories behind them.</p>
 </header>
@@ -14,7 +13,7 @@
 {% for result in results %}
 <article id="result-{{ result.id }}" class="student-ticket result-design" aria-labelledby="student-{{ result.id }}">
     <div class="ticket-score-panel">
-        <p class="result-kicker">SAT FACTORY / RESULT {{ '%03d' | format(result.id) }}</p>
+        <p class="result-kicker">SCORE TICKET / {{ '%03d' | format(result.id) }}</p>
         <h2 id="student-{{ result.id }}">{{ result.name }}</h2>
         <div class="result-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
         <p class="result-kicker">SAT TOTAL SCORE</p>
@@ -23,7 +22,7 @@
     <div class="ticket-story-panel">
         <span class="journey-tag">{{ result.tag }}</span>
         {% if result.quote %}
-        <details><summary>Read {{ result.name }}’s story</summary>
+        <details><summary aria-label="Read student story: {{ result.name }}">Read student story</summary>
             <blockquote>“{{ result.quote }}”</blockquote>
             <p class="quote-credit">{{ result.name }}<span>SAT Factory student</span></p>
         </details>

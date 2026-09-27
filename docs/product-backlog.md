@@ -308,3 +308,9 @@ evidence and scope. Focused SF-17 responsive/keyboard checks included a mobile
 off-screen focus fix. SF-17 as a whole remains In progress. No SF-08 contact route
 or SF-10 teacher dashboard completion is implied. Next bounded design slice:
 Results and Login, before broader portal changes.
+
+## Visual refinement slice 2 — 2026-09-27
+
+Results/Login refinement implemented and in Review; evidence in design-refinement.md.
+Existing content and authentication behavior retained. SF-10 dashboard is the next
+bounded implementation. SF-17 overall and real-device/owner review remain open.

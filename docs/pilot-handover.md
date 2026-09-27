@@ -139,3 +139,12 @@ responsive/contrast checks and isolated auth test command (24 passed, 7.030s).
 Static preview script in output/design-preview.py imports only Jinja/public data;
 unrelated output artifacts preserved. No live DB, remote push or deployment.
 Ready for owner visual review; next: Results/Login refinement, then SF-10.
+
+## Results/Login design checkpoint — 2026-09-27
+
+Finished the interrupted Results/Login refinement; see design-refinement.md for
+scope and evidence (24 auth + 2 onboarding tests, responsive/keyboard/text checks).
+No backend changes. Prior completed commits through 8d4f0e0 pushed to origin/master
+at owner's explicit request. Local scratch previews and unrelated output preserved.
+Next implementation: bounded SF-10 teacher-dashboard hierarchy. Do not treat SF-10,
+SF-17 or owner design acceptance as completed by the public-page changes.

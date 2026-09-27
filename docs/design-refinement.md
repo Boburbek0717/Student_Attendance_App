@@ -114,3 +114,23 @@ Verification:
 No real-phone or screen-reader acceptance claimed. No live server restarted or
 database read. Next slice: Results card/story rhythm and Login form hierarchy,
 using this foundation. SF-10 dashboard restructuring remains a later increment.
+
+## Slice 2 — Results and Login, 2026-09-27
+
+Completed the interrupted slice starting from 8d4f0e0. Results now uses consistent
+name/score spacing, quieter ticket labels, readable story controls and a visible
+outline for a card opened by its anchor. All nine supplied results and story text
+are preserved. Login uses the shared public header and a focused form column;
+credential issuance, recovery guidance, CSRF and error associations are retained.
+No backend or dependency changes. Accessible story names include the visible label
+and the student's name for keyboard, voice and assistive-technology context.
+
+Verification: isolated `scripts/verify.py --pattern test_auth.py` passed 24 tests
+in 6.967s; `scripts/verify.py --pattern test_onboarding.py` passed 2 in 1.829s,
+both using `.venv/Scripts/python.exe`. Static Jinja-only browser preview: Login
+390px and Results 320/1280px, keyboard Enter expansion for account help and student
+story. Both pages at 320px with root text doubled remained within page width
+(305px content width); this is a fixture, not real-device/browser zoom acceptance.
+No real records or live server used. Owner visual review remains pending.
+Next bounded slice: SF-10 teacher dashboard, classes before setup, compact group
+information and explicit access to setup; preserve visible validation errors.
