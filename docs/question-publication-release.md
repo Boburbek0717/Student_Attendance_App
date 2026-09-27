@@ -70,3 +70,36 @@ link. Ten authoring tests passed (3.931s); seven focused practice tests passed a
 (3.451s). These are the final scoped checks after the earlier full 191-test run.
 No real student attempts were created during operational verification; grading
 and permission scenarios used fictional data. No remote push/public hosting.
+
+
+## Transitions collection published — 2026-09-27
+
+Owner requested the same import/publication workflow for SQB PSAT 10 Transitions
+(excluded) ANSWERS.pdf. Added a bounded extraction profile and an explicitly
+allowlisted publication batch. Preserved source assessment PSAT/NMSQT & PSAT 10,
+Reading and Writing / Expression of Ideas / Transitions, separate from PSAT 8/9.
+Source SHA-256: 5be306b0b9b3dfb3dec9f8492b8d7fcb9574a8a30a8ead8c90fc1517fe6e4fd6.
+
+Evidence:
+- 33 pages extracted, zero quarantined; 8 easy, 9 medium, 16 hard.
+- Independent pdfplumber comparison matched all 33 passages/explanations/keys and
+  all 132 choices against pypdf extraction; rendered pages 1, 17, 33 inspected.
+- `.venv/Scripts/python.exe scripts/verify.py --pattern test_sqb_pdf_extract.py`:
+  five tests passed, including profile isolation and original Boundaries regression.
+- `.venv/Scripts/python.exe output/transitions-import/rehearse.py`: temporary-only
+  publication of 33, repeat added zero, every stored field/key reconciled, all 33
+  protected student pages rendered, theme count/pagination checked. Backup restore
+  fingerprints matched; recovery 0.038 seconds. Local review artifacts remain untracked.
+- Authorized operational command: `.venv/Scripts/python.exe
+  scripts/publish_reviewed_questions.py --database attendance.db --candidates
+  output/transitions-import/candidates.json --teacher Teacher --backup-directory
+  "$env:LOCALAPPDATA/SAT Factory/backups/question-bank-release" --apply`.
+  Result: 33 published, zero duplicates. Backup bundle:
+  sat-backup-20260927T185003-0d80c77da8ab4c4e9efc9e56ae1b6eee.
+- Scoped read-only post-publication count confirmed Transitions = 33 published.
+  No accounts, credentials, attendance or unrelated records were inspected/edited.
+
+QB-03 collection automatically appears using existing theme browsing; no app schema
+or UI changes and no server restart required. No remote push/public deployment.
+General PDF upload remains outside this bounded operator import. Next action:
+owner can open Question practice > Transitions and try the collection.

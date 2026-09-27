@@ -361,3 +361,8 @@ Acceptance evidence: `scripts/verify.py --pattern test_question_practice.py`:
 8 tests passed, including collection counts, unpublished exclusion, cross-theme
 navigation and enrollment enforcement. Shared responsive library styles and native
 links are reused; no new real-device visual check or owner acceptance claimed.
+
+
+Owner-authorized Transitions batch published: 33 PSAT/NMSQT & PSAT 10 questions
+under Teacher, with extraction, isolated retry/recovery checks and a pre-publication
+backup. See question-publication-release.md. General PDF import UI remains open.

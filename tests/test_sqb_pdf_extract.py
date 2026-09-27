@@ -70,3 +70,17 @@ class SqbExtractionTests(unittest.TestCase):
             self.assertEqual(report['restored_sessions_revoked'], 1)
             self.assertIn('Correct answer: B', (root/'review/review.html').read_text(encoding='utf-8'))
             with self.assertRaises(FileExistsError): rehearse(source, root/'review')
+
+    def test_transitions_profile_preserves_assessment_and_rejects_wrong_profile(self):
+        from scripts.extract_sqb_pdf import TRANSITIONS_PROFILE, TRANSITIONS_PROMPT
+        raw = (page_text().replace(PROMPT, TRANSITIONS_PROMPT)
+            .replace('PSAT 8/9', 'PSAT/NMSQT &\nPSAT 10')
+            .replace('Standard English\nConventions', 'Expression of Ideas')
+            .replace('Boundaries', 'Transitions'))
+        result = parse_page(raw, 1, TRANSITIONS_PROFILE)
+        self.assertEqual(result['assessment'], 'PSAT/NMSQT & PSAT 10')
+        self.assertEqual(result['domain'], 'Expression of Ideas')
+        self.assertEqual(result['skill'], 'Transitions')
+        self.assertEqual(result['stem'], TRANSITIONS_PROMPT)
+        with self.assertRaises(ValueError): parse_page(raw, 1)
+        with self.assertRaises(ValueError): parse_page(page_text(), 1, TRANSITIONS_PROFILE)

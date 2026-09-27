@@ -21,18 +21,25 @@ from sqlalchemy import select
 from scripts.backup import backup
 
 APPROVED_HASH='e386ca968c399da4df30a404ce3318126558ab2f0aa28921deba728524028aec'
+APPROVED_BATCHES = {
+    APPROVED_HASH: (30, 'psat89', 'PSAT 8/9', 'standard-conventions', 'Standard English Conventions', 'boundaries', 'Boundaries'),
+    '5be306b0b9b3dfb3dec9f8492b8d7fcb9574a8a30a8ead8c90fc1517fe6e4fd6':
+        (33, 'psat10', 'PSAT/NMSQT & PSAT 10', 'expression-of-ideas', 'Expression of Ideas', 'transitions', 'Transitions'),
+}
 
 
 def publish_batch(database, candidates_path, teacher_username, backup_directory):
     database=Path(database).resolve(strict=True)
     data=json.loads(Path(candidates_path).read_text(encoding='utf-8'))
     candidates=data['candidates']
-    if data.get('source_sha256')!=APPROVED_HASH or data.get('rejected') or len(candidates)!=30:
-        raise ValueError('This command is restricted to the reviewed 30-question PDF batch.')
-    if len({q['source_id'] for q in candidates})!=30:
+    batch = APPROVED_BATCHES.get(data.get('source_sha256'))
+    if not batch or data.get('rejected') or len(candidates) != batch[0]:
+        raise ValueError('This command is restricted to explicitly reviewed PDF batches.')
+    count, bank_code, assessment, domain_code, domain_name, skill_code, skill_name = batch
+    if len({q['source_id'] for q in candidates}) != count:
         raise ValueError('Duplicate question IDs in the reviewed batch.')
     for q in candidates:
-        if (q['assessment'],q['section'],q['domain'],q['skill'])!=('PSAT 8/9','Reading and Writing','Standard English Conventions','Boundaries'):
+        if (q['assessment'],q['section'],q['domain'],q['skill'])!=(assessment,'Reading and Writing',domain_name,skill_name):
             raise ValueError('Unexpected question classification.')
         if len(q['choices'])!=4 or type(q['answer']) is not int or not 0<=q['answer']<4:
             raise ValueError('Invalid answer choices.')
@@ -45,18 +52,18 @@ def publish_batch(database, candidates_path, teacher_username, backup_directory)
         with write_transaction(engine) as db:
             teacher=db.scalar(select(User).where(User.username==teacher_username.strip().lower(),User.role=='teacher'))
             if not teacher: raise ValueError('The specified teacher account does not exist. No questions were imported.')
-            bank=db.scalar(select(Bank).where(Bank.code=='psat89'))
-            if not bank: bank=Bank(code='psat89',name='PSAT 8/9');db.add(bank);db.flush()
+            bank=db.scalar(select(Bank).where(Bank.code==bank_code))
+            if not bank: bank=Bank(code=bank_code,name=assessment);db.add(bank);db.flush()
             section=db.scalar(select(Section).where(Section.bank_id==bank.id,Section.code=='reading-writing'))
             if not section: section=Section(bank_id=bank.id,code='reading-writing',name='Reading and Writing');db.add(section);db.flush()
-            domain=db.scalar(select(Domain).where(Domain.section_id==section.id,Domain.code=='standard-conventions'))
-            if not domain: domain=Domain(section_id=section.id,code='standard-conventions',name='Standard English Conventions');db.add(domain);db.flush()
-            skill=db.scalar(select(Skill).where(Skill.domain_id==domain.id,Skill.code=='boundaries'))
-            if not skill: skill=Skill(domain_id=domain.id,code='boundaries',name='Boundaries');db.add(skill);db.flush()
+            domain=db.scalar(select(Domain).where(Domain.section_id==section.id,Domain.code==domain_code))
+            if not domain: domain=Domain(section_id=section.id,code=domain_code,name=domain_name);db.add(domain);db.flush()
+            skill=db.scalar(select(Skill).where(Skill.domain_id==domain.id,Skill.code==skill_code))
+            if not skill: skill=Skill(domain_id=domain.id,code=skill_code,name=skill_name);db.add(skill);db.flush()
             for item in candidates:
-                reference=f"PSAT 8/9 | ID {item['source_id']} | PDF page {item['page']}"
+                reference=f"{assessment} | ID {item['source_id']} | PDF page {item['page']}"
                 matches=db.scalars(select(Question).join(Revision,Question.current_revision_id==Revision.id)
-                    .where(Revision.source_reference.contains(f"PSAT 8/9 | ID {item['source_id']} |",autoescape=True))).all()
+                    .where(Revision.source_reference.contains(f"{assessment} | ID {item['source_id']} |",autoescape=True))).all()
                 if matches:
                     if len(matches)!=1: raise ValueError('Multiple existing questions share a source ID; manual review required.')
                     question=matches[0]; revision=db.get(Revision,question.current_revision_id)
@@ -69,7 +76,7 @@ def publish_batch(database, candidates_path, teacher_username, backup_directory)
                     continue
                 values=dict(stem=item['stem'],passage=item['passage'],explanation=item['explanation'],
                     difficulty=item['difficulty'],skill_id=str(skill.id),answer=str(item['answer']),
-                    source_name=data['source_name'],rights_note='Owner explicitly authorized publication on 2026-09-27; source PDF SHA-256 '+APPROVED_HASH,
+                    source_name=data['source_name'],rights_note='Owner explicitly authorized publication on 2026-09-27; source PDF SHA-256 '+data['source_sha256'],
                     source_reference=reference,**{f'choice_{i}':v for i,v in enumerate(item['choices'])})
                 clean=validate(values)
                 source=Source(name=clean['source_name'],rights_note=clean['rights_note'],created_by=teacher.id);db.add(source);db.flush()

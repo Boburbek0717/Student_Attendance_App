@@ -1,4 +1,4 @@
-"""Bounded, read-only extractor for SQB PSAT 8/9 Boundaries answer PDFs.
+"""Bounded, read-only extractor for reviewed SQB Boundaries and Transitions layouts.
 
 Use the bundled PDF runtime (pypdf). Does not import the app, contact services,
 execute PDF actions, write a database or publish questions. Unsupported pages
@@ -28,33 +28,44 @@ def prose(value):
     return ' '.join(value.split())
 
 
-def parse_page(raw, page):
+TRANSITIONS_PROFILE = 'sqb-psat10-transitions-v1'
+TRANSITIONS_PROMPT = 'Which choice completes the text with the most logical transition?'
+
+
+def parse_page(raw, page, profile=PROFILE):
     text = raw.translate(LIGATURES).replace('\r\n', '\n').strip()
     if len(text) > 50000:
         raise ValueError('Page text exceeds the supported profile limit.')
+    transitions = profile == TRANSITIONS_PROFILE
+    if profile not in (PROFILE, TRANSITIONS_PROFILE):
+        raise ValueError('Unsupported extraction profile.')
+    assessment_pattern = r'PSAT/NMSQT &\s+PSAT 10' if transitions else r'PSAT 8/9'
+    domain_pattern = r'Expression of Ideas' if transitions else r'Standard English\s+Conventions'
+    skill = 'Transitions' if transitions else 'Boundaries'
+    prompt = TRANSITIONS_PROMPT if transitions else PROMPT
     match = re.fullmatch(
         r'Question ID (?P<id>[a-fA-F0-9]{8})\s+ID: (?P=id)\s+(?P<body>.*?)\s+'
         r'ID: (?P=id) Answer\s+Correct Answer:\s*(?P<answer>[A-D])\s+Rationale\s+'
         r'(?P<rationale>.*?)\s+Question Difficulty:\s*(?P<difficulty>Easy|Medium|Hard)\s+'
-        r'Assessment\s+PSAT 8/9\s+Test\s+Reading and Writing\s+Domain\s+'
-        r'Standard English\s+Conventions\s+Skill\s+Boundaries\s+Difficulty', text, re.S)
+        r'Assessment\s+' + assessment_pattern + r'\s+Test\s+Reading and Writing\s+Domain\s+'
+        + domain_pattern + r'\s+Skill\s+' + skill + r'\s+Difficulty', text, re.S)
     if not match:
         raise ValueError('Unsupported page structure, metadata or mismatched question IDs.')
-    body = re.fullmatch(r'(?P<passage>.*?)\s+' + re.escape(PROMPT) +
+    body = re.fullmatch(r'(?P<passage>.*?)\s+' + re.escape(prompt) +
         r'\s+A\. (?P<a>.*?)\nB\. (?P<b>.*?)\nC\. (?P<c>.*?)\nD\. (?P<d>.+)', match['body'], re.S)
     if not body:
         raise ValueError('Passage, prompt or four labelled choices could not be separated safely.')
     choices = [prose(body[label]) for label in 'abcd']
     if not prose(body['passage']) or not all(choices) or not prose(match['rationale']):
         raise ValueError('Required content is empty.')
-    return dict(source_id=match['id'].lower(), page=page, assessment='PSAT 8/9',
-        section='Reading and Writing', domain='Standard English Conventions', skill='Boundaries',
-        difficulty=match['difficulty'].lower(), passage=prose(body['passage']), stem=PROMPT,
+    return dict(source_id=match['id'].lower(), page=page, assessment='PSAT/NMSQT & PSAT 10' if transitions else 'PSAT 8/9',
+        section='Reading and Writing', domain='Expression of Ideas' if transitions else 'Standard English Conventions', skill=skill,
+        difficulty=match['difficulty'].lower(), passage=prose(body['passage']), stem=prompt,
         choices=choices, answer=ord(match['answer'])-ord('A'), explanation=prose(match['rationale']),
         review_status='needs_review')
 
 
-def extract(source):
+def extract(source, profile=PROFILE):
     from pypdf import PdfReader
     source = Path(source).resolve(strict=True)
     if source.stat().st_size > 10*1024*1024:
@@ -65,7 +76,7 @@ def extract(source):
     candidates, rejected, seen = [], [], set()
     for number, page in enumerate(reader.pages, 1):
         try:
-            item = parse_page(page.extract_text() or '', number)
+            item = parse_page(page.extract_text() or '', number, profile)
             for image in page.images:
                 if DIFFICULTY_ICONS.get(hashlib.sha256(image.data).hexdigest()) != item['difficulty']:
                     raise ValueError('Unknown image or difficulty mismatch; manual visual review is required.')
@@ -75,7 +86,7 @@ def extract(source):
             candidates.append(item)
         except Exception as error:
             rejected.append(dict(page=number, reason=str(error)))
-    return dict(profile=PROFILE, source_name=source.name,
+    return dict(profile=profile, source_name=source.name,
         source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(), pages=len(reader.pages),
         candidates=candidates, rejected=rejected, publication_allowed=False)
 
@@ -84,8 +95,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--profile', choices=(PROFILE, TRANSITIONS_PROFILE), default=PROFILE)
     args = parser.parse_args()
-    result = extract(args.source)
+    result = extract(args.source, args.profile)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open('x', encoding='utf-8') as stream:
         json.dump(result, stream, ensure_ascii=False, indent=2)
