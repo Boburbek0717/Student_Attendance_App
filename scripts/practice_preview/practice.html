@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAT Factory · Practice preview</title><link rel="stylesheet" href="practice.css"><script src="practice.js" defer></script></head>
+<body><a class="skip" href="#main-content">Skip to content</a>
+<header><div><a href="review.html" class="back">← PDF review</a><strong class="brand">SAT FACTORY <span>Practice preview</span></strong></div><div class="progress-wrap"><span id="progress"></span><progress id="progress-bar" aria-label="Questions checked"></progress></div></header>
+<div class="context"><span>PSAT 8/9 · Reading and Writing · Boundaries</span><span id="storage-note">Progress stays in this tab.</span></div>
+<main id="main-content" tabindex="-1">
+<div id="workspace" class="workspace"><section id="passage-panel" class="passage-panel" aria-labelledby="passage-heading"><h2 id="passage-heading">Passage</h2><p id="passage"></p></section>
+<section class="question-panel" aria-labelledby="question-number"><div class="question-heading"><h1 id="question-number" tabindex="-1"></h1><label class="mark"><input type="checkbox" id="mark"> Mark for review</label></div><p id="metadata" class="metadata"></p>
+<form id="answer-form"><fieldset><legend id="stem"></legend><div id="choices"></div></fieldset><button id="check" class="primary" disabled>Check answer</button></form>
+<section id="feedback" class="feedback" hidden aria-labelledby="feedback-title"><h2 id="feedback-title" tabindex="-1"></h2><p id="explanation"></p></section></section></div>
+<section id="summary" class="summary" hidden><p class="eyebrow">YOUR PRACTICE</p><h1 id="summary-title" tabindex="-1">Session summary</h1><p id="summary-text"></p><p>Select a question to revisit it.</p><div id="summary-questions"></div></section>
+<noscript>This interactive preview needs JavaScript. You can still read the <a href="review.html">PDF review</a>.</noscript>
+</main>
+<footer><div><label for="jump">Go to</label><select id="jump"></select></div><button id="show-summary" class="quiet">Summary</button><div class="navigation"><button id="previous">← Previous</button><button id="next" class="primary">Next →</button></div></footer>
+<script type="application/json" id="question-data">__QUESTION_DATA__</script>
+</body></html>

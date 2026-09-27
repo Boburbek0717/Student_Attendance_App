@@ -88,3 +88,17 @@ an unrestricted web upload service. A production import needs staged jobs,
 review/approval, transactional batches, persistent duplicate identity across
 imports, upload limits and audited publication. Current duplicate rejection is
 within the candidate document; no real import has occurred.
+
+## Interactive local preview
+
+Owner requested interactive practice. `scripts/build_practice_preview.py` builds
+`practice.html`, CSS and JavaScript into the existing review directory from the
+local candidates. Radio selection, one-time answer checking, explanations,
+previous/next and jump navigation, review marks and summary are implemented.
+Session storage retains this tab's work; it is not an official attempt record.
+Answer keys necessarily exist in this owner-facing artifact; never reuse its
+client-side scoring as the authenticated student endpoint.
+Three Node state tests and one Python safe-JSON embedding test pass. Browser
+keyboard checks demonstrated correct/incorrect feedback and question navigation.
+Owner subsequently authorized official publication after final checks; that requires
+server-side grading and authenticated access, with teacher attribution still pending.
