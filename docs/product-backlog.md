@@ -366,3 +366,17 @@ links are reused; no new real-device visual check or owner acceptance claimed.
 Owner-authorized Transitions batch published: 33 PSAT/NMSQT & PSAT 10 questions
 under Teacher, with extraction, isolated retry/recovery checks and a pre-publication
 backup. See question-publication-release.md. General PDF import UI remains open.
+
+
+## QB-03 teacher category parity — 2026-09-27
+
+Fixed the teacher library's flat list: its entry page now groups current revisions
+by skill with assessment/section labels and total/published counts. Category pages
+retain preview/edit/publication access and category-scoped pagination. Drafts and
+archived records stay manageable; student published-only access is unchanged.
+Preview links return to the relevant category. No database changes.
+Verification: `scripts/verify.py --pattern test_question_authoring.py` (11 passed)
+and `scripts/verify.py --pattern test_question_practice.py` (8 passed), isolated
+from working records. Covers categories, scoped pagination, escaping, authorization
+and existing practice/publication behavior. Shared responsive styles reused; no
+new real-device visual review claimed. Next: owner review of teacher categories.

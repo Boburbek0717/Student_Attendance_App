@@ -292,3 +292,17 @@ QB-03 collection automatically appears using existing theme browsing; no app sch
 or UI changes and no server restart required. No remote push/public deployment.
 General PDF upload remains outside this bounded operator import. Next action:
 owner can open Question practice > Transitions and try the collection.
+
+
+## QB-03 teacher category parity — 2026-09-27
+
+Fixed the teacher library's flat list: its entry page now groups current revisions
+by skill with assessment/section labels and total/published counts. Category pages
+retain preview/edit/publication access and category-scoped pagination. Drafts and
+archived records stay manageable; student published-only access is unchanged.
+Preview links return to the relevant category. No database changes.
+Verification: `scripts/verify.py --pattern test_question_authoring.py` (11 passed)
+and `scripts/verify.py --pattern test_question_practice.py` (8 passed), isolated
+from working records. Covers categories, scoped pagination, escaping, authorization
+and existing practice/publication behavior. Shared responsive styles reused; no
+new real-device visual review claimed. Next: owner review of teacher categories.

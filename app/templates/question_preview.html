@@ -2,7 +2,7 @@
 {% block title %}Question {{ question.id }} preview · SAT Factory{% endblock %}
 {% block main_class %}qb-workspace{% endblock %}
 {% block content %}
-<nav class="qb-actions" aria-label="Question navigation"><a href="/teacher/questions">← Question library</a>{% if question.status == 'draft' %}<a class="button secondary" href="/teacher/questions/{{ question.id }}/edit">Edit latest draft</a>{% endif %}</nav>
+<nav class="qb-actions" aria-label="Question navigation"><a href="/teacher/questions">All categories</a><a href="/teacher/questions?theme_id={{ revision.skill_id }}">← {{ taxonomy[3] }}</a>{% if question.status == 'draft' %}<a class="button secondary" href="/teacher/questions/{{ question.id }}/edit">Edit latest draft</a>{% endif %}</nav>
 <h1>Question #{{ question.id }}</h1><p class="hint">Teacher preview · {{ question.status|capitalize }} · Revision {{ revision.number }}{% if revision.id != question.current_revision_id %} · Historical revision{% endif %}</p>
 <p class="hint">{{ taxonomy|join(' · ') }} · {{ revision.difficulty|capitalize }}</p>
 {% if publication_notice %}<p class="notice" role="status">{{ publication_notice }}</p>{% endif %}

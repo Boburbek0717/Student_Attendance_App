@@ -131,7 +131,7 @@ class QuestionAuthoringTests(unittest.TestCase):
     def test_html_escaped_and_duplicate_warning(self):
         q = self.create(stem='<script>alert(1)</script>', passage='<script>alert(1)</script>')
         other = self.create(stem='<script>alert(1)</script>', passage='<script>alert(1)</script>')
-        for path in ['/teacher/questions', f'/teacher/questions/{q}/edit', f'/teacher/questions/{q}/preview']:
+        for path in [f'/teacher/questions?theme_id={self.skill}', f'/teacher/questions/{q}/edit', f'/teacher/questions/{q}/preview']:
             page = self.client.get(path)
             self.assertNotIn('<script>alert(1)</script>', page.text)
             self.assertIn('&lt;script&gt;', page.text)
@@ -160,9 +160,29 @@ class QuestionAuthoringTests(unittest.TestCase):
 
     def test_library_paginates_without_losing_records(self):
         for i in range(21): self.create(stem=f'Question number {i}')
-        first = self.client.get('/teacher/questions').text
-        second = self.client.get('/teacher/questions?page=2').text
+        first = self.client.get(f'/teacher/questions?theme_id={self.skill}').text
+        second = self.client.get(f'/teacher/questions?theme_id={self.skill}&page=2').text
         self.assertEqual(first.count('class="sr-only"> question'), 20)
         self.assertEqual(second.count('class="sr-only"> question'), 1)
         self.assertIn('Next page', first)
         self.assertNotIn('Next page', second)
+
+    def test_teacher_categories_include_drafts_and_filter_questions(self):
+        self.create(passage='First category passage')
+        with Session(self.engine) as db:
+            other_skill = db.scalar(select(Skill.id).where(Skill.id != self.skill))
+            first_name = db.get(Skill, self.skill).name
+            second_name = db.get(Skill, other_skill).name
+        self.create(skill_id=str(other_skill), passage='Second category passage')
+        index = self.client.get('/teacher/questions')
+        self.assertIn(first_name, index.text)
+        self.assertIn(second_name, index.text)
+        self.assertIn('0 published', index.text)
+        self.assertNotIn('First category passage', index.text)
+        category = self.client.get(f'/teacher/questions?theme_id={self.skill}')
+        self.assertIn('First category passage', category.text)
+        self.assertNotIn('Second category passage', category.text)
+        self.assertIn('Draft', category.text)
+        self.assertEqual(self.client.get('/teacher/questions?theme_id=99999').status_code, 404)
+        self.login('student')
+        self.assertEqual(self.client.get(f'/teacher/questions?theme_id={self.skill}').status_code, 403)

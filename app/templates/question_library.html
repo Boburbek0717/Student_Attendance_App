@@ -2,11 +2,12 @@
 {% block title %}Question library · SAT Factory{% endblock %}
 {% block main_class %}qb-workspace{% endblock %}
 {% block content %}
-<div class="dashboard-heading"><div><p class="eyebrow">TEACHER WORKSPACE</p><h1>Question library</h1><p class="hint">Create, review and publish questions for enrolled students.</p></div><a class="button" href="/teacher/questions/new">Create question</a></div>
+<nav class="qb-actions" aria-label="Category navigation"><a href="/teacher/questions">← All categories</a></nav>
+<div class="dashboard-heading"><div><p class="eyebrow">TEACHER WORKSPACE</p><h1>{{ theme.name }}</h1><p class="hint">{{ theme.bank }} · {{ theme.section }} · {{ theme.count }} questions · {{ theme.published }} published.</p></div><a class="button" href="/teacher/questions/new">Create question</a></div>
 {% if rows %}
 <ul class="qb-library">
 {% for question, revision in rows %}<li><div><p class="hint">#{{ question.id }} · {{ question.status|capitalize }} · Revision {{ revision.number }} · {{ revision.difficulty|capitalize }}</p><h2><a href="/teacher/questions/{{ question.id }}/preview">{{ (revision.passage or revision.stem)|truncate(150) }}</a></h2></div><a class="text-action" href="/teacher/questions/{{ question.id }}/preview">Preview<span class="sr-only"> question {{ question.id }}</span> →</a></li>{% endfor %}
 </ul>
 {% else %}<section class="qb-empty"><h2>{{ 'No questions yet' if page == 1 else 'No questions on this page' }}</h2><p>Start with one question. You can save unfinished answers and come back to them.</p></section>{% endif %}
-<nav class="qb-actions" aria-label="Library pages">{% if page > 1 %}<a href="?page={{ page-1 }}">Previous page</a>{% endif %}<span>Page {{ page }}</span>{% if more %}<a href="?page={{ page+1 }}">Next page</a>{% endif %}</nav>
+<nav class="qb-actions" aria-label="Library pages">{% if page > 1 %}<a href="?theme_id={{ theme.id }}&amp;page={{ page-1 }}">Previous page</a>{% endif %}<span>Page {{ page }}</span>{% if more %}<a href="?theme_id={{ theme.id }}&amp;page={{ page+1 }}">Next page</a>{% endif %}</nav>
 {% endblock %}

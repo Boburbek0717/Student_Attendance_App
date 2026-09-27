@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 from starlette.concurrency import run_in_threadpool
@@ -32,12 +32,28 @@ def editor(request, db, user, question=None, values=None, expected='', error=Non
 
 
 @router.get('')
-def library(request: Request, page: int = 1, db: Session = Depends(get_db), user: User = Depends(require_teacher)):
+def library(request: Request, page: int = 1, theme_id: int | None = None,
+            db: Session = Depends(get_db), user: User = Depends(require_teacher)):
     if not 1 <= page <= 100000:
         raise HTTPException(400, 'Choose a valid library page.')
+    themes_query = (select(Skill.id, Skill.name, Bank.name.label('bank'),
+        Section.name.label('section'), func.count(Question.id).label('count'),
+        func.sum(case((Question.status == 'published', 1), else_=0)).label('published'))
+        .select_from(Question).join(Revision, Question.current_revision_id == Revision.id)
+        .join(Skill, Revision.skill_id == Skill.id).join(Domain, Skill.domain_id == Domain.id)
+        .join(Section, Domain.section_id == Section.id).join(Bank, Section.bank_id == Bank.id)
+        .group_by(Skill.id, Skill.name, Bank.name, Section.name))
+    if theme_id is None:
+        themes = db.execute(themes_query.order_by(Bank.name, Section.name, Skill.name, Skill.id)).all()
+        return render(request, 'question_themes.html', user=user, themes=themes)
+    theme = db.execute(themes_query.where(Skill.id == theme_id)).first() if 0 < theme_id < 2**63 else None
+    if not theme:
+        raise HTTPException(404, 'Question category not found.')
     rows = db.execute(select(Question, Revision).join(Revision, Question.current_revision_id == Revision.id)
+        .where(Revision.skill_id == theme_id)
         .order_by(Question.id.desc()).offset((page-1)*20).limit(21)).all()
-    return render(request, 'question_library.html', user=user, rows=rows[:20], page=page, more=len(rows)>20)
+    return render(request, 'question_library.html', user=user, theme=theme,
+                  rows=rows[:20], page=page, more=len(rows)>20)
 
 
 @router.get('/new')
