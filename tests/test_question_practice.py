@@ -203,7 +203,7 @@ class QuestionPracticeTests(unittest.TestCase):
         self.assertIn('data-fresh="false"', again.text)
         self.assertIn('practice-feedback is-correct', again.text)
 
-    def test_incorrect_feedback_marks_selected_and_correct_choices(self):
+    def test_first_mistake_hides_answer_until_second_submission(self):
         q = self.ready()
         values = self.answer_values(q)
         with Session(self.engine) as db:
@@ -212,7 +212,43 @@ class QuestionPracticeTests(unittest.TestCase):
         response = self.client.post(f'/student/questions/{q}/answer', data=values)
         self.assertIn('practice-feedback is-incorrect', response.text)
         self.assertIn('choice-incorrect', response.text)
-        self.assertIn('choice-correct', response.text)
+        self.assertNotIn('choice-correct', response.text)
         self.assertIn('Your choice · Incorrect', response.text)
-        self.assertIn('Correct answer: B', response.text)
-        self.assertNotIn('choice-correct', self.client.get(f'/student/questions/{q}?retry=1').text)
+        self.assertNotIn('Correct answer:', response.text)
+        self.assertNotIn('Two pairs make four.', response.text)
+        self.assertIn('Try again', response.text)
+        first_url = str(response.url)
+        # Lost-response replays and refreshing do not consume another attempt.
+        replay = self.client.post(f'/student/questions/{q}/answer', data=values)
+        self.assertNotIn('Correct answer:', replay.text)
+        self.assertNotIn('Correct answer:', self.client.get(first_url).text)
+        retry = self.client.get(f'/student/questions/{q}?retry=1')
+        values['retry_key'] = re.search(r'name="retry_key" value="([^"]+)"', retry.text)[1]
+        second = self.client.post(f'/student/questions/{q}/answer', data=values)
+        self.assertIn('Correct answer: B', second.text)
+        self.assertIn('choice-correct', second.text)
+        self.assertIn('Two pairs make four.', second.text)
+        self.assertNotIn('Correct answer:', self.client.get(first_url).text)
+
+    def test_new_category_and_question_inherit_practice_design(self):
+        self.ready()
+        self.login('teacher')
+        with Session(self.engine) as db:
+            domain = db.get(Skill, self.skill).domain_id
+            skill = Skill(domain_id=domain, code='future-theme', name='Future category')
+            db.add(skill); db.commit(); skill_id = skill.id
+        q = self.create(skill_id=str(skill_id), stem='A newly added question')
+        with Session(self.engine) as db:
+            teacher = db.scalar(select(User.id).where(User.role=='teacher'))
+            publish_revision(db, teacher, q, db.get(Question, q).current_revision_id)
+            db.commit()
+        self.login('student')
+        index = self.client.get('/student/questions').text
+        self.assertIn('Future category', index)
+        self.assertIn('practice-theme-card', index)
+        listing = self.client.get(f'/student/questions/themes/{skill_id}').text
+        self.assertIn('practice-question-list', listing)
+        page = self.client.get(f'/student/questions/{q}').text
+        self.assertIn('/static/practice.css', page)
+        self.assertIn('/static/practice-feedback.js', page)
+        self.assertIn('practice-stage', page)

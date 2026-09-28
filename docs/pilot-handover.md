@@ -444,3 +444,18 @@ Correct/incorrect server results and one-time animation flag covered by tests.
 Real phones and owner acceptance are not claimed. Full suite not repeated for this slice.
 Baseline 4d66e33; feature files committed separately from pre-existing untracked output.
 Next: owner reviews practice flow; preserve existing highlights and question content.
+
+## Practice retry disclosure — 2026-09-28
+
+Owner-requested follow-up to student Question Bank refinement. Shared templates
+already apply the design to future published categories/questions; a regression
+test now creates a new category and published question to verify this.
+First incorrect submission withholds the answer key, correct-choice styling and
+explanation server-side, while marking the student's wrong choice and offering
+Try again. Correct submissions or the second saved submission for that revision
+reveal the answer/explanation. Refreshes and duplicate request retries do not
+advance the count. Old first-attempt URLs retain their original disclosure state.
+No schema or live-data changes. Verification: `.venv\Scripts\python.exe scripts/verify.py
+--pattern test_question_practice.py`: 13 passed (6.452s), including new-category
+styling, first-error secrecy, repeat submissions and second-attempt disclosure.
+Next: owner reviews the two-try flow. No owner acceptance assumed.

@@ -73,7 +73,15 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
         .join(Domain,Skill.domain_id==Domain.id).join(Section,Domain.section_id==Section.id)
         .join(Bank,Section.bank_id==Bank.id).where(Skill.id==revision.skill_id)).one()
     choices = db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all()
-    key = db.get(AnswerKey, revision.id) if attempt else None
+    # Count saved submissions for this revision, not the question's lifetime
+    # attempt number. A newly published revision gets its own first try.
+    reveal_answer = False
+    if attempt:
+        revision_attempts = db.scalar(select(func.count()).select_from(Attempt).where(
+            Attempt.student_id == user.id, Attempt.revision_id == revision.id,
+            Attempt.number <= attempt.number))
+        reveal_answer = attempt.is_correct or revision_attempts >= 2
+    key = db.get(AnswerKey, revision.id) if reveal_answer else None
     # Navigation follows the currently published theme, even when viewing an older attempt.
     current_revision = db.get(Revision, q.published_revision_id)
     theme = db.get(Skill, current_revision.skill_id)
@@ -83,7 +91,7 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
     following = db.scalar(neighbors.where(Question.id > q.id).order_by(Question.id).limit(1))
     return render(request, 'practice_question.html', 400 if error else 200, user=user, question=q,
         content=content, taxonomy=taxonomy, theme=theme, fresh_feedback=fresh_feedback, choices=choices, attempt=attempt, answer=key,
-        explanation=revision.explanation if attempt else None, previous=previous, following=following,
+        explanation=revision.explanation if reveal_answer else None, previous=previous, following=following,
         error=error, retry_key=retry_key or secrets.token_urlsafe(32),
         saved=db.get(Bookmark,(user.id,q.id)) is not None)
 
