@@ -188,3 +188,31 @@ class QuestionPracticeTests(unittest.TestCase):
                 event.remove(self.engine, 'before_cursor_execute', capture)
             self.assertLessEqual(len(statements), 2)
             self.assertEqual(db.scalar(select(func.count()).select_from(PublicationEvent)), 1)
+
+    def test_correct_feedback_is_prominent_and_animates_only_once(self):
+        q = self.ready()
+        before = self.client.get(f'/student/questions/{q}')
+        self.assertNotIn('id="answer-feedback"', before.text)
+        self.assertNotIn('choice-correct', before.text)
+        self.assertIn('/static/practice.css', before.text)
+        response = self.client.post(f'/student/questions/{q}/answer', data=self.answer_values(q))
+        self.assertIn('practice-feedback is-correct', response.text)
+        self.assertIn('data-fresh="true"', response.text)
+        self.assertIn('Correct answer · Your choice', response.text)
+        again = self.client.get(f'/student/questions/{q}')
+        self.assertIn('data-fresh="false"', again.text)
+        self.assertIn('practice-feedback is-correct', again.text)
+
+    def test_incorrect_feedback_marks_selected_and_correct_choices(self):
+        q = self.ready()
+        values = self.answer_values(q)
+        with Session(self.engine) as db:
+            wrong = db.scalar(select(Choice.id).where(Choice.revision_id == int(values['revision_id']), Choice.id != values['choice_id']))
+        values['choice_id'] = wrong
+        response = self.client.post(f'/student/questions/{q}/answer', data=values)
+        self.assertIn('practice-feedback is-incorrect', response.text)
+        self.assertIn('choice-incorrect', response.text)
+        self.assertIn('choice-correct', response.text)
+        self.assertIn('Your choice · Incorrect', response.text)
+        self.assertIn('Correct answer: B', response.text)
+        self.assertNotIn('choice-correct', self.client.get(f'/student/questions/{q}?retry=1').text)

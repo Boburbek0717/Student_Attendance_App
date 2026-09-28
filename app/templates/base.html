@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}SAT Factory{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}?v=practice-highlights-1">
+    {% block extra_styles %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <a class="skip-link" href="#main-content">Skip to content</a>

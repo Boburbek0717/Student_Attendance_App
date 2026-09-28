@@ -495,3 +495,26 @@ Production protections prepared, not activated/deployed. Disk/backup encryption,
 TLS/proxy/storage choices and real pilot remain outstanding. No scope expansion into
 CAPTCHA, external bot services or a different database. Next: owner can review the
 20-row assessment; actual production activation waits for hosting decisions.
+
+## Student practice visual refinement — 2026-09-28
+
+Owner-requested Question Bank UX slice, related to student practice delivery.
+Refined student-only navigation, theme cards, question rows and split reading/answer
+layout. Correct and incorrect submissions now get distinct icon/text/color panels
+and labeled answer choices. Brief entry/result animations respect reduced motion;
+fresh feedback receives focus once, while saved results remain quiet. Submission
+shows a busy state. Native radio keyboard behavior and server-side grading remain.
+No new dependencies, migrations or live-record reads.
+
+References: Carbon motion (https://carbondesignsystem.com/elements/motion/overview/)
+and GOV.UK notification banners (https://design-system.service.gov.uk/components/notification-banner/).
+Applied purposeful short motion and outcome text/icons rather than color alone.
+
+Evidence: `.venv\Scripts\python.exe scripts/verify.py --pattern test_question_practice.py`
+passed 12 tests (5.860s); `node --test tests/test_practice_highlights.cjs` passed 3.
+Fictional isolated rendered fixtures checked in browser at desktop and 390px mobile
+width; no horizontal overflow; native Space/arrow answer selection verified.
+Correct/incorrect server results and one-time animation flag covered by tests.
+Real phones and owner acceptance are not claimed. Full suite not repeated for this slice.
+Baseline 4d66e33; feature files committed separately from pre-existing untracked output.
+Next: owner reviews practice flow; preserve existing highlights and question content.

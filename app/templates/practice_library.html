@@ -1,6 +1,8 @@
-{% extends "base.html" %}
+{% extends "practice_base.html" %}
 {% block title %}{{ theme.name }} · SAT Factory{% endblock %}
-{% block main_class %}qb-workspace{% endblock %}
-{% block content %}<nav class="qb-actions" aria-label="Practice navigation"><a href="/student/questions">← All themes</a></nav><h1>{{ theme.name }}</h1><p class="hint">{{ theme.bank }} · {{ theme.section }} · {{ theme.count }} questions</p><p class="hint">Choose a question, submit your answer, then review the explanation.</p>
-<ul class="qb-library">{% for question,revision in rows %}<li><div><p class="hint">Question #{{ question.id }} · {{ revision.difficulty|capitalize }}</p><h2><a href="/student/questions/{{ question.id }}">{{ revision.passage[:120] or revision.stem[:120] }}{% if revision.passage|length > 120 %}…{% endif %}</a></h2></div><a href="/student/questions/{{ question.id }}">Practice →</a></li>{% else %}<li>Your teacher has not published any questions yet.</li>{% endfor %}</ul>
-<nav class="qb-actions" aria-label="Library pages">{% if page>1 %}<a href="?page={{ page-1 }}">Previous page</a>{% endif %}<span>Page {{ page }}</span>{% if more %}<a href="?page={{ page+1 }}">Next page</a>{% endif %}</nav>{% endblock %}
+{% block content %}
+<nav class="practice-breadcrumb" aria-label="Practice navigation"><a href="/student/questions">← All themes</a></nav>
+<div class="practice-intro practice-intro-small"><div><p class="eyebrow">{{ theme.bank }} · {{ theme.section }}</p><h1>{{ theme.name }}</h1><p class="practice-lead">One question at a time. Choose where to start.</p></div><span class="practice-chip">{{ theme.count }} questions</span></div>
+<ol class="practice-question-list" start="{{ (page-1)*20+1 }}">{% for question,revision in rows %}<li><a href="/student/questions/{{ question.id }}"><span class="practice-list-number" aria-hidden="true">{{ (page-1)*20+loop.index }}</span><span class="practice-list-copy"><span class="practice-row-meta">Question #{{ question.id }} <span class="practice-chip difficulty-{{ revision.difficulty }}">{{ revision.difficulty|capitalize }}</span></span><span class="practice-question-snippet">{{ (revision.passage or revision.stem)|truncate(145) }}</span></span><span class="practice-list-arrow" aria-hidden="true">→</span></a></li>{% else %}<li class="practice-empty">No questions on this page. <a href="?page=1">Return to the first page</a></li>{% endfor %}</ol>
+<nav class="practice-pagination" aria-label="Library pages">{% if page>1 %}<a class="button secondary" href="?page={{ page-1 }}">← Previous page</a>{% endif %}<span>Page {{ page }}</span>{% if more %}<a class="button secondary" href="?page={{ page+1 }}">Next page →</a>{% endif %}</nav>
+{% endblock %}

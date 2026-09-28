@@ -1,13 +1,7 @@
-{% extends "base.html" %}
+{% extends "practice_base.html" %}
 {% block title %}Question practice · SAT Factory{% endblock %}
-{% block main_class %}qb-workspace{% endblock %}
 {% block content %}
-<h1>Question practice</h1><p class="hint">Choose a theme to focus your practice.</p>
-<ul class="qb-library">
-{% for theme in themes %}
-<li><div><p class="hint">{{ theme.bank }} · {{ theme.section }}</p>
-<h2><a href="/student/questions/themes/{{ theme.id }}">{{ theme.name }}</a></h2>
-<p class="hint">{{ theme.count }} {{ 'question' if theme.count == 1 else 'questions' }}</p></div>
-<a class="button secondary" href="/student/questions/themes/{{ theme.id }}" aria-label="Explore {{ theme.name }} in {{ theme.bank }}">Explore theme →</a></li>
-{% else %}<li>Your teacher has not published any questions yet.</li>{% endfor %}
-</ul>{% endblock %}
+<div class="practice-intro"><div><p class="eyebrow">QUESTION BANK</p><h1>A little practice.<br>A clearer understanding.</h1><p class="practice-lead">Pick a theme and work through it at your own pace.</p></div><div class="practice-total"><strong>{{ themes|sum(attribute='count') }}</strong><span>questions to explore</span></div></div>
+<div class="practice-section-title"><h2>Choose your focus</h2><span>{{ themes|length }} {{ 'theme' if themes|length == 1 else 'themes' }}</span></div>
+<ul class="practice-theme-grid">{% for theme in themes %}<li><a class="practice-theme-card" href="/student/questions/themes/{{ theme.id }}"><span class="practice-card-top"><span class="practice-card-icon" aria-hidden="true">Aa</span><span class="practice-chip">{{ theme.bank }}</span></span><h3>{{ theme.name }}</h3><p>{{ theme.section }}</p><span class="practice-card-bottom"><span>{{ theme.count }} {{ 'question' if theme.count == 1 else 'questions' }}</span><span class="practice-card-arrow" aria-hidden="true">↗</span></span></a></li>{% else %}<li class="practice-empty"><h3>Your practice starts here</h3><p>Your teacher has not published any questions yet. Check back after your next lesson.</p><a href="/student">Back to your dashboard</a></li>{% endfor %}</ul>
+{% endblock %}

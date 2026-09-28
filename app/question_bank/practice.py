@@ -59,7 +59,7 @@ def theme_library(skill_id: int, request: Request, page: int = 1, db: Session = 
                   rows=rows[:20], more=len(rows)>20, page=page)
 
 
-def question_page(request, db, user, question_id, attempt_id=None, error=None, retry_key=None):
+def question_page(request, db, user, question_id, attempt_id=None, error=None, retry_key=None, fresh_feedback=False):
     q = published(db, question_id)
     attempt = None
     if attempt_id is not None:
@@ -82,7 +82,7 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
     previous = db.scalar(neighbors.where(Question.id < q.id).order_by(Question.id.desc()).limit(1))
     following = db.scalar(neighbors.where(Question.id > q.id).order_by(Question.id).limit(1))
     return render(request, 'practice_question.html', 400 if error else 200, user=user, question=q,
-        content=content, taxonomy=taxonomy, theme=theme, choices=choices, attempt=attempt, answer=key,
+        content=content, taxonomy=taxonomy, theme=theme, fresh_feedback=fresh_feedback, choices=choices, attempt=attempt, answer=key,
         explanation=revision.explanation if attempt else None, previous=previous, following=following,
         error=error, retry_key=retry_key or secrets.token_urlsafe(32),
         saved=db.get(Bookmark,(user.id,q.id)) is not None)
@@ -95,7 +95,10 @@ def show(question_id: int, request: Request, attempt: int | None = None, retry: 
         q=published(db,question_id)
         attempt=db.scalar(select(Attempt.id).where(Attempt.student_id==user.id,Attempt.question_id==q.id,
             Attempt.revision_id==q.published_revision_id).order_by(Attempt.number.desc()).limit(1))
-    return question_page(request, db, user, question_id, attempt)
+    fresh = attempt is not None and request.session.get('practice_feedback') == attempt
+    if fresh:
+        request.session.pop('practice_feedback', None)
+    return question_page(request, db, user, question_id, attempt, fresh_feedback=fresh)
 
 
 def record_answer(engine, request, question_id, revision_id, choice_id, retry_key):
@@ -132,6 +135,7 @@ def answer(question_id: int, request: Request, revision_id: int = Form(default=0
     except ValueError as error:
         db.expire_all()
         return question_page(request,db,user,question_id,error=str(error),retry_key=retry_key)
+    request.session['practice_feedback'] = attempt_id
     return RedirectResponse(f'/student/questions/{question_id}?attempt={attempt_id}',303)
 
 
