@@ -538,3 +538,6 @@ main.qb-workspace { max-width: 76rem; }
 
 .qb-import-item { padding: 1rem 0; border-bottom: 1px solid var(--line); }
 .qb-import-item summary { cursor: pointer; font-weight: 600; }
+
+.practice-highlight { background: #f4df72; color: #20251f; padding: 0; }
+[data-highlight-region] { user-select: text; -webkit-user-select: text; }

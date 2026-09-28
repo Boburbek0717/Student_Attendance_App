@@ -460,3 +460,21 @@ Working records/secrets were not read during verification. Existing untracked
 artifacts preserved. No PDF feature expansion, public deployment or remote push.
 Next bounded opportunity: manual new-question retry protection and larger-library
 query profiling; neither is claimed complete by this slice.
+
+
+## QB-03 student text highlighting — 2026-09-28
+
+Added selection-based highlighting to passage/question text, selected highlight
+removal and Clear highlights. Uses native text selection and safe text/mark nodes;
+no HTML insertion, grading requests or answer-key exposure. Browser-local offset
+storage is keyed by student and exact revision, so it persists on that browser
+when revisiting; no cross-device sync is claimed. No text, answers or credentials
+are stored. Malformed/out-of-bounds storage is ignored; unavailable storage gives
+a visible temporary-only notice. Bounded ranges; controls hidden without JS.
+Verification: `node --test tests/test_practice_highlights.cjs`: 3 passed (overlap,
+malformed/bounded data, removal/splitting). `scripts/verify.py --pattern
+ test_question_practice.py`: 10 passed. Isolated browser fixture: drag selection,
+Highlight, reload persistence, Clear, reload with zero marks all verified. Real
+student records untouched. Desktop browser check only; real mobile touch selection
+remains unverified. Screenshot in output/highlights-check (untracked).
+Next: owner tries highlighting in student practice. No owner acceptance assumed.
