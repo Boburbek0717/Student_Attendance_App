@@ -3,6 +3,7 @@
 {% block main_class %}qb-workspace{% endblock %}
 {% block content %}
 <a class="text-action" href="/teacher/questions">← Question library</a>
+<p><a href="/teacher/questions/import">Import questions from a PDF →</a></p>
 <h1>{{ 'Edit question #' ~ question.id if question else 'Create a question' }}</h1>
 <p class="hint">Save a private draft, then preview it. Only question text, category and difficulty are required. This editor currently supports plain-text multiple-choice questions.</p>
 {% if error %}<section class="error" role="alert" aria-labelledby="form-error"><h2 id="form-error">Draft not saved</h2><p><a href="#{{ error_field }}">{{ error }}</a></p>{% if question %}<a href="/teacher/questions/{{ question.id }}/preview" target="_blank" rel="noopener">Open latest preview in a new tab</a>{% endif %}</section>{% endif %}

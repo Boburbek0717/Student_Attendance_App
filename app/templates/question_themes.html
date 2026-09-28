@@ -2,7 +2,7 @@
 {% block title %}Question library · SAT Factory{% endblock %}
 {% block main_class %}qb-workspace{% endblock %}
 {% block content %}
-<div class="dashboard-heading"><div><p class="eyebrow">TEACHER WORKSPACE</p><h1>Question library</h1><p class="hint">Choose a category to review, edit and publish its questions.</p></div><a class="button" href="/teacher/questions/new">Create question</a></div>
+<div class="dashboard-heading"><div><p class="eyebrow">TEACHER WORKSPACE</p><h1>Question library</h1><p class="hint">Choose a category to review, edit and publish its questions.</p></div><div class="qb-actions"><a class="button secondary" href="/teacher/questions/import">Import PDF</a><a class="button" href="/teacher/questions/new">Create question</a></div></div>
 <ul class="qb-library">
 {% for theme in themes %}<li><div><p class="hint">{{ theme.bank }} · {{ theme.section }}</p><h2><a href="/teacher/questions?theme_id={{ theme.id }}">{{ theme.name }}</a></h2><p class="hint">{{ theme.count }} {{ 'question' if theme.count == 1 else 'questions' }} · {{ theme.published }} published</p></div><a class="button secondary" href="/teacher/questions?theme_id={{ theme.id }}" aria-label="Manage {{ theme.name }} in {{ theme.bank }}">Manage questions →</a></li>
 {% else %}<li>No questions yet. Create a question to start a category.</li>{% endfor %}

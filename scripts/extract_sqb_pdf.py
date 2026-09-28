@@ -76,7 +76,19 @@ def extract(source, profile=PROFILE):
     candidates, rejected, seen = [], [], set()
     for number, page in enumerate(reader.pages, 1):
         try:
-            item = parse_page(page.extract_text() or '', number, profile)
+            raw = page.extract_text() or ''
+            if profile == 'auto':
+                item = None
+                for known in (PROFILE, TRANSITIONS_PROFILE):
+                    try:
+                        item = parse_page(raw, number, known)
+                        break
+                    except ValueError:
+                        pass
+                if item is None:
+                    raise ValueError('Unsupported page. Use a supported text-based SQB answer PDF; scans need manual entry.')
+            else:
+                item = parse_page(raw, number, profile)
             for image in page.images:
                 if DIFFICULTY_ICONS.get(hashlib.sha256(image.data).hexdigest()) != item['difficulty']:
                     raise ValueError('Unknown image or difficulty mismatch; manual visual review is required.')

@@ -176,3 +176,15 @@ Backup tooling accepts v1/v2/v3. Before upgrading, create a consistent backup;
 rollback to older code requires restoring the pre-upgrade backup into a separate
 destination and switching to that destination while the server is stopped, rather
 than running old code against v3. Post-upgrade records would not be in that backup.
+
+
+## QB-07 local PDF upload — 2026-09-28
+
+Delivered teacher Upload > Review > Import as drafts/Publish for the two verified
+SQB formats. Auto-category, exact duplicate skipping, conflict/unsupported-page
+blocking, atomic audited confirmation and bounded private parser/review storage.
+Full evidence and limits: [pdf-upload.md](pdf-upload.md). 210 isolated tests passed;
+actual 30+33 PDFs rehearsed in a disposable DB, all duplicates detected on re-upload.
+Desktop/390px/keyboard review completed on isolated rendered pages. No real student
+records touched, public deployment, remote push or owner acceptance claimed.
+Next: owner tries Import PDF; arbitrary/scanned PDF support remains out of scope.

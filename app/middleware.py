@@ -11,14 +11,17 @@ class RequestBodyLimit:
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
+        # Only the authenticated PDF upload endpoint receives a larger envelope.
+        pdf_upload = scope.get('method') == 'POST' and scope.get('path') == '/teacher/questions/import'
+        limit = 10 * 1024 * 1024 + 65536 if pdf_upload else self.max_bytes
         body = bytearray()
         while True:
             message = await receive()
             if message["type"] == "http.disconnect":
                 return
             chunk = message.get("body", b"")
-            if len(body) + len(chunk) > self.max_bytes:
-                response = PlainTextResponse("Form is too large. Shorten the input and try again.", status_code=413)
+            if len(body) + len(chunk) > limit:
+                response = PlainTextResponse("PDF upload is too large. Use a PDF under 10 MB." if pdf_upload else "Form is too large. Shorten the input and try again.", status_code=413)
                 return await response(scope, receive, send)
             body.extend(chunk)
             if not message.get("more_body", False):

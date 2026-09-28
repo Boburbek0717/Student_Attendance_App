@@ -535,3 +535,6 @@ main.qb-workspace { max-width: 76rem; }
 .practice-choice input { width:auto; flex:0 0 auto; accent-color:var(--ink); }
 .practice-choice:has(input:checked) { background:#f3f8e3; border-color:var(--ink); }
 .practice-choice:focus-within { outline:3px solid var(--ink); outline-offset:2px; }
+
+.qb-import-item { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+.qb-import-item summary { cursor: pointer; font-weight: 600; }

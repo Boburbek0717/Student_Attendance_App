@@ -341,3 +341,15 @@ in LOCALAPPDATA/SAT Factory/backups/question-bank-release. Guarded launcher rest
 succeeded; scoped schema-ledger check confirmed [1,2,3]. No student data printed,
 remote push or public deployment. No new real-device visual review claimed.
 Next: owner can use the simplified Create question form; no owner acceptance assumed.
+
+
+## QB-07 local PDF upload — 2026-09-28
+
+Delivered teacher Upload > Review > Import as drafts/Publish for the two verified
+SQB formats. Auto-category, exact duplicate skipping, conflict/unsupported-page
+blocking, atomic audited confirmation and bounded private parser/review storage.
+Full evidence and limits: [pdf-upload.md](pdf-upload.md). 210 isolated tests passed;
+actual 30+33 PDFs rehearsed in a disposable DB, all duplicates detected on re-upload.
+Desktop/390px/keyboard review completed on isolated rendered pages. No real student
+records touched, public deployment, remote push or owner acceptance claimed.
+Next: owner tries Import PDF; arbitrary/scanned PDF support remains out of scope.

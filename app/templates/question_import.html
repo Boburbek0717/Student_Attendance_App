@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Import PDF · SAT Factory{% endblock %}
+{% block main_class %}qb-workspace{% endblock %}
+{% block content %}
+<a href="/teacher/questions">← Question library</a>
+<h1>Import questions from PDF</h1>
+<p>Upload an answer PDF, review the extracted questions, then save drafts or publish.</p>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" enctype="multipart/form-data" action="/teacher/questions/import" class="qb-editor">
+<input type="hidden" name="csrf" value="{{ csrf_token }}">
+<label for="pdf">Question PDF</label><input id="pdf" name="pdf" type="file" accept=".pdf,application/pdf" required aria-describedby="pdf-help">
+<p id="pdf-help" class="hint">Up to 10 MB and 100 pages. Supported: SQB PSAT 8/9 Boundaries and PSAT/NMSQT &amp; PSAT 10 Transitions answer PDFs. Scanned PDFs and other layouts are flagged for manual review.</p>
+<button type="submit">Extract and review</button>
+</form>
+<p class="hint">Processed locally without AI. Nothing is added until you confirm. Reviews expire after 20 minutes or a server restart. Original uploads are removed after extraction.</p>
+{% endblock %}

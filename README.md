@@ -371,3 +371,9 @@ Question creation uses four answer slots (A–D). Explanation and every source f
 are optional, including for publication. Question text, category and difficulty
 remain required. Drafts may be unfinished; publication requires all four answer
 texts and a correct answer. Existing question snapshots are preserved.
+
+
+Teachers can use **Question library → Import PDF** to review and import supported
+SQB Boundaries/Transitions answer PDFs locally, without AI. Nothing is imported
+until the teacher chooses drafts or publication. See [PDF upload](docs/pdf-upload.md)
+for supported formats, duplicate behavior, size limits and review expiry.
