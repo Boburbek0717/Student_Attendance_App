@@ -56,18 +56,18 @@ def validate(values):
     clean['difficulty'] = values.get('difficulty', '')
     if clean['difficulty'] not in ('easy', 'medium', 'hard'):
         raise DraftError('Choose a difficulty.', 'difficulty')
-    clean['choices'] = [str(values.get(f'choice_{i}', '')).strip() for i in range(6)]
+    if any(str(values.get(f'choice_{i}', '')).strip() for i in (4, 5)):
+        raise DraftError('Use only four answer choices: A, B, C and D.', 'choice_0')
+    clean['choices'] = [str(values.get(f'choice_{i}', '')).strip() for i in range(4)]
     for i, choice in enumerate(clean['choices']):
         if len(choice) > 600 or '\x00' in choice:
             raise DraftError('Use at most 600 characters and no null characters.', f'choice_{i}')
     answer = values.get('answer', '')
-    if answer not in ('', '0', '1', '2', '3', '4', '5'):
+    if answer not in ('', '0', '1', '2', '3'):
         raise DraftError('Choose a valid correct answer.', 'answer')
     if answer and not clean['choices'][int(answer)]:
         raise DraftError('The correct answer must have answer text.', 'answer')
     clean['answer'] = answer
-    if bool(clean['source_name']) != bool(clean['rights_note']):
-        raise DraftError('Provide both the source name and your permission or ownership note.', 'source_name')
     return clean
 
 
@@ -105,13 +105,15 @@ def save_draft(engine, request, values, question_id=None, expected_revision=''):
             if str(question.current_revision_id) != expected_revision:
                 raise DraftError('A newer revision was saved. Your text is kept below; open the latest preview before copying your changes into a fresh editor.')
             previous = db.get(Revision, question.current_revision_id)
+            if db.scalar(select(Choice.id).where(Choice.revision_id == previous.id, Choice.position >= 4).limit(1)):
+                raise DraftError('This older question has more than four choices and cannot be edited here.')
             if previous.question_type != 'multiple_choice' or previous.media_id:
                 raise DraftError('This editor cannot safely edit this question type or attached media.')
             if previous.content_hash == digest:
                 return question.id
             number = previous.number + 1
         source_id = None
-        if clean['source_name']:
+        if clean['source_name'] or clean['rights_note']:
             source = Source(name=clean['source_name'], rights_note=clean['rights_note'], created_by=teacher.id)
             db.add(source)
             db.flush()
@@ -132,8 +134,7 @@ def save_draft(engine, request, values, question_id=None, expected_revision=''):
                     db.add(AnswerKey(revision_id=revision.id, choice_id=choice.id))
         db.flush()
         # Complete drafts can be sealed now; incomplete work remains saveable.
-        revision.sealed = bool(clean['explanation'] and clean['answer'] and
-                               sum(bool(c) for c in clean['choices']) >= 2)
+        revision.sealed = bool(clean['answer'] and all(clean['choices']))
         question.current_revision_id = revision.id
         question.updated_at = utc_now()
         return question.id

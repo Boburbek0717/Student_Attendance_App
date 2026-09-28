@@ -105,7 +105,7 @@ class QuestionPracticeTests(unittest.TestCase):
         self.assertEqual(self.client.get(f'/student/questions/{q}').status_code,404)
 
     def test_incomplete_publication_refused(self):
-        q=self.create(explanation='')
+        q=self.create(choice_3='')
         with Session(self.engine) as db:
             teacher=db.scalar(select(User.id).where(User.role=='teacher'))
             with self.assertRaises(ValueError): publish_revision(db,teacher,q,db.get(Question,q).current_revision_id)
@@ -156,3 +156,18 @@ class QuestionPracticeTests(unittest.TestCase):
             db.scalar(select(Enrollment)).active = False
             db.commit()
         self.assertEqual(self.client.get(f'/student/questions/themes/{self.skill}').status_code, 403)
+
+    def test_publish_and_answer_without_explanation_or_source(self):
+        q = self.create(explanation='', source_name='', rights_note='', source_reference='')
+        with Session(self.engine) as db:
+            teacher = db.scalar(select(User.id).where(User.role == 'teacher'))
+            student = db.scalar(select(User.id).where(User.role == 'student'))
+            group = Group(name='Optional fields class'); db.add(group); db.flush()
+            db.add(Enrollment(student_id=student, group_id=group.id))
+            publish_revision(db, teacher, q, db.get(Question, q).current_revision_id)
+            db.commit()
+        self.login('student')
+        response = self.client.post(f'/student/questions/{q}/answer', data=self.answer_values(q))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Correct answer: B', response.text)
+        self.assertIn('Attempt 1 saved.', response.text)

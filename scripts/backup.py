@@ -53,7 +53,7 @@ def inspect_database(path):
         qb_version = 0
         if 'qb_schema_versions' in actual:
             versions = db.execute('SELECT version FROM qb_schema_versions ORDER BY version').fetchall()
-            if versions not in ([(1,)], [(1,), (2,)]):
+            if versions not in ([(1,)], [(1,), (2,)], [(1,), (2,), (3,)]):
                 raise ValueError('Unsupported Question Bank schema version.')
             qb_version = versions[-1][0]
         expected = {name: table for name, table in Base.metadata.tables.items()

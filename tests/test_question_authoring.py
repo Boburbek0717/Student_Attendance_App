@@ -42,7 +42,7 @@ class QuestionAuthoringTests(unittest.TestCase):
 
     def values(self, **updates):
         values = dict(skill_id=str(self.skill), difficulty='easy', stem='What is 2 + 2?',
-            passage='A fictional passage.', choice_0='3', choice_1='4', answer='1',
+            passage='A fictional passage.', choice_0='3', choice_1='4', choice_2='5', choice_3='6', answer='1',
             explanation='Two pairs make four.', source_name='Original', rights_note='Written for tests.')
         values.update(updates)
         return values
@@ -79,7 +79,7 @@ class QuestionAuthoringTests(unittest.TestCase):
         q = self.create(answer='', choice_0='', choice_1='', explanation='')
         self.assertIn('Correct answer not chosen', self.client.get(f'/teacher/questions/{q}/preview').text)
         for changes in [dict(stem=''), dict(skill_id='999999'), dict(difficulty='invalid'),
-                        dict(choice_1=''), dict(source_name=''), dict(stem='a'*2001)]:
+                        dict(choice_1=''), dict(choice_4='Extra option'), dict(stem='a'*2001)]:
             response = self.post(**changes)
             self.assertEqual(response.status_code, 400)
             self.assertIn('Draft not saved', response.text)
@@ -224,3 +224,17 @@ class QuestionAuthoringTests(unittest.TestCase):
         with Session(self.engine) as db:
             self.assertIsNone(db.scalar(select(Skill).where(Skill.name == 'Rollback category')))
             self.assertEqual(db.scalar(select(func.count()).select_from(Question)), 0)
+
+    def test_four_option_editor_and_optional_source_fields(self):
+        page = self.client.get('/teacher/questions/new').text
+        for i in range(4): self.assertIn(f'name="choice_{i}"', page)
+        self.assertNotIn('name="choice_4"', page)
+        self.assertNotIn('name="choice_5"', page)
+        for changes in [dict(explanation='', source_name='', rights_note='', source_reference=''),
+                        dict(source_name='', rights_note='Optional note'),
+                        dict(source_name='Optional source', rights_note='')]:
+            q = self.create(**changes)
+            with Session(self.engine) as db:
+                revision = db.get(Revision, db.get(Question, q).current_revision_id)
+                self.assertTrue(revision.sealed)
+        self.assertEqual(self.post(answer='4').status_code, 400)

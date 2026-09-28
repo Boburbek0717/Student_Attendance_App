@@ -363,5 +363,11 @@ archive reviewed questions. Actively enrolled students can open Question practic
 submit answers, see explanations and bookmark questions. Grading runs on the server;
 retries preserve one attempt. See [Question Bank plan](docs/question-bank-plan.md) for scope,
 the selected question-screen layout, verification and migration/rollback guidance.
-The next normal app startup applies the additive version-2 schema. Back up before
+The next normal app startup applies the version-3 schema (optional explanations). Back up before
 an operational upgrade and rehearse on a separate restored copy first.
+
+
+Question creation uses four answer slots (A–D). Explanation and every source field
+are optional, including for publication. Question text, category and difficulty
+remain required. Drafts may be unfinished; publication requires all four answer
+texts and a correct answer. Existing question snapshots are preserved.

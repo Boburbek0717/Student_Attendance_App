@@ -1,7 +1,7 @@
 from sqlalchemy import select, func
 from starlette.exceptions import HTTPException
 from app.models import User, utc_now
-from app.question_bank.models import Question, Revision, Source, PublicationEvent
+from app.question_bank.models import Question, Revision, Choice, AnswerKey, PublicationEvent
 
 
 def publish_revision(db, teacher_id, question_id, expected_revision):
@@ -11,10 +11,16 @@ def publish_revision(db, teacher_id, question_id, expected_revision):
     if not question: raise HTTPException(404,'Question not found.')
     if question.current_revision_id!=expected_revision: raise ValueError('The draft changed. Review its latest revision.')
     revision=db.get(Revision,expected_revision)
-    source=db.get(Source,revision.source_id) if revision.source_id else None
-    if not revision.sealed or revision.question_type!='multiple_choice' or revision.media_id:
+    if revision.question_type!='multiple_choice' or revision.media_id:
         raise ValueError('Publish a complete multiple-choice draft without unsupported media.')
-    if not source or not source.rights_note.strip(): raise ValueError('Record the source and permission before publishing.')
+    choices = db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all()
+    answer = db.get(AnswerKey, revision.id)
+    if ([c.position for c in choices] != [0, 1, 2, 3] or any(not c.text.strip() for c in choices)
+            or not answer or answer.choice_id not in {c.id for c in choices}):
+        raise ValueError('Fill all four options (A–D) and choose the correct answer before publishing.')
+    if not revision.sealed:
+        revision.sealed = True
+        db.flush()
     if question.status=='archived': raise ValueError('Archived questions cannot be published.')
     if question.status=='published' and question.published_revision_id==revision.id: return
     question.status='published';question.published_revision_id=revision.id;question.updated_at=utc_now()

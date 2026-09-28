@@ -322,3 +322,22 @@ Verification: `scripts/verify.py --pattern test_question_authoring.py`: 14 passe
 mandatory selection, creation/reuse, invalid input preservation and category rollback
 when draft saving fails. `git diff --check` passed. No real-device review claimed.
 Next: owner can try Create question > Category > Create a new category.
+
+
+## QB-02 optional fields and A–D editor — 2026-09-28
+
+Owner requested optional explanation/source details and only four options. Delivered
+four-slot editor, independent optional source fields, optional explanations through
+publication/grading, and a publication check requiring all A–D texts and correct key.
+Existing drafts remain saveable unfinished. Schema v3 removes only the explanation
+sealing requirement; existing content/history is not rewritten. Updated backup
+compatibility and rollback guidance in question-bank-plan.md.
+Evidence: isolated `scripts/verify.py --pattern test_question*.py` 36 passed;
+full `scripts/verify.py` 201 passed. Includes v2 upgrade content preservation,
+backup/recovery, source-free publication and grading, A–D validation, permissions,
+concurrency and existing attendance behavior. `git diff --check` passed.
+Operational pre-upgrade backup: sat-backup-20260928T092453-0d6ffdbab533486594fdfeec6f6ee319
+in LOCALAPPDATA/SAT Factory/backups/question-bank-release. Guarded launcher restart
+succeeded; scoped schema-ledger check confirmed [1,2,3]. No student data printed,
+remote push or public deployment. No new real-device visual review claimed.
+Next: owner can use the simplified Create question form; no owner acceptance assumed.

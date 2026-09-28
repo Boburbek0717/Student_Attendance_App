@@ -161,3 +161,18 @@ Later owner instruction explicitly authorized official publication under `Teache
 That batch has now been published after protected practice and audited publication
 were implemented; see question-publication-release.md and the latest handover.
 Historical statements above about unavailable routes apply to their dated slices.
+
+
+## Owner change: simpler authoring — 2026-09-28
+
+Supersedes the earlier six-choice and mandatory explanation/source requirements.
+Editor now has A–D only. Explanation, source name, permission note and reference
+are independently optional. Publication requires four nonempty choices and a valid
+correct answer; incomplete drafts remain saveable. Category, question text and
+difficulty remain required. Schema v3 removes the explanation sealing condition
+without modifying existing revisions or attempt history. Legacy records with more
+than four choices cannot be silently truncated by the four-choice editor.
+Backup tooling accepts v1/v2/v3. Before upgrading, create a consistent backup;
+rollback to older code requires restoring the pre-upgrade backup into a separate
+destination and switching to that destination while the server is stopped, rather
+than running old code against v3. Post-upgrade records would not be in that backup.

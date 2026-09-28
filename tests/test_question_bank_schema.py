@@ -113,7 +113,7 @@ class QuestionBankSchemaTests(unittest.TestCase):
         upgrade(self.engine); q,r,c=self.content()
         with self.engine.begin() as db:
             db.execute(text('DROP TABLE qb_publication_events'))
-            db.execute(text('DELETE FROM qb_schema_versions WHERE version=2'))
+            db.execute(text('DELETE FROM qb_schema_versions WHERE version>=2'))
         before=inspect_database(self.path)
         upgrade(self.engine)
         after=inspect_database(self.path)
@@ -163,3 +163,27 @@ class QuestionBankSchemaTests(unittest.TestCase):
                 db.execute(text("UPDATE qb_questions SET status='published', published_revision_id=:r WHERE id=:q"), {'r':r,'q':q})
             with self.assertRaises(IntegrityError):
                 db.execute(text("INSERT INTO qb_attempts(student_id,question_id,revision_id,response_text,is_correct,number,submission_key,created_at) VALUES (2,:q,:r,'4',0,1,'unsealed',CURRENT_TIMESTAMP)"), {'r':r,'q':q})
+
+    def test_v2_upgrade_preserves_snapshots_and_allows_no_explanation(self):
+        from app.question_bank.migrations import _seal_trigger
+        upgrade(self.engine)
+        self.content()
+        with self.engine.begin() as db:
+            db.exec_driver_sql('DROP TRIGGER qb_revision_seal_valid')
+            _seal_trigger(db, require_explanation=True)
+            db.exec_driver_sql('DELETE FROM qb_schema_versions WHERE version=3')
+        before = inspect_database(self.path)
+        upgrade(self.engine)
+        after = inspect_database(self.path)
+        for name in ('qb_revisions', 'qb_choices', 'qb_answer_keys', 'qb_questions'):
+            self.assertEqual(before['fingerprints'][name], after['fingerprints'][name])
+        with Session(self.engine) as db:
+            skill = db.scalar(select(Skill.id))
+            q = Question(created_by=1); db.add(q); db.flush()
+            r = Revision(question_id=q.id, number=1, skill_id=skill, difficulty='easy',
+                         stem='Optional explanation', explanation='', content_hash='f'*64, created_by=1)
+            db.add(r); db.flush()
+            choices = [Choice(revision_id=r.id, position=i, text=str(i)) for i in range(4)]
+            db.add_all(choices); db.flush()
+            db.add(AnswerKey(revision_id=r.id, choice_id=choices[0].id)); db.flush()
+            r.sealed=True; q.current_revision_id=r.id; db.commit()

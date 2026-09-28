@@ -8,7 +8,7 @@ from app.database import Base
 from app.question_bank import models
 from app.question_bank.taxonomy import seed
 
-VERSION = 2
+VERSION = 3
 
 
 def trigger_names(version=VERSION):
@@ -37,12 +37,10 @@ def tables(version=VERSION):
             and (version >= 2 or name != "qb_publication_events")]
 
 
-def _triggers(connection):
-    connection.exec_driver_sql("""CREATE TRIGGER qb_revision_insert_unsealed BEFORE INSERT ON qb_revisions
-        WHEN NEW.sealed=1 BEGIN SELECT RAISE(ABORT, 'Assemble answers before sealing'); END""")
-    connection.exec_driver_sql("""CREATE TRIGGER qb_revision_seal_valid BEFORE UPDATE OF sealed ON qb_revisions
+def _seal_trigger(connection, require_explanation=True):
+    connection.exec_driver_sql(f"""CREATE TRIGGER qb_revision_seal_valid BEFORE UPDATE OF sealed ON qb_revisions
         WHEN NEW.sealed=1 AND (
-          length(trim(NEW.stem))=0 OR length(trim(NEW.explanation))=0 OR
+          length(trim(NEW.stem))=0 OR {"length(trim(NEW.explanation))=0 OR" if require_explanation else ""}
           (NEW.question_type='multiple_choice' AND (
             (SELECT COUNT(*) FROM qb_choices WHERE revision_id=NEW.id)<2 OR
             EXISTS(SELECT 1 FROM qb_choices WHERE revision_id=NEW.id AND length(trim(text))=0) OR
@@ -51,6 +49,12 @@ def _triggers(connection):
             EXISTS(SELECT 1 FROM qb_choices WHERE revision_id=NEW.id) OR
             NOT EXISTS(SELECT 1 FROM qb_answer_keys WHERE revision_id=NEW.id AND length(trim(numeric_answer))>0))))
         BEGIN SELECT RAISE(ABORT, 'Question snapshot is incomplete'); END""")
+
+
+def _triggers(connection):
+    connection.exec_driver_sql("""CREATE TRIGGER qb_revision_insert_unsealed BEFORE INSERT ON qb_revisions
+        WHEN NEW.sealed=1 BEGIN SELECT RAISE(ABORT, 'Assemble answers before sealing'); END""")
+    _seal_trigger(connection)
     for event in ("INSERT", "UPDATE"):
         connection.exec_driver_sql(f"""CREATE TRIGGER qb_publish_{event.lower()} BEFORE {event} ON qb_questions
           WHEN NEW.status='published' AND COALESCE((SELECT sealed FROM qb_revisions WHERE id=NEW.published_revision_id),0)!=1
@@ -86,7 +90,7 @@ def upgrade(engine):
                 if "qb_schema_versions" not in actual:
                     raise ValueError("Incomplete Question Bank schema.")
                 versions = list(connection.scalars(select(models.SchemaVersion.version).order_by(models.SchemaVersion.version)))
-                if versions not in ([1], [1,2]):
+                if versions not in ([1], [1,2], [1,2,3]):
                     raise ValueError("Unsupported Question Bank schema version.")
                 validate_schema(connection, versions[-1])
             else:
@@ -100,6 +104,10 @@ def upgrade(engine):
                 for event in ("UPDATE", "DELETE"):
                     connection.exec_driver_sql(f"CREATE TRIGGER qb_publication_no_{event.lower()} BEFORE {event} ON qb_publication_events BEGIN SELECT RAISE(ABORT, 'Publication history is immutable'); END")
                 connection.execute(models.SchemaVersion.__table__.insert().values(version=2))
+            if versions != [1,2,3]:
+                connection.exec_driver_sql('DROP TRIGGER qb_revision_seal_valid')
+                _seal_trigger(connection, require_explanation=False)
+                connection.execute(models.SchemaVersion.__table__.insert().values(version=3))
             validate_schema(connection)
             connection.commit()
         except Exception:
@@ -116,7 +124,7 @@ def downgrade_empty(engine):
             if not names:
                 connection.commit()
                 return
-            if names != {t.name for t in tables()} or list(connection.scalars(select(models.SchemaVersion.version).order_by(models.SchemaVersion.version))) != [1,2]:
+            if names != {t.name for t in tables()} or list(connection.scalars(select(models.SchemaVersion.version).order_by(models.SchemaVersion.version))) != [1,2,3]:
                 raise ValueError("Unsupported Question Bank schema; rollback refused.")
             seed_tables = {"qb_schema_versions", "qb_banks", "qb_sections", "qb_domains", "qb_skills"}
             for name in names - seed_tables:
