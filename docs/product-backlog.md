@@ -478,3 +478,20 @@ Highlight, reload persistence, Clear, reload with zero marks all verified. Real
 student records untouched. Desktop browser check only; real mobile touch selection
 remains unverified. Screenshot in output/highlights-check (untracked).
 Next: owner tries highlighting in student practice. No owner acceptance assumed.
+
+
+## Security checklist implementation — 2026-09-28
+
+Owner requested review of a 20-item security checklist and implementation of useful
+gaps. Full assessment: security-checklist-review.md. Implemented explicit production
+mode requiring external session secret and exact hosts, Secure cookies, HTTPS redirect,
+HSTS on HTTPS, disabled production docs/OpenAPI; local HTTP preserved. Added generic
+validation responses without reflected input. No secrets or real records inspected.
+Protected filename/index/history checks and limited tracked-source key patterns found
+no candidates; no Git history rewrite, secret rotation or exhaustive history claim.
+Verification: three new production-security tests passed; full guarded
+`scripts/verify.py`: 218 passed in 70.073 seconds. `git diff --check` passed.
+Production protections prepared, not activated/deployed. Disk/backup encryption,
+TLS/proxy/storage choices and real pilot remain outstanding. No scope expansion into
+CAPTCHA, external bot services or a different database. Next: owner can review the
+20-row assessment; actual production activation waits for hosting decisions.

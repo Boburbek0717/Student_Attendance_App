@@ -11,8 +11,9 @@ SECURITY_HEADERS = {
 
 class SecurityHeaders:
     """Cover redirects, validation errors and early body-limit responses too."""
-    def __init__(self, app):
+    def __init__(self, app, hsts=False):
         self.app = app
+        self.hsts = hsts
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -27,6 +28,8 @@ class SecurityHeaders:
                     if name == 'Content-Security-Policy' and scope.get('path') in ('/docs', '/redoc', '/docs/oauth2-redirect'):
                         continue
                     headers[name] = value
+                if self.hsts and scope.get('scheme') == 'https':
+                    headers['Strict-Transport-Security'] = 'max-age=31536000'
                 if not scope.get("path", "").startswith("/static/"):
                     headers["Cache-Control"] = "no-store"
             await send(message)

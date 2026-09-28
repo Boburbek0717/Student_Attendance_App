@@ -1,8 +1,12 @@
 from contextlib import asynccontextmanager
 import os
+import re
 
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
@@ -26,7 +30,20 @@ from app.question_bank.import_routes import router as import_router
 from app.question_bank.pdf_import import ReviewStore
 
 
-def create_app(database_engine: Engine = engine, session_secret: str | None = None, code_minutes: int | None = None) -> FastAPI:
+def create_app(database_engine: Engine = engine, session_secret: str | None = None, code_minutes: int | None = None,
+               production: bool | None = None, allowed_hosts: list[str] | None = None) -> FastAPI:
+    if production is None:
+        environment = os.environ.get('SAT_FACTORY_ENV', 'development')
+        if environment not in ('development', 'production'):
+            raise ValueError('SAT_FACTORY_ENV must be development or production.')
+        production = environment == 'production'
+    if production:
+        session_secret = session_secret or os.environ.get('SAT_FACTORY_SESSION_SECRET')
+        if not session_secret or len(session_secret) < 64:
+            raise ValueError('Production requires an external session secret of at least 64 characters.')
+        allowed_hosts = allowed_hosts or [h.strip() for h in os.environ.get('SAT_FACTORY_ALLOWED_HOSTS', '').split(',') if h.strip()]
+        if not allowed_hosts or any(not re.fullmatch(r'[a-zA-Z0-9]+(?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?', h) for h in allowed_hosts):
+            raise ValueError('Production requires explicit hostnames without wildcards, schemes or ports.')
     if code_minutes is None:
         code_minutes = int(os.environ.get("ATTENDANCE_CODE_MINUTES", "15"))
     if not 1 <= code_minutes <= 60:
@@ -39,7 +56,10 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         finally:
             database_engine.dispose()
 
-    app = FastAPI(title="SAT Factory", lifespan=lifespan)
+    app = FastAPI(title="SAT Factory", lifespan=lifespan,
+                  docs_url=None if production else '/docs',
+                  redoc_url=None if production else '/redoc',
+                  openapi_url=None if production else '/openapi.json')
     app.state.database_engine = database_engine
     app.state.code_minutes = code_minutes
     app.state.pdf_reviews = ReviewStore()
@@ -49,10 +69,13 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         session_cookie="attendance_session",
         max_age=8 * 60 * 60,
         same_site="lax",
-        https_only=False,  # Local HTTP development only.
+        https_only=production,
     )
     app.add_middleware(RequestBodyLimit)
-    app.add_middleware(SecurityHeaders)
+    if production:
+        app.add_middleware(HTTPSRedirectMiddleware)
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts, www_redirect=False)
+    app.add_middleware(SecurityHeaders, hsts=production)
     app.mount("/static", StaticFiles(directory=APP_DIRECTORY / "static"), name="static")
     app.include_router(teacher_router)
     app.include_router(student_router)
@@ -62,6 +85,12 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     app.include_router(import_router)
     app.include_router(question_router)
     app.include_router(practice_router)
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(request: Request, error: RequestValidationError):
+        # FastAPI's default payload includes raw submitted input; do not echo it.
+        return render(request, 'error.html', 422,
+                      message='Some submitted values are invalid. Return to the form, check the fields and try again.')
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException):

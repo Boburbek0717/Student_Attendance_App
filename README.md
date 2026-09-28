@@ -377,3 +377,8 @@ Teachers can use **Question library → Import PDF** to review and import suppor
 SQB Boundaries/Transitions answer PDFs locally, without AI. Nothing is imported
 until the teacher chooses drafts or publication. See [PDF upload](docs/pdf-upload.md)
 for supported formats, duplicate behavior, size limits and review expiry.
+
+
+Production security mode is prepared but disabled locally. See [security checklist
+review](docs/security-checklist-review.md) for required external secret/host settings,
+HTTPS/proxy prerequisites and the status of all 20 checklist items.
