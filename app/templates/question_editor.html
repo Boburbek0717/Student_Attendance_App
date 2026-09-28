@@ -5,7 +5,7 @@
 <a class="text-action" href="/teacher/questions">← Question library</a>
 <p><a href="/teacher/questions/import">Import questions from a PDF →</a></p>
 <h1>{{ 'Edit question #' ~ question.id if question else 'Create a question' }}</h1>
-<p class="hint">Save a private draft, then preview it. Only question text, category and difficulty are required. This editor currently supports plain-text multiple-choice questions.</p>
+<p class="hint">Save a private draft, then preview it. Only question text, category and difficulty are required. This editor currently supports multiple-choice questions, including formatted math.</p>
 {% if error %}<section class="error" role="alert" aria-labelledby="form-error"><h2 id="form-error">Draft not saved</h2><p><a href="#{{ error_field }}">{{ error }}</a></p>{% if question %}<a href="/teacher/questions/{{ question.id }}/preview" target="_blank" rel="noopener">Open latest preview in a new tab</a>{% endif %}</section>{% endif %}
 {% macro invalid(name) %}{% if error and error_field == name %}aria-invalid="true" aria-describedby="form-error"{% endif %}{% endmacro %}
 {% macro area(name, label, rows=3) %}
@@ -17,6 +17,7 @@
 <details {% if values.get('skill_id') == 'new' %}open{% endif %}><summary>Create a new category</summary><p class="hint">Choose “+ Create a new category” above, then fill both fields below. The category is created when you save the question. An existing category with the same name and subject area will be reused.</p>
 <label for="new_category_name">New category name</label><input id="new_category_name" name="new_category_name" maxlength="200" value="{{ values.get('new_category_name', '') }}" {{ invalid('new_category_name') }}>
 <label for="new_category_domain">Assessment and subject area</label><select id="new_category_domain" name="new_category_domain" {{ invalid('new_category_domain') }}><option value="">Choose a subject area</option>{% for domain in domains %}<option value="{{ domain.id }}" {% if values.get('new_category_domain') == domain.id|string %}selected{% endif %}>{{ domain.section }} — {{ domain.name }}</option>{% endfor %}</select></details>
+<details><summary>Writing math questions</summary><p>Choose a Math category above. Use four answer choices; typed numerical answers and diagram uploads are not available yet.</p><p>Write inline math between <code>\(</code> and <code>\)</code>, or a separate equation between <code>\[</code> and <code>\]</code>. Math works in the question, passage, choices and explanation. Save the draft to check the rendered preview before publishing.</p><ul><li>Fraction: <code>\(\frac{3}{4}\)</code></li><li>Power: <code>\(x^2 + 2x + 1\)</code></li><li>Root: <code>\(\sqrt{16}\)</code></li><li>Equation: <code>\[2x + 5 = 17\]</code></li></ul><p>Regular text and prices such as $20 remain unchanged.</p></details>
 <fieldset><legend>Question</legend>{{ area('passage', 'Passage (optional)', 7) }}{{ area('stem', 'Question text', 4) }}</fieldset>
 <fieldset><legend>Answer choices</legend><p class="hint">Use four choices: A, B, C and D. Complete all four and choose the correct answer before publishing.</p>
 {% for i in range(4) %}<label for="choice_{{ i }}">Choice {{ 'ABCDEF'[i] }}</label><textarea id="choice_{{ i }}" name="choice_{{ i }}" maxlength="600" rows="2" {{ invalid('choice_' ~ i) }}>{{ values.get('choice_' ~ i, '') }}</textarea>{% endfor %}

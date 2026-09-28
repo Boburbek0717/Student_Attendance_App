@@ -188,3 +188,26 @@ actual 30+33 PDFs rehearsed in a disposable DB, all duplicates detected on re-up
 Desktop/390px/keyboard review completed on isolated rendered pages. No real student
 records touched, public deployment, remote push or owner acceptance claimed.
 Next: owner tries Import PDF; arbitrary/scanned PDF support remains out of scope.
+
+## Math preparation, first slice — 2026-09-28
+
+Prepared existing multiple-choice authoring/practice for formatted math. Existing
+Math taxonomy reused; no production questions or records created. Teacher editor
+now documents inline \(...\) and display \[...\] notation and examples. Teacher
+preview and student passage/stem/choices/explanation render locally using pinned
+KaTeX 0.18.9 (official npm tarball integrity verified; license and provenance included).
+No external browser service/CDN. Trust disabled, strict errors, bounded expansion
+and size; no question content logged. Plain prices are not math delimiters.
+Design includes Math category symbol. Existing answer disclosure and collapsed
+explanation behavior retained. Text highlighting excludes math-containing regions
+so its text-offset renderer cannot destroy generated equations; plain-text regions
+remain highlightable. Numerical-input grading, diagrams and math PDF import are
+not delivered in this slice.
+References: https://katex.org/docs/autorender and https://katex.org/docs/security.
+Evidence: guarded practice suite 13 passed (6.419s); guarded authoring suite 19
+passed (6.946s). `node --test tests/test_question_math.cjs tests/test_practice_highlights.cjs`
+passed 6. Isolated fictional student page rendered six formulas without errors;
+desktop and 390px browser viewport inspected, no horizontal page overflow.
+Real-device/screen-reader validation and owner acceptance remain pending.
+Next: teacher tries creating a Math draft with the notation guide; typed numeric
+responses and private diagrams can be separate bounded follow-ups.

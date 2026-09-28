@@ -27,7 +27,7 @@
     if (typeof document === "undefined") return;
     const toolbar = document.getElementById("practice-highlights");
     if (!toolbar) return;
-    const regions = new Map(Array.from(document.querySelectorAll("[data-highlight-region]"), element =>
+    const regions = new Map(Array.from(document.querySelectorAll("[data-highlight-region]:not([data-math-rendered])"), element =>
         [element.dataset.highlightRegion, {element, text: element.textContent, ranges: []}]));
     const key = `sat-factory:highlights:v1:${toolbar.dataset.student}:${toolbar.dataset.revision}`;
     const status = document.getElementById("highlight-status");
@@ -115,5 +115,8 @@
         save("Highlights cleared.");
     });
     render();
-    toolbar.hidden = false;
+    toolbar.hidden = regions.size === 0;
+    if (document.querySelector('[data-highlight-region][data-math-rendered]')) {
+        status.textContent = "Highlighting is available in plain-text sections only; formatted equations are excluded.";
+    }
 })();
