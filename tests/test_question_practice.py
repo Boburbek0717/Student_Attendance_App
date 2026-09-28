@@ -171,3 +171,20 @@ class QuestionPracticeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Correct answer: B', response.text)
         self.assertIn('Attempt 1 saved.', response.text)
+
+    def test_repeat_publication_skips_content_reads_and_keeps_one_audit(self):
+        from sqlalchemy import event
+        q = self.ready()
+        with Session(self.engine) as db:
+            teacher = db.scalar(select(User.id).where(User.role == 'teacher'))
+            revision = db.get(Question, q).current_revision_id
+            statements = []
+            def capture(conn, cursor, statement, params, context, many):
+                if statement.lstrip().upper().startswith('SELECT'): statements.append(statement)
+            event.listen(self.engine, 'before_cursor_execute', capture)
+            try:
+                publish_revision(db, teacher, q, revision)
+            finally:
+                event.remove(self.engine, 'before_cursor_execute', capture)
+            self.assertLessEqual(len(statements), 2)
+            self.assertEqual(db.scalar(select(func.count()).select_from(PublicationEvent)), 1)

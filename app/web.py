@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.security import csrf_token
 from app.school_time import school_time
+from app.middleware import SECURITY_HEADERS
 
 
 APP_DIRECTORY = Path(__file__).resolve().parent
@@ -26,8 +27,6 @@ def render(request: Request, name: str, status_code: int = 200, **context):
         status_code=status_code,
         headers={
             "Cache-Control": "no-store",
-            "Content-Security-Policy": "default-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
-            "X-Content-Type-Options": "nosniff",
-            "Referrer-Policy": "same-origin",
+            **SECURITY_HEADERS,
         },
     )

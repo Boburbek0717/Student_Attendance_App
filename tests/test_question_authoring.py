@@ -238,3 +238,32 @@ class QuestionAuthoringTests(unittest.TestCase):
                 revision = db.get(Revision, db.get(Question, q).current_revision_id)
                 self.assertTrue(revision.sealed)
         self.assertEqual(self.post(answer='4').status_code, 400)
+
+    def test_long_unicode_question_within_field_limits_can_be_saved(self):
+        passage = 'Тест ' * 700
+        response = self.post(passage=passage)
+        self.assertEqual(response.status_code, 303, response.text)
+        q = int(response.headers['location'].split('/')[3])
+        with Session(self.engine) as db:
+            self.assertEqual(db.get(Revision, db.get(Question, q).current_revision_id).passage, passage.strip())
+
+    def test_validation_errors_and_redirects_have_security_headers(self):
+        for response in [self.client.get('/teacher/questions?theme_id=invalid'), self.post()]:
+            self.assertEqual(response.headers.get('cache-control'), 'no-store')
+            self.assertEqual(response.headers.get('x-content-type-options'), 'nosniff')
+            self.assertIn("frame-ancestors 'none'", response.headers.get('content-security-policy', ''))
+
+    def test_api_documentation_assets_are_not_blocked_by_app_csp(self):
+        response = self.client.get('/docs')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers.get('x-content-type-options'), 'nosniff')
+        self.assertNotIn('content-security-policy', response.headers)
+
+    def test_expanded_editor_limit_does_not_expand_other_forms(self):
+        for path in ['/login', '/teacher/questions/1/publication', '/teacher/questions/import/fake']:
+            response = self.client.post(path, content=b'x'*17000)
+            self.assertEqual(response.status_code, 413)
+            self.assertEqual(response.headers.get('cache-control'), 'no-store')
+        self.assertEqual(self.client.post('/teacher/questions/new', content=b'x'*(192*1024+1)).status_code, 413)
+        self.assertEqual(self.client.post('/teacher/questions/1/edit', content=b'x'*(192*1024+1)).status_code, 413)
+        self.assertEqual(self.post(passage='x'*4001).status_code, 400)

@@ -1,4 +1,37 @@
+import re
 from starlette.responses import PlainTextResponse
+from starlette.datastructures import MutableHeaders
+
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "default-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "same-origin",
+}
+
+
+class SecurityHeaders:
+    """Cover redirects, validation errors and early body-limit responses too."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        async def secured_send(message):
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                for name, value in SECURITY_HEADERS.items():
+                    # FastAPI's optional API documentation supplies its own inline/CDN
+                    # assets. Preserve that existing documentation page behavior.
+                    if name == 'Content-Security-Policy' and scope.get('path') in ('/docs', '/redoc', '/docs/oauth2-redirect'):
+                        continue
+                    headers[name] = value
+                if not scope.get("path", "").startswith("/static/"):
+                    headers["Cache-Control"] = "no-store"
+            await send(message)
+
+        await self.app(scope, receive, secured_send)
 
 
 class RequestBodyLimit:
@@ -11,9 +44,11 @@ class RequestBodyLimit:
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
-        # Only the authenticated PDF upload endpoint receives a larger envelope.
+        # Bound URL-encoded Unicode fields without widening unrelated forms.
         pdf_upload = scope.get('method') == 'POST' and scope.get('path') == '/teacher/questions/import'
-        limit = 10 * 1024 * 1024 + 65536 if pdf_upload else self.max_bytes
+        question_form = scope.get('method') == 'POST' and bool(re.fullmatch(
+            r'/teacher/questions/(?:new|[0-9]+/edit)', scope.get('path', '')))
+        limit = 10 * 1024 * 1024 + 65536 if pdf_upload else (192 * 1024 if question_form else self.max_bytes)
         body = bytearray()
         while True:
             message = await receive()

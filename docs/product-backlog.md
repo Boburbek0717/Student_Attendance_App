@@ -427,3 +427,36 @@ actual 30+33 PDFs rehearsed in a disposable DB, all duplicates detected on re-up
 Desktop/390px/keyboard review completed on isolated rendered pages. No real student
 records touched, public deployment, remote push or owner acceptance claimed.
 Next: owner tries Import PDF; arbitrary/scanned PDF support remains out of scope.
+
+
+## QB-08 reliability/security slice — 2026-09-28
+
+Owner deferred further PDF work and selected optimization/bug fixing/security.
+Scope: manual question forms, publication retries, response header coverage.
+Reproduced before fixing: a valid 3,500-character Cyrillic passage returned HTTP413;
+FastAPI validation responses lacked no-store/nosniff/CSP headers used by rendered pages.
+
+Delivered:
+- Only new/edit question POST forms get 192 KB envelopes for percent-encoded Unicode;
+  existing per-field limits remain enforced. Other forms keep 16 KB, PDF envelope
+  unchanged. Boundary tests prove the exception does not widen unrelated endpoints.
+- Shared security headers now cover normal responses, redirects, validation and
+  body-limit errors. Non-static responses use no-store; static caching remains intact.
+  Built-in API documentation retains its existing asset policy to avoid breaking
+  its inline/CDN assets. Existing authentication/session/CSRF checks are unchanged.
+- Re-publishing the current published revision exits before loading revision,
+  options and key (at most two SELECTs in regression test), still checks teacher
+  identity/current revision and retains one audit event. Archived/missing snapshots
+  are rejected before sealing work. No schema/data migration.
+
+Evidence: two new regression cases failed before changes and pass after them.
+`scripts/verify.py --pattern test_question*.py`: 49 passed at initial checkpoint.
+`scripts/verify.py`: 214 passed in 68.555 seconds. Final compatibility adjustment
+for built-in docs then passed all 19 authoring tests, including a new docs regression.
+`git diff --check` passed. Refreshed dependency-audit.json: PyPI version metadata
+checked all 30 pinned packages, no listed advisories, no unavailable packages.
+This is an advisory metadata check, not a penetration test/security certification.
+Working records/secrets were not read during verification. Existing untracked
+artifacts preserved. No PDF feature expansion, public deployment or remote push.
+Next bounded opportunity: manual new-question retry protection and larger-library
+query profiling; neither is claimed complete by this slice.

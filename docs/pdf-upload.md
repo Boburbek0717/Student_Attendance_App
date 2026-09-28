@@ -36,7 +36,8 @@ IDs, including across restarts. Browser-submitted question content is never trus
 confirmation accepts only the opaque review token and explicit action.
 
 Only the exact POST /teacher/questions/import route gets a 10 MB + 64 KB multipart
-body envelope. All other forms retain 16 KB. Multipart has one file/two-field bounds.
+body envelope. Question new/edit forms allow 192 KB for URL-encoded Unicode within their existing
+field limits; other forms retain 16 KB. Multipart has one file/two-field bounds.
 Parsing runs in a disposable child process with a 25-second timeout, no application
 or database imports, suppressed parser output, a private random temporary directory,
 and a 2 MB result limit. Files are removed after parsing, including failure/timeout.

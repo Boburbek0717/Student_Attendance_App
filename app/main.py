@@ -13,7 +13,7 @@ from app.result_content import RESULTS, FEATURED_RESULTS
 from app.database import engine, initialize_database
 from app.security import authenticate, current_user, load_session_secret, verify_csrf
 from app.security import limit_login_attempt, start_session, revoke_session
-from app.middleware import RequestBodyLimit
+from app.middleware import RequestBodyLimit, SecurityHeaders
 from app.teacher import router as teacher_router
 from app.student import router as student_router
 from app.student_management import router as management_router
@@ -52,6 +52,7 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
         https_only=False,  # Local HTTP development only.
     )
     app.add_middleware(RequestBodyLimit)
+    app.add_middleware(SecurityHeaders)
     app.mount("/static", StaticFiles(directory=APP_DIRECTORY / "static"), name="static")
     app.include_router(teacher_router)
     app.include_router(student_router)

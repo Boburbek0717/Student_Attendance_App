@@ -131,7 +131,7 @@ class QuestionImportTests(unittest.TestCase):
         location=self.upload(data)
         self.assertIn('&lt;script&gt;', self.client.get(location).text)
         self.assertNotIn('<script>alert', self.client.get(location).text)
-        self.assertEqual(self.client.post('/teacher/questions/new',content=b'x'*17000).status_code,413)
+        self.assertEqual(self.client.post('/teacher/questions/new',content=b'x'*(192*1024+1)).status_code,413)
         self.assertEqual(self.client.post('/teacher/questions/import',content=b'x'*(10*1024*1024+65537)).status_code,413)
 
     def test_parser_timeout_and_invalid_pdf_are_visible(self):
