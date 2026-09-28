@@ -533,3 +533,9 @@ No schema or live-data changes. Verification: `.venv\Scripts\python.exe scripts/
 --pattern test_question_practice.py`: 13 passed (6.452s), including new-category
 styling, first-error secrecy, repeat submissions and second-attempt disclosure.
 Next: owner reviews the two-try flow. No owner acceptance assumed.
+
+## Optional explanation expansion — 2026-09-28
+Student practice explanations now start collapsed. Students choose whether to open
+"Why this answer works" using the native keyboard-accessible disclosure. Existing
+first-mistake disclosure rules remain unchanged; shared template applies to future
+questions. Guarded practice suite: 13 passed (6.472s). No data/schema changes.
