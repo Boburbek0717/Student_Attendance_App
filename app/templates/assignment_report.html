@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Assignment progress · SAT Factory{% endblock %}
+{% block content %}
+<a href="/teacher/assignments">← Assignments</a>
+<h1>{{ assignment.title }}</h1>
+<p>{{ group.name }} · {{ completed }} of {{ reports|length }} students completed</p>
+{% if assignment.instructions %}<p class="qb-prose">{{ assignment.instructions }}</p>{% endif %}
+<p>{% if assignment.due_at %}Due {{ assignment.due_at|school_time }}{% else %}No deadline{% endif %}</p>
+<p class="hint">Completion means every question has been answered, regardless of correctness. Results include only this assignment. The student list was saved when you assigned it. Refresh for updated progress.</p>
+{% for report in reports %}
+<section class="card">
+    <h2>{{ report.student.display_name }}</h2>
+    <p class="hint">{{ report.student.username }}</p>
+    <p><strong>{{ report.state }}</strong> · {{ report.done }} of {{ report.total }} answered{% if report.late %} · {{ 'Completed late' if report.completed_at else 'Overdue' }}{% endif %}</p>
+    <p>{{ report.results.correct }} first-try correct · {{ report.results.retried }} correct after a mistake · {{ report.results.incorrect }} not yet correct</p>
+    {% if report.completed_at %}<p>Completed {{ report.completed_at|school_time }}</p>{% endif %}
+    {% if report.last_activity %}<p class="hint">Last activity {{ report.last_activity|school_time }}</p>{% endif %}
+    <details><summary>Question results for {{ report.student.display_name }}</summary>
+        <ol class="practice-question-list">
+        {% for item, revision in report.rows %}
+            <li><span>Question {{ item.position }} · {{ revision.difficulty|capitalize }} — <strong>{{ {'correct':'First-try correct','retried':'Correct after a mistake','incorrect':'Not yet correct'}.get(report.states.get(item.id), 'Not attempted') }}</strong></span></li>
+        {% endfor %}
+        </ol>
+    </details>
+</section>
+{% else %}<p>No recipients were saved for this assignment.</p>{% endfor %}
+{% endblock %}

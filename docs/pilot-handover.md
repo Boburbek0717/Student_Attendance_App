@@ -592,3 +592,23 @@ Verification: isolated `scripts/verify.py --pattern test_assignments.py`: 7 pass
 partial state, category isolation, hidden selections and validation focus recovery.
 `git diff --check` passed. Owner/browser experience review pending. Refresh the
 assignment creation page to load the updated template and versioned script.
+
+
+## Assignments Stage 2 — teacher progress reporting, 2026-09-29
+
+Implemented the planned bounded reporting stage. Assignment titles now link to an
+owner-only teacher report: saved recipients, answered/total, To do/In progress/
+Completed, first-try correct, correct after a mistake, not-yet-correct counts,
+expandable per-question results, completion time, last activity and late status.
+Completion remains answering every question, not achieving every correct answer.
+Later retries do not change initial completion time or erase earlier success.
+Regular Question Bank attempts remain excluded. Recipients stay visible after
+enrollment changes. Shared summary logic keeps student/teacher semantics aligned;
+queries fetch recipients and attempts in batches instead of querying per student.
+No schema changes or new dependencies. No real records used in verification.
+
+Verification: `.venv\Scripts\python.exe scripts/verify.py --pattern test_assignments.py`
+passed 9 tests (6.536s), including reporting progression, inactive recipient history,
+student/other-teacher/anonymous boundaries, invalid IDs, completion timing and retries.
+`git diff --check` passed. Browser/real-device and owner acceptance remain pending.
+Next: owner reviews the report; Stage 3 convenience features remain future scope.

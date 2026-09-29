@@ -151,3 +151,60 @@ class AssignmentTests(unittest.TestCase):
         before,after=inspect_database(source),inspect_database(copy)
         self.assertEqual(before['fingerprints'],after['fingerprints'])
         self.assertEqual(after['counts']['qb_assignment_attempts'],1)
+
+    def test_teacher_report_progress_and_owner_boundary(self):
+        from app.create_user import create_user
+        from test_question_authoring import PASSWORD
+        q, aid, iid = self.assigned()
+        report_url = f'/teacher/assignments/{aid}'
+        self.assertEqual(self.client.get(report_url).status_code, 403)
+        self.login('teacher')
+        page = self.client.get(report_url)
+        self.assertEqual(page.status_code, 200)
+        self.assertIn('0 of 1 students completed', page.text)
+        self.assertIn('0 of 1 answered', page.text)  # Regular practice did not count.
+        self.assertIn('Not attempted', page.text)
+        self.assertIn(report_url, self.client.get('/teacher/assignments').text)
+        self.login('student')
+        url, data = self.form(aid, iid)
+        self.client.post(url + '/answer', data=data)
+        self.login('teacher')
+        page = self.client.get(report_url)
+        self.assertIn('1 of 1 students completed', page.text)
+        self.assertIn('1 not yet correct', page.text)
+        self.assertIn('Completed late', page.text)
+        self.login('student')
+        url, data = self.form(aid, iid)
+        with Session(self.engine) as db:
+            data['choice_id'] = db.get(AnswerKey, db.get(AssignmentItem, iid).revision_id).choice_id
+        self.client.post(url + '/answer', data=data)
+        self.login('teacher')
+        self.assertIn('1 correct after a mistake', self.client.get(report_url).text)
+        with Session(self.engine) as db:
+            db.scalar(select(Enrollment)).active = False
+            db.commit()
+            create_user(db, 'otherteacher', 'Other Teacher', PASSWORD, 'teacher')
+        self.assertIn('1 of 1 students completed', self.client.get(report_url).text)
+        self.assertEqual(self.client.get('/teacher/assignments/99999999999999999999999').status_code, 404)
+        self.login('otherteacher')
+        self.assertEqual(self.client.get(report_url).status_code, 404)
+        self.client.cookies.clear()
+        self.assertEqual(self.client.get(report_url, follow_redirects=False).status_code, 303)
+
+    def test_report_summary_completion_time_and_later_retries(self):
+        from datetime import datetime, timedelta
+        from types import SimpleNamespace as N
+        from app.question_bank.assignments import summarize_progress
+        deadline = datetime(2026, 9, 29, 12)
+        assignment = N(due_at=deadline)
+        rows = [(N(id=1), None), (N(id=2), None)]
+        attempts = [N(item_id=1, number=1, is_correct=True, created_at=deadline-timedelta(hours=2)),
+                    N(item_id=2, number=1, is_correct=False, created_at=deadline-timedelta(hours=1)),
+                    N(item_id=1, number=2, is_correct=False, created_at=deadline+timedelta(hours=1)),
+                    N(item_id=2, number=2, is_correct=True, created_at=deadline+timedelta(hours=2))]
+        summary = summarize_progress(assignment, rows, attempts)
+        self.assertEqual(summary['states'], {1: 'correct', 2: 'retried'})
+        self.assertEqual(summary['completed_at'], deadline-timedelta(hours=1))
+        self.assertFalse(summary['late'])
+        self.assertEqual(summary['last_activity'], deadline+timedelta(hours=2))
+        self.assertEqual(summarize_progress(assignment, rows, attempts[:1])['state'], 'In progress')

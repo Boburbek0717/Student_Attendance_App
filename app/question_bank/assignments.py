@@ -38,6 +38,10 @@ def progress(db, assignment, user):
     rows = items_for(db, assignment.id)
     attempts = db.scalars(select(AssignmentAttempt).where(AssignmentAttempt.assignment_id == assignment.id,
         AssignmentAttempt.student_id == user.id).order_by(AssignmentAttempt.number)).all()
+    return summarize_progress(assignment, rows, attempts)
+
+
+def summarize_progress(assignment, rows, attempts):
     states = {}
     for attempt in attempts:
         old = states.get(attempt.item_id)
@@ -50,7 +54,9 @@ def progress(db, assignment, user):
     late = bool(assignment.due_at and (max(first_dates) if completed else utc_now()) > assignment.due_at)
     next_item = next((item for item, _ in rows if item.id not in states), rows[0][0] if rows else None)
     return dict(assignment=assignment, rows=rows, states=states, done=done, total=len(rows),
-        state='Completed' if completed else 'In progress' if done else 'To do', late=late, next_item=next_item)
+        state='Completed' if completed else 'In progress' if done else 'To do', late=late, next_item=next_item,
+        completed_at=max(first_dates) if completed else None,
+        last_activity=max((a.created_at for a in attempts), default=None))
 
 
 @router.get('/teacher/assignments')
@@ -73,6 +79,32 @@ def new_assignment(request: Request, db: Session = Depends(get_db)):
         .order_by(Skill.name, Question.id)).all()
     return render(request, 'assignment_new.html', user=user, rows=rows,
         groups=db.scalars(select(Group).order_by(Group.name)).all(), submission_key=secrets.token_urlsafe(32))
+
+
+@router.get('/teacher/assignments/{assignment_id}')
+def teacher_report(assignment_id: int, request: Request, db: Session = Depends(get_db)):
+    user = require_teacher(request, db)
+    assignment = db.get(Assignment, assignment_id) if 0 < assignment_id < 2**63 else None
+    if not assignment or assignment.created_by != user.id:
+        raise HTTPException(404, 'Assignment not available.')
+    rows = items_for(db, assignment.id)
+    recipients = db.scalars(select(User).join(AssignmentRecipient,
+        AssignmentRecipient.student_id == User.id).where(
+        AssignmentRecipient.assignment_id == assignment.id).order_by(User.display_name, User.id)).all()
+    attempts_by_student = {}
+    for attempt in db.scalars(select(AssignmentAttempt).where(
+            AssignmentAttempt.assignment_id == assignment.id).order_by(AssignmentAttempt.number)):
+        attempts_by_student.setdefault(attempt.student_id, []).append(attempt)
+    reports = []
+    for student in recipients:
+        report = summarize_progress(assignment, rows, attempts_by_student.get(student.id, []))
+        report['student'] = student
+        report['results'] = {state: sum(value == state for value in report['states'].values())
+                             for state in ('correct', 'retried', 'incorrect')}
+        reports.append(report)
+    return render(request, 'assignment_report.html', user=user, assignment=assignment,
+        group=db.get(Group, assignment.group_id), reports=reports,
+        completed=sum(report['state'] == 'Completed' for report in reports))
 
 
 @router.post('/teacher/assignments/new')
