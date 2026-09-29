@@ -208,3 +208,62 @@ class AssignmentTests(unittest.TestCase):
         self.assertFalse(summary['late'])
         self.assertEqual(summary['last_activity'], deadline+timedelta(hours=2))
         self.assertEqual(summarize_progress(assignment, rows, attempts[:1])['state'], 'In progress')
+
+    def test_malformed_assignment_inputs_fail_without_writes(self):
+        q, aid, iid = self.assigned()
+        url, data = self.form(aid, iid)
+        response = self.client.post(url + '/answer', data=dict(data, choice_id=2**100))
+        self.assertEqual(response.status_code, 400)
+        self.login('teacher')
+        with Session(self.engine) as db:
+            group = db.scalar(select(Group.id))
+            rid = db.get(Question, q).published_revision_id
+        def payload():
+            page = self.client.get('/teacher/assignments/new')
+            return dict(title='Input validation', group_id=group, questions=[f'{q}:{rid}'],
+                        csrf=self.token(page), submission_key=re.search(
+                        r'name="submission_key" value="([^"]+)"', page.text)[1])
+        data = payload()
+        data['questions'] = [f'{q}:{rid}', f'0{q}:0{rid}']
+        self.assertEqual(self.client.post('/teacher/assignments/new', data=data).status_code, 400)
+        data = payload()
+        data['due'] = '0001-01-01T00:00'
+        self.assertEqual(self.client.post('/teacher/assignments/new', data=data).status_code, 400)
+        with Session(self.engine) as db:
+            self.assertEqual(db.scalar(select(func.count()).select_from(Assignment)), 1)
+            self.assertEqual(db.scalar(select(func.count()).select_from(AssignmentAttempt)), 0)
+
+    def test_batched_progress_is_student_scoped_and_uses_two_queries(self):
+        from sqlalchemy import event
+        from app.question_bank.assignments import progress_many
+        q, aid, iid = self.assigned()
+        url, data = self.form(aid, iid)
+        self.client.post(url + '/answer', data=data)
+        with Session(self.engine) as db:
+            assignment = db.get(Assignment, aid)
+            student = db.scalar(select(User).where(User.role == 'student'))
+            teacher = db.scalar(select(User).where(User.role == 'teacher'))
+            statements = []
+            def count(*args): statements.append(args[2])
+            event.listen(self.engine, 'before_cursor_execute', count)
+            try:
+                cards = progress_many(db, [assignment], student)
+                self.assertEqual(len(statements), 2)
+                self.assertEqual(cards[0]['done'], 1)
+                self.assertEqual(cards[0]['states'][iid], 'incorrect')
+                self.assertEqual(progress_many(db, [assignment], teacher)[0]['done'], 0)
+                self.assertEqual(progress_many(db, [], student), [])
+            finally:
+                event.remove(self.engine, 'before_cursor_execute', count)
+
+    def test_busy_database_gives_retryable_error(self):
+        from unittest.mock import patch
+        q, aid, iid = self.assigned()
+        url, data = self.form(aid, iid)
+        with patch('app.question_bank.assignments.write_transaction', side_effect=ValueError('private database detail')):
+            response = self.client.post(url + '/answer', data=data)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.headers['retry-after'], '2')
+        self.assertNotIn('private database detail', response.text)
+        self.assertIn('Go back and retry', response.text)
+        self.assertEqual(self.client.post(url + '/answer', data=data).status_code, 200)

@@ -1,5 +1,6 @@
 """Group assignments with pinned revisions and independent, append-only attempts."""
 import re
+from contextlib import contextmanager
 import secrets
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Form, Request
@@ -18,6 +19,18 @@ from app.question_bank.models import (Assignment, AssignmentItem, AssignmentReci
     AssignmentAttempt, Question, Revision, Choice, AnswerKey, Skill)
 
 router = APIRouter()
+
+
+@contextmanager
+def assignment_write(engine):
+    try:
+        with write_transaction(engine) as db:
+            yield db
+    except ValueError:
+        # Transaction helper has already rolled back. Do not expose database details.
+        raise HTTPException(503, 'Could not save right now. Go back and retry your submission.',
+                            headers={'Retry-After': '2'}) from None
+
 
 
 def student_assignment(db, request, assignment_id):
@@ -39,6 +52,25 @@ def progress(db, assignment, user):
     attempts = db.scalars(select(AssignmentAttempt).where(AssignmentAttempt.assignment_id == assignment.id,
         AssignmentAttempt.student_id == user.id).order_by(AssignmentAttempt.number)).all()
     return summarize_progress(assignment, rows, attempts)
+
+
+def progress_many(db, assignments, user):
+    """Fetch list progress in two queries, regardless of assignment count."""
+    if not assignments:
+        return []
+    ids = [assignment.id for assignment in assignments]
+    rows_by_assignment = {}
+    for item, revision in db.execute(select(AssignmentItem, Revision).join(Revision,
+            AssignmentItem.revision_id == Revision.id).where(AssignmentItem.assignment_id.in_(ids))
+            .order_by(AssignmentItem.position)):
+        rows_by_assignment.setdefault(item.assignment_id, []).append((item, revision))
+    attempts_by_assignment = {}
+    for attempt in db.scalars(select(AssignmentAttempt).where(
+            AssignmentAttempt.assignment_id.in_(ids), AssignmentAttempt.student_id == user.id)
+            .order_by(AssignmentAttempt.number)):
+        attempts_by_assignment.setdefault(attempt.assignment_id, []).append(attempt)
+    return [summarize_progress(assignment, rows_by_assignment.get(assignment.id, []),
+            attempts_by_assignment.get(assignment.id, [])) for assignment in assignments]
 
 
 def summarize_progress(assignment, rows, attempts):
@@ -121,10 +153,10 @@ def create_assignment(request: Request, title: str = Form(''), instructions: str
         try:
             local = datetime.strptime(due, '%Y-%m-%dT%H:%M')
             due_at = local.replace(tzinfo=SCHOOL_ZONE).astimezone(timezone.utc).replace(tzinfo=None)
-        except ValueError: raise HTTPException(400, 'Choose a valid due date and time.') from None
+        except (ValueError, OverflowError): raise HTTPException(400, 'Choose a valid due date and time.') from None
     if not 1 <= len(questions) <= 50 or len(set(questions)) != len(questions):
         raise HTTPException(400, 'Select between 1 and 50 different questions.')
-    with write_transaction(request.app.state.database_engine) as db:
+    with assignment_write(request.app.state.database_engine) as db:
         user = require_teacher(request, db)
         previous = db.scalar(select(Assignment).where(Assignment.submission_key == submission_key))
         if previous:
@@ -143,6 +175,8 @@ def create_assignment(request: Request, title: str = Form(''), instructions: str
             q, revision = db.get(Question, qid), db.get(Revision, rid)
             if not q or q.status != 'published' or q.published_revision_id != rid or not revision or not revision.sealed or revision.question_type != 'multiple_choice' or revision.media_id:
                 raise HTTPException(409, 'A selected question changed. Reload and review the selection before assigning.')
+            if rid in revisions:
+                raise HTTPException(400, 'Select each question only once.')
             revisions.append(rid)
         assignment = Assignment(title=title, instructions=instructions, group_id=group_id,
             due_at=due_at, created_by=user.id, submission_key=submission_key)
@@ -158,7 +192,7 @@ def student_list(request: Request, db: Session = Depends(get_db)):
     assignments = db.scalars(select(Assignment).join(AssignmentRecipient,
         AssignmentRecipient.assignment_id == Assignment.id).where(AssignmentRecipient.student_id == user.id)
         .order_by(Assignment.id.desc()).limit(100)).all()
-    return render(request, 'assignment_list.html', user=user, cards=[progress(db,a,user) for a in assignments])
+    return render(request, 'assignment_list.html', user=user, cards=progress_many(db, assignments, user))
 
 
 @router.get('/student/assignments/{assignment_id}')
@@ -195,7 +229,7 @@ def submit_answer(assignment_id: int,item_id: int,request: Request,choice_id: in
         retry_key: str=Form(''),csrf: str=Form('')):
     verify_csrf(request,csrf)
     if not re.fullmatch(r'[A-Za-z0-9_-]{32,64}',retry_key): raise HTTPException(400,'Reload the question before answering.')
-    with write_transaction(request.app.state.database_engine) as db:
+    with assignment_write(request.app.state.database_engine) as db:
         user, assignment, item = assigned_item(db,request,assignment_id,item_id)
         choice = db.get(Choice,choice_id) if 0 < choice_id < 2**63 else None
         if not choice or choice.revision_id != item.revision_id: raise HTTPException(400,'Choose one of the listed answers.')

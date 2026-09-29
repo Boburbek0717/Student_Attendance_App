@@ -612,3 +612,17 @@ passed 9 tests (6.536s), including reporting progression, inactive recipient his
 student/other-teacher/anonymous boundaries, invalid IDs, completion timing and retries.
 `git diff --check` passed. Browser/real-device and owner acceptance remain pending.
 Next: owner reviews the report; Stage 3 convenience features remain future scope.
+
+
+## Assignment review and hardening — 2026-09-29
+
+Follow-up to Stages 1/2, baseline 01139a9. Fixed canonical duplicate selections,
+UTC date underflow, and retryable storage failures. Batched student list progress
+into two queries instead of two per assignment. No schema changes. Review scope,
+reproductions, verification and remaining work: docs/assignment-review.md.
+Full isolated suite 235 passed; final focused assignment suite 12 passed; 14 Node
+checks passed; pip compatibility check passed. Final transaction-error wrapper
+was verified by the focused suite after the full run started. Live data untouched;
+server not restarted during audit. No remote push. Owner/real-device review pending.
+Next: submission rate limiting and realistic classroom load checks, then creation
+form error recovery. Existing untracked artifacts preserved.
