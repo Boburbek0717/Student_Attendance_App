@@ -64,7 +64,8 @@ class DatabaseTests(unittest.TestCase):
             "balance_adjustments", "lesson_roster_snapshots", "lesson_roster", "attendance_attempt_windows", "login_attempt_windows", "attendance_corrections", "lesson_closures", "check_in_receipts",
             "qb_schema_versions", "qb_banks", "qb_sections", "qb_domains", "qb_skills",
             "qb_sources", "qb_media", "qb_questions", "qb_revisions", "qb_choices",
-            "qb_answer_keys", "qb_attempts", "qb_bookmarks", "qb_publication_events"
+            "qb_answer_keys", "qb_attempts", "qb_bookmarks", "qb_publication_events",
+            "qb_assignments", "qb_assignment_items", "qb_assignment_recipients", "qb_assignment_attempts"
         })
         self.assertEqual(self.session.scalar(text("PRAGMA foreign_keys")), 1)
         self.assert_rejected(Lesson(group_id=999))

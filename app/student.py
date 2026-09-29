@@ -25,7 +25,12 @@ def require_student(request: Request, db: Session = Depends(get_db)) -> User:
 
 
 def dashboard(request: Request, db: Session, user: User, error=None, status_code=None, retry_key=None):
-    return render(request, "student.html", status_code or (400 if error else 200), user=user, error=error,
+    from sqlalchemy import select
+    from app.question_bank.models import Assignment, AssignmentRecipient
+    assignments = db.scalars(select(Assignment).join(AssignmentRecipient,
+        AssignmentRecipient.assignment_id == Assignment.id).where(AssignmentRecipient.student_id == user.id)
+        .order_by(Assignment.id.desc()).limit(3)).all()
+    return render(request, "student.html", status_code or (400 if error else 200), user=user, error=error, assignments=assignments,
                   retry_key=retry_key or secrets.token_urlsafe(32),
                   notice=request.session.pop("attendance_notice", None),
                   **student_records(db, user.id))

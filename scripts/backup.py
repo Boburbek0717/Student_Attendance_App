@@ -53,12 +53,13 @@ def inspect_database(path):
         qb_version = 0
         if 'qb_schema_versions' in actual:
             versions = db.execute('SELECT version FROM qb_schema_versions ORDER BY version').fetchall()
-            if versions not in ([(1,)], [(1,), (2,)], [(1,), (2,), (3,)]):
+            if versions not in ([(1,)], [(1,), (2,)], [(1,), (2,), (3,)], [(1,), (2,), (3,), (4,)]):
                 raise ValueError('Unsupported Question Bank schema version.')
             qb_version = versions[-1][0]
         expected = {name: table for name, table in Base.metadata.tables.items()
                     if (any(n.startswith('qb_') for n in actual) or not name.startswith('qb_'))
-                    and (qb_version >= 2 or name != 'qb_publication_events')}
+                    and (qb_version >= 2 or name != 'qb_publication_events')
+                    and (qb_version >= 4 or name not in {'qb_assignments','qb_assignment_items','qb_assignment_recipients','qb_assignment_attempts'})}
         if actual != set(expected):
             raise ValueError('Schema differs from this release; restore using matching code.')
         if 'qb_schema_versions' in actual:

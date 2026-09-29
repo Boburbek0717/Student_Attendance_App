@@ -507,3 +507,46 @@ wrong-to-correct transitions and personal results alongside prior auth/retry che
 Fictional browser fixtures reviewed desktop and 390px mobile, all badge states,
 no horizontal overflow. No real-device or owner acceptance claimed.
 Next: owner reviews the grid in student practice. Deployment remains deferred.
+
+## Assignments Stage 1 — 2026-09-29
+
+Scope: owner-approved group assignment creation and student start/resume/complete.
+Teacher dashboard links to Assignments; create title/instructions, group, optional
+Asia/Tashkent deadline and 1–50 manually selected published multiple-choice questions.
+Search by category/text and difficulty filter preserve hidden selections. Publication
+revision checked under write lock to reject stale selection. Teacher listing shows
+own assignments, target group and recipient count. Assignments and recipients are
+snapshots; later enrollments do not automatically receive old work. No edit/delete
+UI in this stage. Access requires recipient membership plus active course enrollment.
+
+Student dashboard lists latest three assignments; dedicated page groups latest 100
+into To do/In progress/Completed. Overview resumes first unanswered item, shows
+saved results/difficulty, accepts late work. All questions answered = complete,
+regardless of correctness. Dedicated attempt records keep Question Bank practice
+separate. First wrong answer withholds answer/explanation; correct or second attempt
+reveals them with explanation collapsed. Existing math rendering/highlighting used.
+Assigned sealed revisions remain available even after question unpublication.
+Stage 2 teacher per-student reporting and Stage 3 convenience remain future work.
+
+QB schema v4 adds four tables with FK constraints, duplicate-request protection,
+and immutable update/delete triggers. Versions 1–3 migrate additively; old rows
+remain unchanged. Backup inspector now accepts v4 and recognizes older versions.
+Rollback after real use: restore a verified v3 backup into a SEPARATE destination
+with matching previous code; do not run old code against v4 or delete new history.
+
+Evidence: `.venv\Scripts\python.exe scripts/verify.py` passed 231 tests (86.097s).
+An initial run found outdated schema fixtures; corrected and final run passed.
+After teacher listing refinement, `scripts/verify.py --pattern test_assignments.py`
+passed 7 (4.963s). Includes separate grading, resume, completed-but-wrong, late
+status, CSRF/access, saved recipients, unpublication, concurrent retry, immutability,
+and backup/restore reconciliation. Migration tests cover repeatable v3 upgrade.
+Isolated fictional browser previews: desktop and 390px student layout, keyboard
+radio/checkbox controls, filter retains selections; no horizontal overflow.
+No real-device or owner acceptance claimed. No live records read or migrated.
+
+Activation PENDING: because the owner prohibits live database access, do not restart
+the working app until backup/upgrade operation is authorized. Next concrete step:
+run established SQLite-consistent backup into LOCALAPPDATA/SAT Factory/backups/
+question-bank-release (no pruning), then guarded launcher restart to apply v4.
+Previous baseline 4c9f93a; only assignment-related files staged, unrelated output
+preserved. Screenshots and fictional fixtures are untracked under output/assignments-preview.

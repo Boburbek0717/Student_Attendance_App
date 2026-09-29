@@ -4,7 +4,7 @@
 {% block content %}
 <div class="dashboard-heading">
     <div><p class="eyebrow">TEACHER WORKSPACE</p><h1>Your classes</h1><p class="hint">Welcome, {{ user.display_name }}.</p></div>
-    <nav class="dashboard-actions" aria-label="Teacher actions"><a class="button secondary" href="/teacher/students">Manage students</a><a class="text-action" href="/teacher/questions">Question library</a><a class="text-action" href="#setup">Setup tools</a></nav>
+    <nav class="dashboard-actions" aria-label="Teacher actions"><a class="button secondary" href="/teacher/students">Manage students</a><a class="text-action" href="/teacher/questions">Question library</a><a class="text-action" href="/teacher/assignments">Assignments</a><a class="text-action" href="#setup">Setup tools</a></nav>
 </div>
 {% if error and section in ['group', 'student', 'enrollment'] %}<p class="error" role="alert">Setup could not be saved. <a href="#setup">Review the highlighted form below.</a></p>{% endif %}
 {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}

@@ -112,6 +112,8 @@ class QuestionBankSchemaTests(unittest.TestCase):
     def test_version_one_upgrade_preserves_content_and_backup_compatibility(self):
         upgrade(self.engine); q,r,c=self.content()
         with self.engine.begin() as db:
+            for table in ('qb_assignment_attempts','qb_assignment_recipients','qb_assignment_items','qb_assignments'):
+                db.exec_driver_sql(f'DROP TABLE {table}')
             db.execute(text('DROP TABLE qb_publication_events'))
             db.execute(text('DELETE FROM qb_schema_versions WHERE version>=2'))
         before=inspect_database(self.path)
@@ -171,7 +173,9 @@ class QuestionBankSchemaTests(unittest.TestCase):
         with self.engine.begin() as db:
             db.exec_driver_sql('DROP TRIGGER qb_revision_seal_valid')
             _seal_trigger(db, require_explanation=True)
-            db.exec_driver_sql('DELETE FROM qb_schema_versions WHERE version=3')
+            for table in ('qb_assignment_attempts','qb_assignment_recipients','qb_assignment_items','qb_assignments'):
+                db.exec_driver_sql(f'DROP TABLE {table}')
+            db.exec_driver_sql('DELETE FROM qb_schema_versions WHERE version>=3')
         before = inspect_database(self.path)
         upgrade(self.engine)
         after = inspect_database(self.path)
@@ -187,3 +191,17 @@ class QuestionBankSchemaTests(unittest.TestCase):
             db.add_all(choices); db.flush()
             db.add(AnswerKey(revision_id=r.id, choice_id=choices[0].id)); db.flush()
             r.sealed=True; q.current_revision_id=r.id; db.commit()
+
+    def test_v3_upgrade_preserves_records(self):
+        upgrade(self.engine)
+        self.content()
+        with self.engine.begin() as db:
+            for table in ('qb_assignment_attempts','qb_assignment_recipients','qb_assignment_items','qb_assignments'):
+                db.exec_driver_sql(f'DROP TABLE {table}')
+            db.exec_driver_sql('DELETE FROM qb_schema_versions WHERE version=4')
+        before=inspect_database(self.path)
+        upgrade(self.engine);upgrade(self.engine)
+        after=inspect_database(self.path)
+        for name in before['fingerprints']:
+            if name!='qb_schema_versions':self.assertEqual(before['fingerprints'][name],after['fingerprints'][name])
+        self.assertEqual(after['counts']['qb_assignments'],0)

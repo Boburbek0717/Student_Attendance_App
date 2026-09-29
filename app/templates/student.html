@@ -3,7 +3,9 @@
 {% block content %}
 <h1>Welcome, {{ user.display_name }}</h1>
 <p>You are logged in as a student.</p>
-<p><a class="button secondary" href="/student/questions">Question practice →</a></p>
+<p><a class="button secondary" href="/student/questions">Question practice →</a> <a class="button" href="/student/assignments">Your assignments →</a></p>
+<section aria-labelledby="assignments-heading"><h2 id="assignments-heading">Your assignments</h2>{% for a in assignments %}<p><a href="/student/assignments/{{ a.id }}">{{ a.title }}</a>{% if a.due_at %} · Due {{ a.due_at|school_time }}{% endif %}</p>{% else %}<p class="hint">No assignments yet. Your teacher will share your next task here.</p>{% endfor %}</section>
+
 {% if not memberships %}<p class="notice" role="status">Your account is ready, but you are not enrolled in a group yet. Ask your teacher to add you to the correct group before checking in.</p>{% endif %}
 {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
 <section aria-labelledby="check-in-heading">

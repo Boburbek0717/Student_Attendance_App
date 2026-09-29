@@ -182,3 +182,54 @@ class PublicationEvent(Base):
     action: Mapped[str] = mapped_column(String(20))
     teacher_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+class Assignment(Base):
+    __tablename__ = 'qb_assignments'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(120))
+    instructions: Mapped[str] = mapped_column(Text, default='')
+    group_id: Mapped[int] = mapped_column(ForeignKey('groups.id'))
+    created_by: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    due_at: Mapped[datetime | None] = mapped_column(DateTime)
+    submission_key: Mapped[str] = mapped_column(String(64), unique=True)
+
+
+class AssignmentItem(Base):
+    __tablename__ = 'qb_assignment_items'
+    __table_args__ = (UniqueConstraint('assignment_id', 'position'),
+                     UniqueConstraint('assignment_id', 'revision_id'),
+                     UniqueConstraint('id', 'assignment_id', 'revision_id'),
+                     CheckConstraint('position > 0'))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    assignment_id: Mapped[int] = mapped_column(ForeignKey('qb_assignments.id'), index=True)
+    revision_id: Mapped[int] = mapped_column(ForeignKey('qb_revisions.id'))
+    position: Mapped[int]
+
+
+class AssignmentRecipient(Base):
+    __tablename__ = 'qb_assignment_recipients'
+    assignment_id: Mapped[int] = mapped_column(ForeignKey('qb_assignments.id'), primary_key=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey('users.id'), primary_key=True)
+
+
+class AssignmentAttempt(Base):
+    __tablename__ = 'qb_assignment_attempts'
+    __table_args__ = (
+        ForeignKeyConstraint(['item_id','assignment_id','revision_id'],
+            ['qb_assignment_items.id','qb_assignment_items.assignment_id','qb_assignment_items.revision_id']),
+        ForeignKeyConstraint(['assignment_id','student_id'],
+            ['qb_assignment_recipients.assignment_id','qb_assignment_recipients.student_id']),
+        ForeignKeyConstraint(['revision_id','choice_id'],['qb_choices.revision_id','qb_choices.id']),
+        UniqueConstraint('student_id','item_id','number'),
+        UniqueConstraint('student_id','submission_key'), CheckConstraint('number > 0'))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    assignment_id: Mapped[int]
+    item_id: Mapped[int]
+    revision_id: Mapped[int]
+    student_id: Mapped[int]
+    choice_id: Mapped[int]
+    number: Mapped[int]
+    is_correct: Mapped[bool] = mapped_column(Boolean(create_constraint=True))
+    submission_key: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
