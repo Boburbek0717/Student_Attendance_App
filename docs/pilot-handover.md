@@ -550,3 +550,30 @@ run established SQLite-consistent backup into LOCALAPPDATA/SAT Factory/backups/
 question-bank-release (no pruning), then guarded launcher restart to apply v4.
 Previous baseline 4c9f93a; only assignment-related files staged, unrelated output
 preserved. Screenshots and fictional fixtures are untracked under output/assignments-preview.
+
+
+### Assignments Stage 1 activation — 2026-09-29
+
+The owner authorized the pending local activation. This supersedes the activation
+PENDING note above. Implementation checkpoint: e4eb9fa. Tracked working tree was
+clean before activation; unrelated untracked output remains preserved.
+
+SQLite-consistent backup completed successfully using scripts.backup.backup with
+source attendance.db and destination LOCALAPPDATA/SAT Factory/backups/question-bank-release,
+without pruning. Backup bundle:
+`C:/Users/noral/AppData/Local/Packages/OpenAI.Codex_2p2nqsd0c76g0/LocalCache/Local/SAT Factory/backups/question-bank-release/sat-backup-20260929T101633-cef8cb5de81d42c5b23e6009f77d72a6`.
+
+`.venv\Scripts\python.exe scripts/open_sat_factory.py --no-browser` exited 0 and
+restarted the local app, applying the additive migration. Read-only verification:
+`SELECT version FROM qb_schema_versions ORDER BY version` returned 1,2,3,4;
+all four assignment tables exist; `PRAGMA integrity_check` returned ok and
+`PRAGMA foreign_key_check` returned no violations. Loopback GET / and /login
+returned 200. Unauthenticated GET /teacher/assignments and /student/assignments
+both returned 303 to /login. No account login or real assignment creation was
+performed during verification. Security controls remain enabled.
+
+No application code changed during activation, so the previously recorded 231-test
+suite and 7-test focused follow-up were not repeated. Local activation is complete;
+owner experience review and real-device validation remain pending. No remote push
+or deployment performed. Next: owner creates a group assignment and reviews the
+student start/resume experience; per-student teacher reporting remains Stage 2.
