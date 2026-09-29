@@ -651,3 +651,18 @@ suite and 7-test focused follow-up were not repeated. Local activation is comple
 owner experience review and real-device validation remain pending. No remote push
 or deployment performed. Next: owner creates a group assignment and reviews the
 student start/resume experience; per-student teacher reporting remains Stage 2.
+
+
+### Assignment category selection — 2026-09-29
+
+Stage 1 follow-up: teacher can select/deselect a whole category, then adjust
+individual questions. Category controls show partial selection and include filtered
+questions explicitly; selection counts remain visible. All selected question IDs
+use the existing snapshot/authorization route. The 50-question limit remains;
+client validation explains excess selections without silently truncating categories.
+Without JavaScript, individual question selection remains available. No schema change.
+Verification: isolated `scripts/verify.py --pattern test_assignments.py`: 7 passed
+(5.112s). Node VM interaction checks passed for category selection/deselection,
+partial state, category isolation, hidden selections and validation focus recovery.
+`git diff --check` passed. Owner/browser experience review pending. Refresh the
+assignment creation page to load the updated template and versioned script.
