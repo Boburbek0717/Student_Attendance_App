@@ -252,3 +252,41 @@ class QuestionPracticeTests(unittest.TestCase):
         self.assertIn('/static/practice.css', page)
         self.assertIn('/static/practice-feedback.js', page)
         self.assertIn('practice-stage', page)
+
+    def test_question_grid_results_are_personal_and_revision_scoped(self):
+        from app.question_bank.practice import practice_statuses
+        q = self.ready()
+        with Session(self.engine) as db:
+            revision = db.get(Revision, db.get(Question, q).published_revision_id)
+            student = db.scalar(select(User.id).where(User.role=='student'))
+            teacher = db.scalar(select(User.id).where(User.role=='teacher'))
+            rows = [(db.get(Question,q), revision)]
+            self.assertEqual(practice_statuses(db,student,rows), {})
+        values = self.answer_values(q)
+        correct = values['choice_id']
+        with Session(self.engine) as db:
+            values['choice_id'] = db.scalar(select(Choice.id).where(Choice.revision_id==int(values['revision_id']),Choice.id!=correct))
+        self.client.post(f'/student/questions/{q}/answer',data=values)
+        def status():
+            with Session(self.engine) as db:
+                revision = db.get(Revision,int(values['revision_id']))
+                rows = [(db.get(Question,q),revision)]
+                self.assertEqual(practice_statuses(db,teacher,rows), {})
+                return practice_statuses(db,student,rows)[revision.id]
+        self.assertEqual(status(),'incorrect')
+        retry = self.client.get(f'/student/questions/{q}?retry=1')
+        values['retry_key'] = re.search(r'name="retry_key" value="([^"]+)"',retry.text)[1]
+        values['choice_id'] = correct
+        self.client.post(f'/student/questions/{q}/answer',data=values)
+        self.assertEqual(status(),'retried')
+        page = self.client.get(f'/student/questions/themes/{self.skill}')
+        self.assertIn('question-map-grid',page.text)
+        self.assertIn('easy, Correct after a mistake',page.text)
+        self.assertIn('aria-current="page"',self.client.get(f'/student/questions/{q}').text)
+
+    def test_grid_first_try_correct(self):
+        q = self.ready()
+        self.client.post(f'/student/questions/{q}/answer',data=self.answer_values(q))
+        page = self.client.get(f'/student/questions/themes/{self.skill}')
+        self.assertIn('easy, First-try correct',page.text)
+        self.assertIn('result-correct tile-result',page.text)

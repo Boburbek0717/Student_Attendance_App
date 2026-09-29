@@ -5,6 +5,7 @@
 {% block content %}
 <nav class="practice-breadcrumb" aria-label="Practice navigation"><a href="/student/questions/themes/{{ theme.id }}">← {{ theme.name }}</a></nav>
 <div class="dashboard-heading practice-question-heading"><div><p class="eyebrow">{{ theme.name }}</p><h1>Question #{{ question.id }}</h1></div><form method="post" action="/student/questions/{{ question.id }}/bookmark"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="saved" value="{{ 'no' if saved else 'yes' }}"><button class="secondary">{{ 'Remove bookmark' if saved else 'Bookmark question' }}</button></form></div>
+<details class="practice-navigator"><summary>Question navigator</summary>{% include "practice_grid.html" %}<a href="/student/questions/themes/{{ theme.id }}">Browse all questions in {{ theme.name }}</a></details>
 <p class="hint practice-context">{{ taxonomy|join(' · ') }} · {{ content.difficulty|capitalize }}</p>
 <div id="practice-highlights" data-student="{{ user.id }}" data-revision="{{ content.id }}" hidden>
 <div class="qb-actions" role="group" aria-label="Text highlighting"><button type="button" id="highlight-add" class="secondary" disabled>Highlight selection</button><button type="button" id="highlight-remove" class="secondary" disabled>Remove highlight</button><button type="button" id="highlight-clear" class="secondary">Clear highlights</button></div>

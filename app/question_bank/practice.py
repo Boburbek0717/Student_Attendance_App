@@ -3,7 +3,7 @@ import re
 import secrets
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 from app.database import write_transaction
@@ -14,6 +14,20 @@ from app.web import get_db, render
 from app.question_bank.models import Question, Revision, Choice, AnswerKey, Attempt, Bookmark, Skill, Domain, Section, Bank
 
 router = APIRouter(prefix='/student/questions')
+
+
+def practice_statuses(db, student_id, rows):
+    """Summarize only this student's attempts on the displayed revisions."""
+    revision_ids = [revision.id for _, revision in rows]
+    if not revision_ids:
+        return {}
+    results = db.execute(select(Attempt.revision_id, func.min(Attempt.number),
+        func.min(case((Attempt.is_correct.is_(True), Attempt.number))))
+        .where(Attempt.student_id == student_id, Attempt.revision_id.in_(revision_ids))
+        .group_by(Attempt.revision_id)).all()
+    return {revision: ('incorrect' if correct is None else
+            'correct' if correct == first else 'retried')
+            for revision, first, correct in results}
 
 
 def require_access(request, db):
@@ -56,7 +70,9 @@ def theme_library(skill_id: int, request: Request, page: int = 1, db: Session = 
         .where(Question.status == 'published', Revision.skill_id == skill_id)
         .order_by(Question.id).offset((page-1)*20).limit(21)).all()
     return render(request, 'practice_library.html', user=user, theme=theme,
-                  rows=rows[:20], more=len(rows)>20, page=page)
+                  rows=rows[:20], more=len(rows)>20, page=page,
+                  grid_rows=rows[:20], grid_offset=(page-1)*20,
+                  statuses=practice_statuses(db, user.id, rows[:20]))
 
 
 def question_page(request, db, user, question_id, attempt_id=None, error=None, retry_key=None, fresh_feedback=False):
@@ -89,7 +105,15 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
         .where(Question.status == 'published', Revision.skill_id == theme.id))
     previous = db.scalar(neighbors.where(Question.id < q.id).order_by(Question.id.desc()).limit(1))
     following = db.scalar(neighbors.where(Question.id > q.id).order_by(Question.id).limit(1))
+    position = db.scalar(select(func.count()).select_from(Question).join(Revision,
+        Question.published_revision_id == Revision.id).where(Question.status == 'published',
+        Revision.skill_id == theme.id, Question.id < q.id))
+    grid_offset = (position // 20) * 20
+    grid_rows = db.execute(select(Question, Revision).join(Revision,
+        Question.published_revision_id == Revision.id).where(Question.status == 'published',
+        Revision.skill_id == theme.id).order_by(Question.id).offset(grid_offset).limit(20)).all()
     return render(request, 'practice_question.html', 400 if error else 200, user=user, question=q,
+        grid_rows=grid_rows, grid_offset=grid_offset, statuses=practice_statuses(db, user.id, grid_rows),
         content=content, taxonomy=taxonomy, theme=theme, fresh_feedback=fresh_feedback, choices=choices, attempt=attempt, answer=key,
         explanation=revision.explanation if reveal_answer else None, previous=previous, following=following,
         error=error, retry_key=retry_key or secrets.token_urlsafe(32),

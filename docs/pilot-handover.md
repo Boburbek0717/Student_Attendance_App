@@ -488,3 +488,22 @@ desktop and 390px browser viewport inspected, no horizontal page overflow.
 Real-device/screen-reader validation and owner acceptance remain pending.
 Next: teacher tries creating a Math draft with the notation guide; typed numeric
 responses and private diagrams can be separate bounded follow-ups.
+
+## Question difficulty/result grid — 2026-09-29
+
+Owner-requested student Question Bank organization delivered for review. Category
+pages show numbered question tiles; question pages have a collapsed navigator for
+the current 20-question block with a link to the full paginated theme. Existing
+question previews remain in a disclosure. Difficulty: green easy, amber medium,
+purple hard. Separate badges: green tick = first saved submission correct; amber
+circle = correct after an earlier mistake; red cross = attempted, no correct
+submission yet; no badge = unattempted. A later wrong retry does not erase an
+earlier success. Results use only the signed-in student's displayed revision,
+aggregated in one query per grid; no answer-key disclosure or schema changes.
+Shared templates include future questions/categories, accessible link labels,
+legends and current-question outline. Empty pages omit inverted range labels.
+Evidence: guarded practice suite 15 passed (7.314s), covering first-try success,
+wrong-to-correct transitions and personal results alongside prior auth/retry checks.
+Fictional browser fixtures reviewed desktop and 390px mobile, all badge states,
+no horizontal overflow. No real-device or owner acceptance claimed.
+Next: owner reviews the grid in student practice. Deployment remains deferred.
