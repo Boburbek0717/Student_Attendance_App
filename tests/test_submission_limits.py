@@ -105,4 +105,3 @@ class SubmissionLimitTests(unittest.TestCase):
         with Session(self.engine) as db:
             self.assertEqual(db.scalar(select(func.count()).select_from(AssignmentAttempt)), 30)
         print(f'Fictional classroom: 30 concurrent students, 60 POSTs including retries, {elapsed:.3f}s')
-
