@@ -52,3 +52,12 @@ server restart; this audit does not start or connect to the working database.
 - `.venv\Scripts\python.exe -m pip check`: no broken requirements. This checks
   compatibility, not vulnerability advisories.
 - `git diff --check`: passed.
+
+## Follow-up status — 2026-10-03
+
+The creation-form recovery item was completed in 55bd3be. The next bounded change
+adds a shared persisted budget for new assignment/practice answers (30 per student
+per rolling minute), preserving identical retries. See the latest product backlog
+and pilot handover entries for verification and limits. The earlier remaining-work
+list describes the review baseline, not current completion status. Real classroom
+Wi-Fi/device testing and sustained production load testing remain outstanding.

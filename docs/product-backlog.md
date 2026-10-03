@@ -715,3 +715,33 @@ covers escaped input, saved values/selections, stale publication warning and no
 partial write. Browser/owner review pending. Live records not used for tests.
 Next: persisted submission throttling and classroom load testing remain pending;
 this session deliberately completes only the form-recovery slice.
+
+## Answer submission protection — 2026-10-03
+
+Bounded follow-up to Assignment Stages 1/2 and the assignment security review.
+New saved answers share a rolling budget of 30 per student per 60 seconds across
+independent practice and assignments. Authentication, enrollment, CSRF, choice
+validation and duplicate-key checks remain in place. Identical saved retries bypass
+the budget; altered reuse of a key is still rejected. HTTP 429 explains that the
+new answer was not saved, gives a waiting period, and includes Retry-After.
+
+The budget is derived from existing immutable attempt timestamps within the same
+SQLite BEGIN IMMEDIATE transaction as the write. It survives process restarts and
+cannot be raced by simultaneous fresh keys. Failed/rolled-back writes do not consume
+capacity. No schema change, dependency, IP restriction or cleanup job was added.
+The existing student-leading indexes scope the queries, each returning at most 30
+rows. Long-lived assignment history may warrant a dedicated student/time index
+following measurement. This bounds saved history growth; it is not an edge-level
+DoS defense and does not throttle invalid requests or identical saved retries.
+
+Automated scenarios cover combined practice/assignment capacity, unchanged retry,
+429 reporting, expiry, a fresh engine reading the persisted budget, a race for the
+last slot, and 30 separately authenticated fictional students each submitting and
+retrying through HTTP concurrently. The classroom check uses a local TestClient
+and temporary SQLite, not real Wi-Fi, phones, a multi-worker server or production
+capacity certification. Real-device and owner feedback remain pending.
+
+Verification: isolated `scripts/verify.py` passed all 240 tests in 144.492s. The
+30-student simulation completed 60 POSTs (including retries) in 1.497s, excluding
+login setup, and persisted exactly 30 answers. `git diff --check` passed. Pending
+runtime restart and owner/mobile review; no live-data test or remote deployment.

@@ -12,6 +12,7 @@ from app.student import require_student
 from app.security import verify_csrf
 from app.web import get_db, render
 from app.question_bank.models import Question, Revision, Choice, AnswerKey, Attempt, Bookmark, Skill, Domain, Section, Bank
+from app.question_bank.submission_limits import limit_new_answer
 
 router = APIRouter(prefix='/student/questions')
 
@@ -150,6 +151,7 @@ def record_answer(engine, request, question_id, revision_id, choice_id, retry_ke
         if revision.question_type != 'multiple_choice': raise ValueError('This question type is not available yet.')
         choice = db.get(Choice, choice_id) if 0 < choice_id < 2**63 else None
         if not choice or choice.revision_id != revision_id: raise ValueError('Choose one of the listed answers.')
+        limit_new_answer(db, user.id)
         key = db.get(AnswerKey, revision_id)
         number = (db.scalar(select(func.max(Attempt.number)).where(Attempt.student_id==user.id,Attempt.question_id==q.id)) or 0)+1
         attempt = Attempt(student_id=user.id,question_id=q.id,revision_id=revision_id,choice_id=choice.id,

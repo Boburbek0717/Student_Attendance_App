@@ -679,3 +679,44 @@ sat-backup-20261003T121141-326caa4f00e34967bcf302bcbe0fb0d4
 under LOCALAPPDATA/SAT Factory/backups/question-bank-release.
 Questions are available on refresh; updated explanation edit limit needs server
 restart. No remote push. Owner practice review remains pending.
+
+## Answer submission protection — 2026-10-03
+
+Scope: the persisted submission throttling and classroom simulation left pending
+by Assignment Stages 1/2 and creation recovery. Baseline b649fff, tracked tree clean;
+all pre-existing untracked output artifacts preserved. Deployment remains deferred.
+
+Implemented one shared 30-new-answers/60-second/student budget for assignments and
+practice. Existing immutable attempts provide persisted state; checks run under
+the same immediate write transaction after authorization, validation and duplicate
+recognition. Identical saved retries succeed at capacity. Excess new answers return
+429 with Retry-After and an actionable message; history remains unchanged. No schema
+or dependency change; live records/secrets not accessed, no server restart or push.
+
+Acceptance: reject excess new history across both routes, preserve retries, survive
+new engine/process state, serialize the last available slot, and keep different
+students independent. TestClient simulation covers 30 fictional student sessions
+and 60 concurrent answer/retry POSTs. This does not establish real-device or Wi-Fi
+behavior, sustained production capacity, or owner acceptance. No OpenClaw review
+was performed for this slice; automated evidence is identified separately.
+
+Limits: the limiter bounds successful answer history, not every incoming request.
+Assignment queries use existing student-leading indexes; measure long-term history
+before adding an additional time index. No classroom bandwidth simulation or
+proxy-level abuse protection was attempted.
+
+Next concrete action: review assignment/practice recovery UX on mobile and keyboard,
+including the temporary 429 wait and slow/lost-response experience, using fictional
+data. Arrange owner/real-phone review separately; do not infer acceptance.
+
+Verification for this increment:
+- `.venv\Scripts\python.exe scripts/verify.py`: 240 passed, 144.492s.
+- Final classroom scenario: 30 students / 60 answer-and-retry POSTs in 1.497s;
+  exactly 30 assignment attempts persisted. Timing excludes account/login setup.
+- Initial focused run: `.venv\Scripts\python.exe scripts/verify.py --pattern test_submission_limits.py`
+  passed 16 checks in 24.883s (13 assignment checks were also discovered through a
+  class import). The import was corrected before the full run to avoid duplicate
+  discovery; the final full run includes the three new checks once each.
+- `git diff --check`: passed. No JavaScript changed; Node checks not rerun.
+- Changes are saved in the accompanying local commit. Runtime activation requires
+  the next authorized local server restart; no deployment or remote push performed.

@@ -15,6 +15,7 @@ from app.teacher import require_teacher
 from app.security import verify_csrf
 from app.web import get_db, render
 from app.question_bank.practice import require_access
+from app.question_bank.submission_limits import limit_new_answer
 from app.question_bank.models import (Assignment, AssignmentItem, AssignmentRecipient,
     AssignmentAttempt, Question, Revision, Choice, AnswerKey, Skill)
 
@@ -268,6 +269,7 @@ def submit_answer(assignment_id: int,item_id: int,request: Request,choice_id: in
         if attempt:
             if attempt.item_id!=item.id or attempt.choice_id!=choice_id: raise HTTPException(409,'This submission was already used. Reload the question.')
         else:
+            limit_new_answer(db, user.id)
             number = (db.scalar(select(func.max(AssignmentAttempt.number)).where(AssignmentAttempt.student_id==user.id,AssignmentAttempt.item_id==item.id)) or 0)+1
             key=db.get(AnswerKey,item.revision_id)
             attempt=AssignmentAttempt(assignment_id=assignment.id,item_id=item.id,revision_id=item.revision_id,
