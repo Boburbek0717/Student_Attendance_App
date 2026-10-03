@@ -641,3 +641,14 @@ covers escaped input, saved values/selections, stale publication warning and no
 partial write. Browser/owner review pending. Live records not used for tests.
 Next: persisted submission throttling and classroom load testing remain pending;
 this session deliberately completes only the form-recovery slice.
+
+
+## Homepage visual refresh — 2026-10-03
+
+Owner requested more energy. Homepage-only home.css adds deep-green hero, lime
+headline/action, decorative geometric steps, numbered score tickets and restrained
+hover feedback. Existing public results and teacher content preserved; no libraries,
+data or backend changes. Reference: Linear interface hierarchy design article.
+Browser reviewed at 1440px and 390px; mobile document has no horizontal overflow.
+Reduced-motion CSS disables card movement. Public homepage served updated assets
+without server restart. Screenshot: output/home-refresh.png. Owner review pending.

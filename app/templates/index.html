@@ -3,13 +3,16 @@
 {% block main_class %}welcome-page home-page{% endblock %}
 {% block body_class %}public-site{% endblock %}
 {% block brand_header %}{% set public_page = 'home' %}{% include "public_header.html" %}{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', path='/home.css') }}?v=1">{% endblock %}
 {% block content %}
 <section class="factory-hero home-intro" aria-labelledby="welcome-heading">
     <div class="hero-copy">
         <h1 id="welcome-heading">Small steps. Serious <span>progress.</span></h1>
         <p class="page-intro">Student scores and stories from SAT Factory.</p>
 
+        <a class="hero-action" href="/results">Explore student results <span aria-hidden="true">&#8599;</span></a>
     </div>
+    <div class="factory-mark" aria-hidden="true"><span></span><span></span><span></span><b>&#8599;</b></div>
 </section>
 <section id="results" class="featured-results" aria-labelledby="featured-heading">
     <div class="section-heading"><h2 id="featured-heading">Featured results</h2><a class="text-action" href="/results">View all {{ result_count }} results ↗</a></div>
@@ -17,7 +20,7 @@
     <div class="featured-track" aria-label="Featured student results" aria-describedby="swipe-hint">
         {% for result in featured %}
         <a class="featured-card" href="/results#result-{{ result.id }}" aria-label="{{ result.name }}, SAT {{ result.ebrw + result.math }}. View score card.">
-            <span class="featured-label">SAT score <span aria-hidden="true">↗</span></span>
+            <span class="featured-label"><span class="ticket-index">0{{ loop.index }} / SAT score</span> <span aria-hidden="true">↗</span></span>
             <h3>{{ result.name }}</h3>
             <div class="featured-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
             <dl class="result-breakdown"><div><dt>EBRW</dt><dd>{{ result.ebrw }}</dd></div><div><dt>Math</dt><dd>{{ result.math }}</dd></div></dl>
