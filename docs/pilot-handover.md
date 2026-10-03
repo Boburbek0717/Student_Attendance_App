@@ -626,3 +626,18 @@ was verified by the focused suite after the full run started. Live data untouche
 server not restarted during audit. No remote push. Owner/real-device review pending.
 Next: submission rate limiting and realistic classroom load checks, then creation
 form error recovery. Existing untracked artifacts preserved.
+
+
+## Assignment creation recovery — 2026-10-03
+
+Bounded Stage 3 workflow improvement from docs/assignment-review.md: creation
+validation errors now re-render the form with title, instructions, group, deadline,
+valid selections and submission key retained. Unavailable or changed revision
+selections are removed with an explicit review warning, never silently replaced.
+CSRF and teacher authorization remain enforced; persisted creation still rechecks
+publication in the write transaction. Existing retry headers are preserved.
+No schema/dependency changes. Isolated assignment suite: 13 passed. Regression
+covers escaped input, saved values/selections, stale publication warning and no
+partial write. Browser/owner review pending. Live records not used for tests.
+Next: persisted submission throttling and classroom load testing remain pending;
+this session deliberately completes only the form-recovery slice.

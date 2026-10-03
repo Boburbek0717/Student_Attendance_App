@@ -267,3 +267,33 @@ class AssignmentTests(unittest.TestCase):
         self.assertNotIn('private database detail', response.text)
         self.assertIn('Go back and retry', response.text)
         self.assertEqual(self.client.post(url + '/answer', data=data).status_code, 200)
+
+    def test_creation_error_keeps_input_and_requires_stale_question_review(self):
+        q, aid, iid = self.assigned()
+        self.login('teacher')
+        page = self.client.get('/teacher/assignments/new')
+        with Session(self.engine) as db:
+            group = db.scalar(select(Group.id))
+            rid = db.get(Question, q).published_revision_id
+        key = re.search(r'name="submission_key" value="([^"]+)"', page.text)[1]
+        data = dict(title='<b>Week two</b>', instructions='Keep this instruction',
+                    group_id=group, due='0001-01-01T00:00', questions=[f'{q}:{rid}'],
+                    submission_key=key, csrf=self.token(page))
+        response = self.client.post('/teacher/assignments/new', data=data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('&lt;b&gt;Week two&lt;/b&gt;', response.text)
+        self.assertNotIn('<b>Week two</b>', response.text)
+        self.assertIn('Keep this instruction</textarea>', response.text)
+        self.assertIn(f'value="{q}:{rid}" checked', response.text)
+        self.assertIn(f'value="{group}" selected', response.text)
+        self.assertIn(f'name="submission_key" value="{key}"', response.text)
+        data['due'] = ''
+        with Session(self.engine) as db:
+            db.get(Question, q).status = 'draft'
+            db.commit()
+        response = self.client.post('/teacher/assignments/new', data=data)
+        self.assertEqual(response.status_code, 409)
+        self.assertIn('1 selected question(s) changed or are unavailable', response.text)
+        self.assertNotIn(f'value="{q}:{rid}" checked', response.text)
+        with Session(self.engine) as db:
+            self.assertEqual(db.scalar(select(func.count()).select_from(Assignment)), 1)

@@ -105,12 +105,22 @@ def teacher_list(request: Request, db: Session = Depends(get_db)):
 @router.get('/teacher/assignments/new')
 def new_assignment(request: Request, db: Session = Depends(get_db)):
     user = require_teacher(request, db)
+    return assignment_form(request, db, user)
+
+
+def assignment_form(request, db, user, *, values=None, error=None, status_code=200):
+    values = values or {}
     rows = db.execute(select(Question, Revision, Skill).join(Revision,
         Question.published_revision_id == Revision.id).join(Skill, Revision.skill_id == Skill.id)
         .where(Question.status == 'published', Revision.question_type == 'multiple_choice', Revision.media_id.is_(None))
         .order_by(Skill.name, Question.id)).all()
-    return render(request, 'assignment_new.html', user=user, rows=rows,
-        groups=db.scalars(select(Group).order_by(Group.name)).all(), submission_key=secrets.token_urlsafe(32))
+    selected = set(values.get('questions', []))
+    available = {f'{q.id}:{r.id}' for q, r, skill in rows}
+    removed = len(selected - available)
+    return render(request, 'assignment_new.html', status_code, user=user, rows=rows,
+        groups=db.scalars(select(Group).order_by(Group.name)).all(),
+        submission_key=values.get('submission_key') or secrets.token_urlsafe(32),
+        values=values, selected=selected & available, removed=removed, error=error)
 
 
 @router.get('/teacher/assignments/{assignment_id}')
@@ -144,9 +154,30 @@ def create_assignment(request: Request, title: str = Form(''), instructions: str
         group_id: int = Form(0), due: str = Form(''), questions: list[str] = Form([]),
         submission_key: str = Form(''), csrf: str = Form('')):
     verify_csrf(request, csrf)
+    with Session(request.app.state.database_engine) as db:
+        require_teacher(request, db)
+    values = dict(title=title, instructions=instructions, group_id=group_id, due=due,
+                  questions=questions, submission_key=submission_key)
+    try:
+        return save_assignment(request, title, instructions, group_id, due, questions, submission_key)
+    except HTTPException as error:
+        if error.status_code not in (400, 409, 503):
+            raise
+        if not re.fullmatch(r'[A-Za-z0-9_-]{32,64}', submission_key):
+            values['submission_key'] = secrets.token_urlsafe(32)
+        with Session(request.app.state.database_engine) as db:
+            user = require_teacher(request, db)
+            response = assignment_form(request, db, user, values=values,
+                error=error.detail, status_code=error.status_code)
+            if error.headers:
+                response.headers.update(error.headers)
+            return response
+
+
+def save_assignment(request, title, instructions, group_id, due, questions, submission_key):
     title, instructions = title.strip(), instructions.strip()
     if not title or len(title) > 120 or len(instructions) > 2000 or '\x00' in title + instructions:
-        raise HTTPException(400, 'Enter a title (up to 120 characters) and instructions up to 2000 characters. Go back to keep your selections.')
+        raise HTTPException(400, 'Enter a title (up to 120 characters) and instructions up to 2000 characters.')
     if not re.fullmatch(r'[A-Za-z0-9_-]{32,64}', submission_key): raise HTTPException(400, 'Reload the assignment form.')
     due_at = None
     if due:
