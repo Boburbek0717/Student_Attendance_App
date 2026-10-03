@@ -22,6 +22,8 @@ from scripts.backup import backup
 
 APPROVED_HASH='e386ca968c399da4df30a404ce3318126558ab2f0aa28921deba728524028aec'
 APPROVED_BATCHES = {
+    '96206f8c97dfcf0620ad0009e71764f8da16a552b965075e30a2b1ff9b4e09d3':
+        (35, 'psat10', 'PSAT/NMSQT & PSAT 10', 'craft-and-structure', 'Craft and Structure', 'text-structure-and-purpose', 'Text Structure and Purpose'),
     APPROVED_HASH: (30, 'psat89', 'PSAT 8/9', 'standard-conventions', 'Standard English Conventions', 'boundaries', 'Boundaries'),
     '5be306b0b9b3dfb3dec9f8492b8d7fcb9574a8a30a8ead8c90fc1517fe6e4fd6':
         (33, 'psat10', 'PSAT/NMSQT & PSAT 10', 'expression-of-ideas', 'Expression of Ideas', 'transitions', 'Transitions'),
@@ -76,7 +78,7 @@ def publish_batch(database, candidates_path, teacher_username, backup_directory)
                     continue
                 values=dict(stem=item['stem'],passage=item['passage'],explanation=item['explanation'],
                     difficulty=item['difficulty'],skill_id=str(skill.id),answer=str(item['answer']),
-                    source_name=data['source_name'],rights_note='Owner explicitly authorized publication on 2026-09-27; source PDF SHA-256 '+data['source_sha256'],
+                    source_name=data['source_name'],rights_note='Owner authorized import of this supplied PDF; source PDF SHA-256 '+data['source_sha256'],
                     source_reference=reference,**{f'choice_{i}':v for i,v in enumerate(item['choices'])})
                 clean=validate(values)
                 source=Source(name=clean['source_name'],rights_note=clean['rights_note'],created_by=teacher.id);db.add(source);db.flush()

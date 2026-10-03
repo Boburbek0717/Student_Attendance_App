@@ -652,3 +652,30 @@ data or backend changes. Reference: Linear interface hierarchy design article.
 Browser reviewed at 1440px and 390px; mobile document has no horizontal overflow.
 Reduced-motion CSS disables card movement. Public homepage served updated assets
 without server restart. Screenshot: output/home-refresh.png. Owner review pending.
+
+
+## Text Structure and Purpose PDF import — 2026-10-03
+
+Owner requested this supplied PDF be added to the question bank. Published 35
+questions under Teacher in PSAT/NMSQT & PSAT 10 / Reading and Writing /
+Craft and Structure / Text Structure and Purpose. 37 PDF pages: pages 11 and 28
+continue preceding answers. All A–D options, difficulty, answers and complete
+rationales retained. Twelve underlined references visually checked against rendered
+PDF pages; prompts say quoted instead and include the exact referenced text to
+preserve meaning in the plain-text question renderer. No unsafe HTML added.
+Source SHA256: 96206f8c97dfcf0620ad0009e71764f8da16a552b965075e30a2b1ff9b4e09d3.
+Candidates and rendered evidence: output/text-structure/ (local, untracked).
+One rationale has 2808 characters; bounded explanation validation raised from
+2000 to 4000 (existing Text storage; no schema change). Generic upload parser
+remains restricted to its existing profiles; this was an operator-reviewed batch.
+
+Rehearsal: temporary fictional DB publication of 35, exact fields/options/answer
+keys reconciled, repeat import created zero and recognized 35 existing questions.
+Authoring suite: 19 passed, 10.745s. Authorized local publication: 35 created,
+0 previously present. Read-only verification of these 35 published records and
+category passed; no private student/account information exposed.
+Pre-publication consistent backup bundle:
+sat-backup-20261003T121141-326caa4f00e34967bcf302bcbe0fb0d4
+under LOCALAPPDATA/SAT Factory/backups/question-bank-release.
+Questions are available on refresh; updated explanation edit limit needs server
+restart. No remote push. Owner practice review remains pending.

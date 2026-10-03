@@ -11,7 +11,7 @@ from app.models import utc_now
 from app.teacher import require_teacher
 from app.question_bank.models import Question, Revision, Choice, AnswerKey, Skill, Source, Domain
 
-FIELDS = {'stem': 2000, 'passage': 4000, 'explanation': 2000,
+FIELDS = {'stem': 2000, 'passage': 4000, 'explanation': 4000,
           'source_name': 200, 'rights_note': 600, 'source_reference': 200}
 
 
