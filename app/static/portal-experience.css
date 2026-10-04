@@ -1,0 +1,47 @@
+/* Course surfaces: shared brand, steady controls and clear task hierarchy. */
+body.portal-experience,body.library-experience { background:#f5f6fa; background-image:none; border-top:0; color:#202939; }
+.portal-experience main { max-width:78rem; background:transparent; box-shadow:none; border:0; padding:0 clamp(.25rem,2vw,1.5rem); margin:0 auto; }
+.portal-experience .brand-header { border-bottom:1px solid #dce0e7; margin-bottom:1.8rem; padding-bottom:1rem; }
+.portal-experience .brand-logo { width:64px; height:64px; }
+.portal-experience .brand-tagline { display:none; }
+.portal-experience .role-badge { background:#202a37; color:#fff; border-radius:8px; }
+.portal-experience .dashboard-heading,.library-experience .practice-intro { padding:clamp(1.5rem,3vw,2.5rem); background:#172733; border-radius:18px; color:#fff; margin-bottom:1.8rem; gap:1.5rem; }
+.portal-experience .dashboard-heading h1,.library-experience .practice-intro h1 { color:#fff; letter-spacing:-.045em; }
+.portal-experience .dashboard-heading .eyebrow,.library-experience .practice-intro .eyebrow { color:#c4f65d; }
+.portal-experience .dashboard-heading .hint,.library-experience .practice-intro .practice-lead { color:#c5d0d9; }
+.portal-experience .dashboard-heading a:not(.button) { color:#d2f886; }
+.portal-experience .dashboard-actions { gap:1rem; }
+.portal-experience .button,.portal-experience button { border-radius:8px; background:#c4f65d; color:#203023; border:1px solid #a8cd56; min-height:44px; }
+.portal-experience .secondary { background:#fff; color:#202939; border:1px solid #b7c0ca; }
+.portal-experience .button:hover,.portal-experience button:hover { background:#dbff95; color:#203023; }
+.portal-experience a:focus-visible,.portal-experience button:focus-visible,.portal-experience input:focus-visible,.portal-experience select:focus-visible,.portal-experience summary:focus-visible { outline:3px solid #7851d5; outline-offset:3px; }
+.portal-experience input,.portal-experience select { border-radius:8px; border-color:#a3aebb; }
+.portal-experience h2 { letter-spacing:-.025em; }
+.student-shortcuts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.25rem; margin-bottom:2rem; }
+.student-shortcuts a { display:flex; flex-direction:column; gap:.5rem; padding:1.5rem; border:1px solid #c8d8ad; border-radius:14px; background:#e2efcb; color:#202939; text-decoration:none; transition:transform 180ms,box-shadow 180ms; }
+.student-shortcuts a:nth-child(2) { background:#e8e1fb; border-color:#d5c9ef; }
+.student-shortcuts a:hover { transform:translateY(-3px); box-shadow:0 8px 20px #20293914; }
+.student-shortcuts span { font-size:.7rem; letter-spacing:.08em; font-weight:650; }
+.student-shortcuts strong { font-size:1.35rem; letter-spacing:-.03em; }
+.student-shortcuts small { font-size:.9rem; }
+.student-dashboard > section { background:#fff; border:1px solid #dce0e7; border-radius:14px; padding:clamp(1.2rem,3vw,2rem); margin:1.25rem 0; }
+.student-dashboard > section:has(#check-in-heading) { border-top:4px solid #97b954; }
+.student-dashboard #attendance-code { max-width:22rem; font-size:1.6rem; letter-spacing:.25em; font-variant-numeric:tabular-nums; }
+.portal-experience .group-card,.portal-experience .qb-library > li { background:#fff; border:1px solid #dce0e7; border-radius:14px; box-shadow:0 5px 16px #20293908; }
+.portal-experience .lesson-code { background:#edf4df; border-left:4px solid #819e42; border-radius:8px; }
+.portal-experience .dashboard-setup { background:#fff; border:1px solid #dce0e7; border-radius:12px; padding:1rem; }
+.portal-experience .qb-library > li { padding:1.5rem; margin-bottom:1rem; border-left:4px solid #bdd98c; }
+.portal-experience .qb-library > li:nth-child(3n+2) { border-left-color:#bca7e8; }
+.portal-experience .qb-library > li:nth-child(3n+3) { border-left-color:#87cec2; }
+.library-experience .practice-header { border-color:#dce0e7; }
+.library-experience .practice-total { background:#c4f65d; color:#203023; padding:1.2rem 1.5rem; border:0; border-radius:12px; }
+.library-experience .practice-total span { color:#30452e; }
+.library-experience .practice-intro > .practice-chip { background:#e8e1fb; color:#332d43; }
+.library-experience .practice-theme-card { border-color:#dce0e7; box-shadow:0 5px 16px #20293908; border-radius:14px; }
+.library-experience .practice-card-icon { background:#e2efcb; color:#233822; }
+.library-experience li:nth-child(3n+2) .practice-card-icon { background:#e8e1fb; color:#392c50; }
+.library-experience li:nth-child(3n+3) .practice-card-icon { background:#d6f0ed; color:#203e39; }
+.library-experience .practice-theme-card:hover { border-color:#a5b4c2; box-shadow:0 14px 26px #20293914; }
+.library-experience .practice-question-list { background:#fff; border-radius:12px; }
+@media(max-width:700px) { .student-shortcuts { grid-template-columns:minmax(0,1fr); } .portal-experience .dashboard-heading,.library-experience .practice-intro { flex-direction:column; align-items:stretch; padding:1.5rem; } .portal-experience .dashboard-actions { justify-content:flex-start; } .library-experience .practice-total { min-width:0; } .library-experience .practice-total strong { font-size:2.25rem; } }
+@media(prefers-reduced-motion:reduce) { .student-shortcuts a { transition:none; } .student-shortcuts a:hover { transform:none; } }

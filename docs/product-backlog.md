@@ -790,3 +790,21 @@ Verification: isolated `scripts/verify.py --pattern test_auth.py`: 24 passed (12
 Teacher screenshot: output/teacher-spotlight.png. Public assets updated without
 restart; no private records used. Next visual slice: student/teacher dashboard and
 assignment views using fictional previews. Owner acceptance of this slice pending.
+
+
+## Dashboards and Question Library refresh — 2026-10-05
+
+Completed the previously unfinished visual slice (baseline 5091f39). Shared scoped
+portal-experience.css covers student/teacher dashboards and both role libraries.
+Dark welcome panels, lime actions, lavender/mint accents, clearer category cards,
+student practice/assignment shortcuts and direct check-in anchor. Existing forms,
+CSRF fields, statuses, difficulty semantics and question-practice screens preserved.
+Singular library question count corrected. No new dependencies or database changes.
+Verification: guarded attendance suite 20 passed (4.496s), teacher suite 8 passed
+(3.570s), final question-practice suite 15 passed. Fictional rendered previews:
+desktop teacher/library and 390px teacher/student/library; student and teacher
+pages and student library had no horizontal document overflow. Check-in anchor
+confirmed at heading. No real-account or real-device acceptance claimed.
+Screenshot: output/portal-style-preview/library-finished.png. Preview artifacts
+remain untracked; unrelated output preserved. Runtime templates/styles require
+page refresh, not a migration. Next scope: assignment visual refinement.

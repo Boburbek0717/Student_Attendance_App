@@ -1,7 +1,9 @@
 {% extends "practice_base.html" %}
 {% block title %}Question practice · SAT Factory{% endblock %}
+{% block body_class %}student-practice library-experience{% endblock %}
+{% block extra_styles %}{{ super() }}<link rel="stylesheet" href="/static/portal-experience.css?v=1">{% endblock %}
 {% block content %}
-<div class="practice-intro"><div><p class="eyebrow">QUESTION BANK</p><h1>A little practice.<br>A clearer understanding.</h1><p class="practice-lead">Pick a theme and work through it at your own pace.</p></div><div class="practice-total"><strong>{{ themes|sum(attribute='count') }}</strong><span>questions to explore</span></div></div>
+<div class="practice-intro"><div><p class="eyebrow">QUESTION BANK</p><h1>A little practice.<br>A clearer understanding.</h1><p class="practice-lead">Pick a theme and work through it at your own pace.</p></div><div class="practice-total"><strong>{{ themes|sum(attribute='count') }}</strong><span>{{ 'question' if themes|sum(attribute='count') == 1 else 'questions' }} to explore</span></div></div>
 <div class="practice-section-title"><h2>Choose your focus</h2><span>{{ themes|length }} {{ 'theme' if themes|length == 1 else 'themes' }}</span></div>
 <ul class="practice-theme-grid">{% for theme in themes %}<li><a class="practice-theme-card" href="/student/questions/themes/{{ theme.id }}"><span class="practice-card-top"><span class="practice-card-icon" aria-hidden="true">{{ "∑" if theme.section == "Math" else "Aa" }}</span><span class="practice-chip">{{ theme.bank }}</span></span><h3>{{ theme.name }}</h3><p>{{ theme.section }}</p><span class="practice-card-bottom"><span>{{ theme.count }} {{ 'question' if theme.count == 1 else 'questions' }}</span><span class="practice-card-arrow" aria-hidden="true">↗</span></span></a></li>{% else %}<li class="practice-empty"><h3>Your practice starts here</h3><p>Your teacher has not published any questions yet. Check back after your next lesson.</p><a href="/student">Back to your dashboard</a></li>{% endfor %}</ul>
 {% endblock %}

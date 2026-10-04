@@ -1,9 +1,11 @@
 {% extends "base.html" %}
+{% block main_class %}student-dashboard{% endblock %}
 {% block title %}Student · SAT Factory{% endblock %}
+{% block body_class %}portal-experience{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="/static/portal-experience.css?v=1">{% endblock %}
 {% block content %}
-<h1>Welcome, {{ user.display_name }}</h1>
-<p>You are logged in as a student.</p>
-<p><a class="button secondary" href="/student/questions">Question practice →</a> <a class="button" href="/student/assignments">Your assignments →</a></p>
+<div class="dashboard-heading student-welcome"><div><p class="eyebrow">YOUR LEARNING SPACE</p><h1>Welcome, {{ user.display_name }}</h1><p class="hint">Your lessons and practice in one place.</p><a class="text-action" href="#check-in-heading">Go to check-in →</a></div></div>
+<nav class="student-shortcuts" aria-label="Student tools"><a href="/student/questions"><span>QUESTION LIBRARY</span><strong>Keep practicing ↗</strong><small>Choose a category and build your skills.</small></a><a href="/student/assignments"><span>YOUR ASSIGNMENTS</span><strong>Continue your work ↗</strong><small>Find the tasks your teacher has shared.</small></a></nav>
 <section aria-labelledby="assignments-heading"><h2 id="assignments-heading">Your assignments</h2>{% for a in assignments %}<p><a href="/student/assignments/{{ a.id }}">{{ a.title }}</a>{% if a.due_at %} · Due {{ a.due_at|school_time }}{% endif %}</p>{% else %}<p class="hint">No assignments yet. Your teacher will share your next task here.</p>{% endfor %}</section>
 
 {% if not memberships %}<p class="notice" role="status">Your account is ready, but you are not enrolled in a group yet. Ask your teacher to add you to the correct group before checking in.</p>{% endif %}
