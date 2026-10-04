@@ -827,3 +827,29 @@ Preview screenshot: output/question-style-preview/finished.png (fictional data).
 Baseline 11f9924; only this slice committed, unrelated output preserved. No live
 records accessed, no push/deploy. Owner/real-device acceptance pending.
 Next: assignment list, creation and report visual refinement.
+
+
+## Step 2 — Assignment visual refinement — 2026-10-05
+
+Delivered the owner-selected visual continuation from aafb307: student task list
+and overview, teacher list, creation and progress report. Shared scoped stylesheet
+uses ink headers, lime actions, lavender selection/status accents and white panels.
+Native labelled progress bars represent answered questions, not accuracy. Reports
+show first-try/retried/incorrect separately; student deadlines distinguish Overdue
+from Completed late. Creation groups details and question selection, retaining all
+form names, CSRF, saved values, category selection and filter behavior. Empty lists
+provide next-step guidance. No dependencies, database or backend changes.
+Reference: https://design-system.service.gov.uk/components/task-list/ (explicit task
+statuses and grouping); applied within the existing SAT Factory visual language.
+Verification: `.venv\Scripts\python.exe scripts/verify.py --pattern test_assignments.py`
+14 passed (17.919s), `git diff --check` passed. Initial report assertions were coupled
+to uninterrupted HTML text; updated them to check rendered words across number
+markup, and updated the late-label expectation. Fictional browser previews covered
+all five screens; 390px teacher list/create/report and student overview had no
+horizontal overflow. Category keyboard selection survives a filter hiding every
+question; report disclosure expands. Textarea width corrected during visual review.
+Preview: output/assignment-style-preview/report.png. Static previews do not prove
+real-device or owner acceptance. No live records read, no push/deployment.
+Only this visual slice committed; unrelated untracked outputs preserved.
+Next proposed step: student progress visibility using existing records, keeping
+assignment results separate from independent practice. Owner review remains pending.

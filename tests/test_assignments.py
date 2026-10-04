@@ -63,7 +63,7 @@ class AssignmentTests(unittest.TestCase):
             self.assertEqual(db.scalar(select(func.count()).select_from(AssignmentAttempt)),1)
             self.assertEqual(db.scalar(select(func.count()).select_from(Attempt)),1)
         overview=self.client.get(f'/student/assignments/{aid}')
-        self.assertIn('Completed',overview.text);self.assertIn('Late',overview.text)
+        self.assertIn('Completed',overview.text);self.assertIn('Completed late',overview.text)
         self.assertIn('Not yet correct',overview.text)
         url,data=self.form(aid,iid)
         result=self.client.post(url+'/answer',data=data)
@@ -171,7 +171,7 @@ class AssignmentTests(unittest.TestCase):
         self.login('teacher')
         page = self.client.get(report_url)
         self.assertIn('1 of 1 students completed', page.text)
-        self.assertIn('1 not yet correct', page.text)
+        self.assertIn('1 not yet correct', re.sub(r'<[^>]+>', '', page.text))
         self.assertIn('Completed late', page.text)
         self.login('student')
         url, data = self.form(aid, iid)
@@ -179,7 +179,7 @@ class AssignmentTests(unittest.TestCase):
             data['choice_id'] = db.get(AnswerKey, db.get(AssignmentItem, iid).revision_id).choice_id
         self.client.post(url + '/answer', data=data)
         self.login('teacher')
-        self.assertIn('1 correct after a mistake', self.client.get(report_url).text)
+        self.assertIn('1 correct after a mistake', re.sub(r'<[^>]+>', '', self.client.get(report_url).text))
         with Session(self.engine) as db:
             db.scalar(select(Enrollment)).active = False
             db.commit()
