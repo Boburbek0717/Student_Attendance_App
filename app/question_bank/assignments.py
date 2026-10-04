@@ -242,6 +242,11 @@ def assigned_item(db, request, assignment_id, item_id):
 
 @router.get('/student/assignments/{assignment_id}/questions/{item_id}')
 def question(assignment_id: int, item_id: int, request: Request, retry: bool = False, db: Session = Depends(get_db)):
+    return question_page(db, request, assignment_id, item_id, retry=retry)
+
+
+def question_page(db, request, assignment_id, item_id, *, retry=False, error=None,
+                  status_code=200, retry_key=None, selected_choice=None):
     user, assignment, item = assigned_item(db,request,assignment_id,item_id)
     revision = db.get(Revision,item.revision_id)
     attempt = None if retry else db.scalar(select(AssignmentAttempt).where(AssignmentAttempt.item_id==item.id,
@@ -249,10 +254,11 @@ def question(assignment_id: int, item_id: int, request: Request, retry: bool = F
     reveal = attempt and (attempt.is_correct or attempt.number >= 2)
     choices = db.scalars(select(Choice).where(Choice.revision_id==revision.id).order_by(Choice.position)).all()
     fresh = attempt is not None and request.session.pop('assignment_feedback',None) == attempt.id
-    return render(request,'assignment_question.html',user=user,assignment=assignment,item=item,
+    return render(request,'assignment_question.html',status_code,user=user,assignment=assignment,item=item,
         content=dict(id=revision.id,stem=revision.stem,passage=revision.passage,difficulty=revision.difficulty),
         choices=choices,attempt=attempt,answer=db.get(AnswerKey,revision.id) if reveal else None,
-        explanation=revision.explanation if reveal else None,fresh_feedback=fresh,retry_key=secrets.token_urlsafe(32),
+        explanation=revision.explanation if reveal else None,fresh_feedback=fresh,
+        error=error, selected_choice=selected_choice, retry_key=retry_key or secrets.token_urlsafe(32),
         items=items_for(db,assignment.id))
 
 
@@ -261,6 +267,27 @@ def submit_answer(assignment_id: int,item_id: int,request: Request,choice_id: in
         retry_key: str=Form(''),csrf: str=Form('')):
     verify_csrf(request,csrf)
     if not re.fullmatch(r'[A-Za-z0-9_-]{32,64}',retry_key): raise HTTPException(400,'Reload the question before answering.')
+    try:
+        return save_answer(assignment_id, item_id, request, choice_id, retry_key)
+    except HTTPException as error:
+        if error.status_code not in (400, 429, 503):
+            raise
+        # The write context has rolled back. Recheck access before showing content.
+        with Session(request.app.state.database_engine) as db:
+            message = error.detail
+            if error.status_code == 503:
+                message = 'Could not save right now. Your selection is kept below. Wait a moment, then check your answer again.'
+            elif error.status_code == 429:
+                message = ('You have submitted answers too quickly. This answer was not saved. '
+                           f'Wait {error.headers["Retry-After"]} seconds, then check your answer again. '
+                           'Your selection is kept below; previously saved answers are safe.')
+            response = question_page(db, request, assignment_id, item_id, retry=True,
+                error=message, status_code=error.status_code, retry_key=retry_key, selected_choice=choice_id)
+            response.headers.update(error.headers or {})
+            return response
+
+
+def save_answer(assignment_id, item_id, request, choice_id, retry_key):
     with assignment_write(request.app.state.database_engine) as db:
         user, assignment, item = assigned_item(db,request,assignment_id,item_id)
         choice = db.get(Choice,choice_id) if 0 < choice_id < 2**63 else None

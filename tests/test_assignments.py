@@ -265,7 +265,10 @@ class AssignmentTests(unittest.TestCase):
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.headers['retry-after'], '2')
         self.assertNotIn('private database detail', response.text)
-        self.assertIn('Go back and retry', response.text)
+        self.assertIn('Your selection is kept below', response.text)
+        self.assertIn(f'name="retry_key" value="{data["retry_key"]}"', response.text)
+        self.assertRegex(response.text, rf'name="choice_id" value="{data["choice_id"]}" required checked')
+        self.assertNotIn('Correct answer:', response.text)
         self.assertEqual(self.client.post(url + '/answer', data=data).status_code, 200)
 
     def test_creation_error_keeps_input_and_requires_stale_question_review(self):
@@ -297,3 +300,21 @@ class AssignmentTests(unittest.TestCase):
         self.assertNotIn(f'value="{q}:{rid}" checked', response.text)
         with Session(self.engine) as db:
             self.assertEqual(db.scalar(select(func.count()).select_from(Assignment)), 1)
+
+    def test_invalid_answer_recovers_without_disclosing_feedback(self):
+        q, aid, iid = self.assigned()
+        url, data = self.form(aid, iid)
+        response = self.client.post(url + '/answer', data=dict(data, choice_id=0))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Choose one of the listed answers.', response.text)
+        self.assertIn('id="practice-answer-form"', response.text)
+        self.assertIn(f'name="retry_key" value="{data["retry_key"]}"', response.text)
+        self.assertNotIn('Correct answer:', response.text)
+        self.assertNotIn('Two pairs make four.', response.text)
+        with Session(self.engine) as db:
+            self.assertEqual(db.scalar(select(func.count()).select_from(AssignmentAttempt)), 0)
+        # The recovered form can submit safely; replaying it still records only once.
+        self.assertEqual(self.client.post(url + '/answer', data=data).status_code, 200)
+        self.assertEqual(self.client.post(url + '/answer', data=data).status_code, 200)
+        with Session(self.engine) as db:
+            self.assertEqual(db.scalar(select(func.count()).select_from(AssignmentAttempt)), 1)

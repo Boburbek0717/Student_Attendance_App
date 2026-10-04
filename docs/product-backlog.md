@@ -745,3 +745,14 @@ Verification: isolated `scripts/verify.py` passed all 240 tests in 144.492s. The
 30-student simulation completed 60 POSTs (including retries) in 1.497s, excluding
 login setup, and persisted exactly 30 answers. `git diff --check` passed. Pending
 runtime restart and owner/mobile review; no live-data test or remote deployment.
+
+## Assignment answer recovery — 2026-10-04
+
+Implemented the next Stage 3 reliability slice: invalid answers, temporary storage
+failures and submission throttling re-render the assignment question with selected
+answer and retry key preserved. Error receives keyboard focus; response status and
+Retry-After remain correct. Authorization is rechecked; errors reveal no answers.
+Stages 1/2 and prior hardening are reconciled in docs/question-bank-plan.md.
+Evidence: 14 assignment tests, 3 limiter/classroom tests and 8 Node checks passed;
+fictional static preview checked at 390px/1440px with keyboard radio navigation.
+No schema changes, live-data access or deployment. Real-device/owner review pending.

@@ -720,3 +720,20 @@ Verification for this increment:
 - `git diff --check`: passed. No JavaScript changed; Node checks not rerun.
 - Changes are saved in the accompanying local commit. Runtime activation requires
   the next authorized local server restart; no deployment or remote push performed.
+
+## Assignment recovery checkpoint — 2026-10-04
+
+Baseline 2e704c3; tracked tree clean, unrelated untracked artifacts preserved.
+Scope: Assignments Stage 3 answer recovery, following the latest handover next step.
+400/429/503 recoverable answer failures now keep the question, valid selected option
+and retry key on screen. Access rechecked after rollback; CSRF and conflicting keys
+remain fail-closed. Focus goes to the error; no new answer disclosure or schema.
+Exact commands, outcomes and preview limits: docs/question-bank-plan.md final entry.
+14 assignment + 3 limiter tests passed; 8 Node checks passed. Thirty students each
+submitted and retried: 30 records, 60 requests, 1.418s excluding login setup.
+Browser static 390/1440px checks passed for layout/focus/radio keyboard behavior.
+No full-suite repeat, OpenClaw review, live-data access, server restart, push or owner
+acceptance claimed. Local commit records this slice; new preview artifacts untracked.
+Next: isolated browser interrupted-response flow, then owner teacher-report review;
+actual Wi-Fi/device testing remains outstanding. No general assignment edit/delete
+or changes to immutable recipients/deadlines were introduced.

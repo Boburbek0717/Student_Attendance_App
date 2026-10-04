@@ -301,3 +301,40 @@ passed 9 tests (6.536s), including reporting progression, inactive recipient his
 student/other-teacher/anonymous boundaries, invalid IDs, completion timing and retries.
 `git diff --check` passed. Browser/real-device and owner acceptance remain pending.
 Next: owner reviews the report; Stage 3 convenience features remain future scope.
+
+## Assignments Stage 3 — answer recovery, 2026-10-04
+
+Current reconciliation: Stage 1 creation/student workflow and Stage 2 teacher
+reporting are implemented. Subsequent delivery includes creation-form recovery
+(55bd3be) and shared persisted submission limits with a 30-student simulation
+(f2c14c9/2e704c3). Older future-work statements above are historical.
+
+This increment keeps students on their assignment question when an answer is
+invalid (400), throttled (429), or temporarily cannot be saved (503). Valid selected
+choices and the same submission key survive. Retry-After/status codes remain intact;
+no answer or explanation is disclosed by the error view. Access is rechecked after
+rollback before rendering. CSRF, denied access and conflicting submission keys still
+fail closed. Error focus and native radio controls support keyboard recovery.
+No schema/dependency change, business-rule change, or live data access.
+
+Verification:
+- `.venv\Scripts\python.exe scripts/verify.py --pattern test_assignments.py`:
+  14 passed, 15.557s; invalid input, busy storage, recovery, saved retry, progress,
+  reporting, authorization, stale selections, snapshots and restore coverage.
+- `.venv\Scripts\python.exe scripts/verify.py --pattern test_submission_limits.py`:
+  3 passed, 6.840s; final-slot concurrency, persisted/shared budget, expiry, recovery
+  HTML and 30 independent students/60 POSTs including retries (1.418s, exactly 30
+  assignment attempts). All accounts/data fictional; temporary SQLite only.
+- `node --test tests/test_practice_feedback.cjs tests/test_practice_highlights.cjs tests/test_question_math.cjs`:
+  8 passed; error/success focus, submit/Back recovery, highlights and math safety.
+- Rendered fictional 429 HTML reviewed at 390x844 and 1440x1000: no horizontal
+  overflow, error focused, selected answer retained, arrow keys change selection.
+  Static preview under output/assignment-recovery-check; form submission behavior
+  is covered by isolated HTTP tests, not that static preview.
+- `git diff --check`: passed. Full 240-test baseline from 2026-10-03 was not rerun;
+  this increment used focused coverage. Real phones/Wi-Fi and owner acceptance
+  remain unverified. No OpenClaw review performed in this slice.
+
+Next: simulate interrupted navigation/lost responses in an isolated running browser
+session and review teacher report usability with the owner. Stage 3 is not declared
+fully complete. No deployment/push/restart performed; new server code needs restart.

@@ -1,5 +1,10 @@
 (() => {
     "use strict";
+    const error = document.getElementById("answer-error");
+    if (error) {
+        error.focus({preventScroll: true});
+        error.scrollIntoView({block: "nearest", behavior: "instant"});
+    }
     const feedback = document.getElementById("answer-feedback");
     if (feedback?.dataset.fresh === "true") {
         feedback.focus({preventScroll: true});
