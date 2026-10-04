@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Log in · SAT Factory{% endblock %}
 {% block main_class %}welcome-page auth-page{% endblock %}
-{% block body_class %}public-site{% endblock %}
+{% block body_class %}public-site public-experience{% endblock %}
 {% block brand_header %}{% set public_page = 'login' %}{% include "public_header.html" %}{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', path='/public-experience.css') }}?v=1">{% endblock %}
 {% block content %}
-<section class="auth-panel" aria-labelledby="login-heading">
+<div class="auth-composition"><aside class="auth-welcome"><p class="eyebrow">SAT FACTORY / COURSE PORTAL</p><h2>Your next step<br>starts here.</h2><p>Practice questions, stay on top of assignments, and follow your progress.</p><div class="auth-motif" aria-hidden="true"><span>↗</span></div></aside><section class="auth-panel" aria-labelledby="login-heading">
 <h1 id="login-heading">Log in</h1>
 <p class="page-intro">Your lessons, attendance, and progress in one place.</p>
 {% if error %}<p id="login-error" class="error" role="alert">{{ error }}</p>{% endif %}
@@ -25,5 +26,7 @@
     <p>After a reset, use the new password to log in again. Never share your password or send it in a group chat.</p>
 </details>
 <p><a href="/">Back to SAT Factory home</a></p>
-</section>
+</section></div>
 {% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', path='/home-motion.js') }}?v=2" defer></script>{% endblock %}

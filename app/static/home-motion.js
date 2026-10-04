@@ -4,7 +4,7 @@
     if (!('IntersectionObserver' in window) || !Element.prototype.animate) return;
     const active = new Set();
     const played = new WeakSet();
-    const targets = document.querySelectorAll('.hero-copy, .score-scene, .featured-card, .teacher-feature, .portal-entry');
+    const targets = document.querySelectorAll('.hero-copy, .score-scene, .featured-card, .teacher-feature, .portal-entry, .results-intro, .student-ticket, .auth-composition');
     const observer = new IntersectionObserver(entries => {
         for (const entry of entries) {
             if (!entry.isIntersecting) continue;

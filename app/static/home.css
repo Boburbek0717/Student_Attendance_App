@@ -67,3 +67,20 @@
 .hero-action:hover,.home-page .featured-card:hover { transform:none; }
 .spotlight-ticket:hover { transform:rotate(-6deg); }
 }
+
+/* Teacher spotlight: text-led, compact and portrait-free. */
+.home-page .teacher-feature { position:relative; overflow:hidden; background:#172733; color:#f6f8fb; padding:clamp(1.5rem,4vw,3rem); border:0; gap:2.5rem; }
+.home-page .teacher-feature::before { content:''; position:absolute; top:0; left:0; bottom:0; width:5px; background:#c4f65d; }
+.home-page .teacher-feature .eyebrow { color:#c4f65d; letter-spacing:.14em; margin-bottom:1rem; }
+.home-page .teacher-feature h2 { color:#fff; font-size:clamp(1.9rem,3.5vw,3rem); line-height:1.12; margin-bottom:1rem; }
+.home-page .teacher-role { color:#bac8d2; }
+.home-page .teacher-approach { color:#eef2f4; max-width:47ch; }
+.home-page .teacher-credentials { border:0; padding:0; gap:1rem; display:flex; }
+.home-page .teacher-credentials > div { padding:1.1rem 1.4rem; background:#c4f65d; color:#1b3023; border-radius:12px; min-width:130px; }
+.home-page .teacher-credentials > div:nth-child(2) { background:#c5b5f2; color:#2a2340; }
+.home-page .teacher-credentials dt { color:inherit; font-weight:650; }
+.home-page .teacher-credentials dd { color:inherit; font-size:2.5rem; }
+.home-page .teacher-credentials dd span { color:inherit; opacity:.8; }
+@media(max-width:750px) { .home-page .teacher-feature { grid-template-columns:minmax(0,1fr); } .home-page .teacher-credentials { flex-wrap:wrap; } .home-page .teacher-credentials > div { flex:1; min-width:110px; } }
+
+@media(max-width:750px) { .home-page .teacher-credentials dd { line-height:1.3; font-size:2rem; } .home-page .teacher-credentials dd span { display:block; margin:.25rem 0 0; line-height:1.4; } }

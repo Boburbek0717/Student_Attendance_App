@@ -755,3 +755,19 @@ teacher anchor works, no browser errors observed. `node --test tests/test_home_m
 2 passed; `node --check app/static/home-motion.js` and `git diff --check` passed.
 Screenshot: output/home-experience-desktop.png. Live public assets updated without
 server restart; no private records read or migrations performed. Owner review pending.
+
+
+## Public experience continuation — 2026-10-04
+
+Owner approved the new homepage direction and requested extension plus teacher
+emphasis. Completed this slice: results library and login share ink/lime/lavender
+styling and one-shot motion. Teacher section now uses a dark spotlight, larger name
+and colored SAT/IELTS credential cards, without portrait or biography changes.
+Login retains all form fields, CSRF, autocomplete, error associations and recovery
+help. Styles scoped to public-experience/home-page; course dashboards unchanged.
+Verification: isolated `scripts/verify.py --pattern test_auth.py`: 24 passed (12.414s);
+`node --test tests/test_home_motion.cjs`: 2 passed. Browser desktop/mobile review,
+390px login/results no horizontal document overflow, result story disclosure works.
+Teacher screenshot: output/teacher-spotlight.png. Public assets updated without
+restart; no private records used. Next visual slice: student/teacher dashboard and
+assignment views using fictional previews. Owner acceptance of this slice pending.

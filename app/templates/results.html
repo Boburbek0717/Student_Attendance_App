@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Student results · SAT Factory{% endblock %}
 {% block main_class %}welcome-page results-page{% endblock %}
-{% block body_class %}public-site{% endblock %}
+{% block body_class %}public-site public-experience{% endblock %}
 {% block brand_header %}{% set public_page = 'results' %}{% include "public_header.html" %}{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', path='/public-experience.css') }}?v=1">{% endblock %}
 {% block content %}
 <header class="results-intro">
     <a class="text-action" href="/">← Back to home</a>
@@ -36,3 +37,5 @@
 </div>
 <footer class="home-footer"><a href="/">← Back to SAT Factory</a></footer>
 {% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', path='/home-motion.js') }}?v=2" defer></script>{% endblock %}
