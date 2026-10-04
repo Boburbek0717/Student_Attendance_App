@@ -808,3 +808,22 @@ confirmed at heading. No real-account or real-device acceptance claimed.
 Screenshot: output/portal-style-preview/library-finished.png. Preview artifacts
 remain untracked; unrelated output preserved. Runtime templates/styles require
 page refresh, not a migration. Next scope: assignment visual refinement.
+
+
+## Question reading surface refresh — 2026-10-05
+
+Owner identified question pages as missing from the dashboard/library refresh.
+Completed shared question-experience.css, scoped to regular and assignment
+question templates: compact ink heading, lavender highlighting tools and selected
+choices, lime submission/navigation, white passage/answer reading panels and a
+brief reduced-motion-aware heading entrance. Existing difficulty/result semantics,
+CSRF/forms, first-wrong answer concealment and collapsed explanations preserved.
+No new dependency or data changes. Applies to future questions through templates.
+Verification: `.venv\Scripts\python.exe scripts/verify.py --pattern test_question_practice.py`
+15 passed (10.941s); same runner with `--pattern test_assignments.py` 14 passed
+(15.046s). Fictional static previews inspected; 390px regular/assignment layouts
+had no document overflow. Keyboard radio selection and visible focus confirmed.
+Preview screenshot: output/question-style-preview/finished.png (fictional data).
+Baseline 11f9924; only this slice committed, unrelated output preserved. No live
+records accessed, no push/deploy. Owner/real-device acceptance pending.
+Next: assignment list, creation and report visual refinement.

@@ -1,9 +1,10 @@
 {% extends "practice_base.html" %}
 {% block title %}Question {{ item.position }} · SAT Factory{% endblock %}
 
-{% block extra_styles %}{{ super() }}{% include "math_styles.html" %}{% endblock %}
+{% block body_class %}student-practice question-experience{% endblock %}
+{% block extra_styles %}{{ super() }}<link rel="stylesheet" href="/static/question-experience.css?v=1">{% include "math_styles.html" %}{% endblock %}
 {% block content %}
-<a href="/student/assignments/{{ assignment.id }}">← {{ assignment.title }}</a><h1>Question {{ item.position }} of {{ items|length }}</h1><p class="practice-chip">{{ content.difficulty|capitalize }}</p>
+<nav class="practice-breadcrumb" aria-label="Assignment navigation"><a href="/student/assignments/{{ assignment.id }}">← {{ assignment.title }}</a></nav><div class="dashboard-heading practice-question-heading"><div><p class="eyebrow">Assignment practice</p><h1>Question {{ item.position }} of {{ items|length }}</h1></div><span class="practice-chip">{{ content.difficulty|capitalize }}</span></div>
 <div id="practice-highlights" data-student="{{ user.id }}" data-revision="{{ content.id }}" hidden>
 <div class="qb-actions" role="group" aria-label="Text highlighting"><button type="button" id="highlight-add" class="secondary" disabled>Highlight selection</button><button type="button" id="highlight-remove" class="secondary" disabled>Remove highlight</button><button type="button" id="highlight-clear" class="secondary">Clear highlights</button></div>
 <p class="hint" id="highlight-status" role="status">Select text in the passage or question, then choose Highlight selection. Saved in this browser only.</p>
