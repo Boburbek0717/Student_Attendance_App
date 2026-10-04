@@ -737,3 +737,21 @@ acceptance claimed. Local commit records this slice; new preview artifacts untra
 Next: isolated browser interrupted-response flow, then owner teacher-report review;
 actual Wi-Fi/device testing remains outstanding. No general assignment edit/delete
 or changes to immutable recipients/deadlines were introduced.
+
+
+## Homepage experience refinement — 2026-10-04
+
+Owner requested a modern, vibrant, animated public homepage. Replaced the abstract
+bar graphic with a linked student spotlight using existing featured result data,
+layered lavender card backing and decorative orbit lines. Dark ink/lime hero,
+colored result breakdown panels, compact teacher card and lavender portal panel
+now share an intentional visual system. No portraits, invented results or added
+libraries. Homepage-only stylesheet/body class prevents portal style changes.
+New native animation script reveals each section once, cancels on keyboard focus
+and reduced-motion changes; content remains available without JS. CSS hover states
+respect reduced motion. Existing teacher biography/results unchanged.
+Verification: browser inspection at 1440px and 390px, no mobile document overflow,
+teacher anchor works, no browser errors observed. `node --test tests/test_home_motion.cjs`
+2 passed; `node --check app/static/home-motion.js` and `git diff --check` passed.
+Screenshot: output/home-experience-desktop.png. Live public assets updated without
+server restart; no private records read or migrations performed. Owner review pending.
