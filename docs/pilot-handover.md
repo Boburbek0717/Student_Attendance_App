@@ -950,3 +950,29 @@ Next bounded task: free-host entry point and configuration with HTTPS, host/prox
 validation, health checks and resource/abuse controls. Shared visitor state, login
 throttling, uploads and content edits require public-demo review before exposure.
 Local demo preparation is implemented; SF-13 public release remains incomplete.
+
+## SF-13 free-host preparation — 2026-10-06
+
+Baseline 46f3629, clean tree. Added an opt-in Render-only demo launcher and free
+Blueprint with automatic deploys disabled. Public-mode cookies/HTTPS/host checks,
+DB health probe, no-index robots, bounded global traffic/write counters and mutation
+allowlist added. Shared lesson/practice/renewal remain interactive; uploads and
+content/account creation are denied before body buffering. One worker and concurrency
+limit 20. No production records accessed, no resources provisioned, no remote push.
+Normal/local demo defaults unchanged; existing local preview was not restarted.
+
+Commands and evidence:
+- `.venv\Scripts\python.exe scripts/verify.py --pattern test_demo_host.py`: 3 passed,
+  0.545s (config denial, secure cookies, health/host, roles, upload/content blocks,
+  minute-window/lifetime limits and recovery).
+- Same runner `--pattern test_portfolio_demo.py`: 3 passed, 1.537s.
+- Same runner `--pattern test_production_security.py`: 3 passed, 1.065s.
+- `git diff --check`: passed.
+Provider docs checked for free-plan lifecycle, Python pinning, Blueprint and proxy
+defaults. Full suite not repeated for this isolated demo slice. No new browser or
+real-device review; login copy adds public-demo limits. No owner acceptance claimed.
+
+Next: owner-authorized publication, push reviewed commits and run Render build/HTTPS
+smoke checks including restart/session reset. Linux wheel availability and actual
+health-proxy behavior are unverified. Shared-state/rate-limit interference is an
+explicit demo limitation, not suitable for real course operation.

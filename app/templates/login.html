@@ -8,7 +8,8 @@
 <div class="auth-composition"><aside class="auth-welcome"><p class="eyebrow">SAT FACTORY / COURSE PORTAL</p><h2>Your next step<br>starts here.</h2><p>Practice questions, stay on top of assignments, and follow your progress.</p><div class="auth-motif" aria-hidden="true"><span>↗</span></div></aside><section class="auth-panel" aria-labelledby="login-heading">
 <h1 id="login-heading">Log in</h1>
 {% if request.app.state.portfolio_demo|default(false) %}
-<div class="demo-access"><strong>Try the fictional course</strong><p>Teacher: <code>demo-teacher</code><br>Student: <code>demo-student</code><br>Public demo password: <code>Explore-SAT-Factory!</code></p><p>Shared sandbox: other visitors can change practice progress. Account credentials and enrollment access are protected.</p></div>
+<div class="demo-access"><strong>Try the fictional course</strong><p>Teacher: <code>demo-teacher</code><br>Student: <code>demo-student</code><br>Public demo password: <code>Explore-SAT-Factory!</code></p><p>Shared sandbox: other visitors can change practice progress. Account credentials and enrollment access are protected.</p>
+{% if request.app.state.public_demo|default(false) %}<p>Public demo: account creation, PDF uploads and content editing are unavailable. Practice, check-in, lesson controls and renewals are interactive. Activity limits are shared across visitors.</p>{% endif %}</div>
 {% endif %}
 <p class="page-intro">Your lessons, attendance, and progress in one place.</p>
 {% if error %}<p id="login-error" class="error" role="alert">{{ error }}</p>{% endif %}

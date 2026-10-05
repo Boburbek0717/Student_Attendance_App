@@ -100,7 +100,7 @@ class ProtectDemoAccess:
 
 
 @contextmanager
-def portfolio_demo():
+def portfolio_demo(*, public=False, allowed_hosts=None):
     # Keep the import guard active for the entire application lifetime.
     with isolated_imports(), tempfile.TemporaryDirectory(prefix='sat-portfolio-') as directory:
         from app.database import make_engine, initialize_database
@@ -110,9 +110,32 @@ def portfolio_demo():
         try:
             initialize_database(engine)
             seed(engine)
-            app = create_app(engine, secrets.token_hex(32), production=False)
+            app = create_app(engine, secrets.token_hex(32), production=public, allowed_hosts=allowed_hosts)
             app.state.portfolio_demo = True
-            app.add_middleware(ProtectDemoAccess)
+            from starlette.middleware import Middleware
+            app.user_middleware.append(Middleware(ProtectDemoAccess))
+            if public:
+                from scripts.demo_host import DemoLimits
+                # Inside host/security middleware, before request bodies are buffered.
+                from app.middleware import RequestBodyLimit
+                position = next(i for i, item in enumerate(app.user_middleware) if item.cls is RequestBodyLimit)
+                app.user_middleware.insert(position, Middleware(DemoLimits))
+                app.state.public_demo = True
+                from fastapi.responses import PlainTextResponse
+                from sqlalchemy import text
+
+                @app.get('/healthz', include_in_schema=False)
+                def health():
+                    try:
+                        with engine.connect() as connection:
+                            connection.execute(text('SELECT 1 FROM users LIMIT 1'))
+                    except Exception:
+                        return PlainTextResponse('Unavailable', status_code=503)
+                    return PlainTextResponse('ok')
+
+                @app.get('/robots.txt', include_in_schema=False)
+                def robots():
+                    return PlainTextResponse('User-agent: *\nDisallow: /\n')
             for middleware in app.user_middleware:
                 if middleware.cls is SessionMiddleware:
                     middleware.kwargs['session_cookie'] = 'sat_portfolio_demo'

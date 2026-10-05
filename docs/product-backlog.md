@@ -927,3 +927,11 @@ Acceptance evidence: 3 demo and 24 auth tests passed; narrow-screen browser and
 keyboard login checked. See portfolio-demo.md and latest handover. Public hosting,
 abuse/resource limits and simultaneous-visitor experience are the next slice;
 no public deployment or real-course readiness is claimed.
+
+### SF-13 free-host preparation — 2026-10-06
+
+Prepared free Render Blueprint and opt-in hosting launcher with production security,
+health check, explicit public-demo write allowlist and shared resource limits.
+Nine focused tests passed; see portfolio-demo.md for setup, costs/limits and the
+publication checklist. No public deployment, Linux build or owner acceptance yet.
+Public course launch remains postponed; this slice is fictional portfolio use only.
