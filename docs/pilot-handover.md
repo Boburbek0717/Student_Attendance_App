@@ -897,3 +897,32 @@ passed (2.224s), including ignored date submissions and hidden legacy dates.
 Desktop/390px fictional previews and native keyboard disclosure checked; no overflow.
 Screenshot: output/compact-target-preview/desktop.png. `git diff --check` passed.
 No live DB access, restart, remote push or full-suite repeat. Runtime reload needed.
+
+## Portfolio documentation and pre-push workflow — 2026-10-06
+
+Owner authorized README/workflow optimization and pushing all completed project
+work to the connected GitHub repository. Baseline c78962b; tracked tree clean with
+40 commits ahead after fetching origin (no divergence). Rewrote the README around
+current features, architecture decisions, fictional demo setup, verification,
+operations and honest pilot/scale limitations. Includes a reviewed screenshot of
+fictional test data, copied intentionally to docs/images/student-dashboard.png.
+CONTRIBUTING.md defines bounded changes and explicit staging/review.
+
+Added scripts/check.py: the current interpreter runs the guarded Python suite,
+then explicitly discovered Node test files, pip compatibility and both whitespace
+checks; fail-fast and missing tools fail visibly. No installations, app startup,
+data access, commit or push are performed by this helper. Added output/ and logs
+to .gitignore while preserving tracked branding references and all local files.
+Generated PDFs/import previews and unrelated local artifacts are not published.
+
+README local file links resolved. Filename-only all-ref history audit found no
+.env/session-secret/database/log paths; this is not an exhaustive secret scan.
+No live databases, credentials or backup contents read. No deployment or restart.
+
+Verification: `.venv\Scripts\python.exe scripts/check.py` passed: 246 isolated
+Python tests in 149.054s; 18 Node checks; pip dependency compatibility; staged and
+unstaged whitespace checks. Local log: output/check-2026-10-06.txt (ignored).
+These are automated checks, not owner acceptance, real-device testing or deployment.
+Next action: commit this documentation/workflow checkpoint and push master normally,
+then confirm the remote branch matches the local commit. External pilot/release
+choices remain separate from this repository publication.

@@ -907,3 +907,13 @@ card remains, with a collapsed score editor. Date UI/calculation and date writes
 removed; existing storage preserved for compatibility. Five focused goal tests
 passed, including privacy/stale changes/backup and ignored legacy date input.
 Desktop/mobile keyboard review passed. See latest handover for evidence.
+
+## Workflow and portfolio README — 2026-10-06
+
+Owner requested a portfolio-ready repository and an authorized GitHub push.
+Current README now presents course operations, Question Bank, assignments, personal
+target, architecture tradeoffs, reproducible fictional demo and delivery limits.
+Added CONTRIBUTING.md and one fail-fast scripts/check.py command combining guarded
+Python, Node, dependency compatibility and whitespace checks. Generated local
+output/logs ignored; reviewed fictional dashboard screenshot deliberately included.
+No application behavior or deployment changes. Evidence in latest pilot handover.

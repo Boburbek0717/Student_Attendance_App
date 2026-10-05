@@ -1,395 +1,191 @@
-# SAT Factory — Course attendance app
+# SAT Factory
 
-Future development follows the [Scrum working agreement](docs/scrum-working-agreement.md).
-See the [ordered backlog](docs/product-backlog.md), [usage simulation](docs/usage-simulation.md)
-and [active Sprint 1](docs/sprint-01-proposal.md) and [implementation evidence](docs/sprint-01-review.md).
+**A course-management and SAT practice application built around real classroom workflows.**
 
-The portal uses SAT Factory branding, a workshop-inspired graphite, paper and lime theme, responsive
-layouts, and keyboard-visible focus styles. All styling and the SF mark are local;
-no external fonts or image services are required.
+SAT Factory brings student enrollment, lesson attendance, lesson credits, question
+practice and group assignments into one teacher/student portal. It also includes a
+public course website with student results and teacher information.
 
-The teacher page supports creating groups, creating student accounts, enrolling
-students with a 12-lesson package, starting group lessons, and viewing balances
-and attendance history. Students can check in with a temporary code. Teachers can
-manually renew packages, including early and late renewals; no payments are taken
-in the app. Available, advance and owed lesson counters are calculated from records.
-Teachers can also search students, edit profiles, reset passwords and deactivate
-or reactivate group enrollments from **Manage students**.
-Each group now has **Manage lessons** for lesson history, attendance lists, and
-closing or reopening check-in for the same class.
+This is both a working course project and a portfolio of practical backend and
+product-development decisions: protecting balances under concurrent requests,
+keeping an audit trail, making retries safe, recovering SQLite data, and designing
+usable server-rendered screens.
 
-## Run
+**Status:** actively developed for a supervised course pilot. Local simulations and
+automated checks exist; they do not establish production readiness or real-classroom
+acceptance. Public deployment is not part of this repository update.
 
-Use Python 3.14. From this project folder, install packages on a new checkout:
+![Student dashboard with fictional demonstration data](docs/images/student-dashboard.png)
+
+*Student dashboard preview using fictional test data.*
+
+## What it does
+
+| Area | Implemented behavior |
+| --- | --- |
+| Course operations | Teacher-created accounts, groups, enrollment, password resets and enrollment deactivation |
+| Attendance | Expiring lesson codes, saved rosters, live teacher feedback and safe student retries |
+| Lesson lifecycle | Reopen check-in for an unfinished lesson; permanently finish it or cancel an eligible empty lesson |
+| Lesson credits | Twelve-lesson packages, manual early/late renewals, lessons owed and audited balance corrections |
+| Question Bank | Categories, four-choice authoring, reviewed publication, optional explanations and supported PDF imports |
+| Student practice | Server-side grading, bookmarks, browser-local text highlights and retry history |
+| Assignments | Group recipient snapshots, pinned question revisions, deadlines, completion and teacher progress reports |
+| Student dashboard | Practice/assignment shortcuts, lesson check-in and a compact editable target score |
+| Public website | Results gallery, manually switchable score spotlight and teacher profile |
+
+Assignments and independent practice maintain separate attempts. Completion means
+answering every assigned question, not answering every question correctly. First-try
+and later success remain distinguishable. Target score is a personal goal, not an
+SAT score prediction. Exam-date/countdown controls are no longer part of the UI.
+
+## Engineering decisions
+
+- **Server-rendered by design.** FastAPI and Jinja2 keep navigation and core forms
+  usable without a frontend framework. Small JavaScript modules add feedback,
+  polling, highlighting and result switching.
+- **Record-based balances.** Packages, effective attendance and audited corrections
+  determine credits and debt per enrollment; a manually edited counter is not the
+  source of truth.
+- **Atomic writes and safe retries.** SQLite immediate transactions serialize critical
+  checks and writes. Submission keys recognize duplicate requests after a lost response.
+- **Historical integrity.** Published question revisions and assignment recipients
+  are snapshots. Corrections retain earlier records instead of rewriting history.
+- **Authorization at the write boundary.** Server-side role/session checks, CSRF,
+  revocable sessions, password hashing and persisted rate limits protect key flows.
+- **Recovery is exercised.** SQLite-consistent backups, separate-destination restores,
+  record reconciliation and session revocation are tested with fictional records.
+- **Explicit time handling.** Operational timestamps are stored in UTC and displayed
+  in Asia/Tashkent.
+
+These controls have automated coverage; this is not a claim of an external security
+certification or exhaustive penetration testing.
+
+## Stack and structure
+
+Python 3.14 · FastAPI · SQLAlchemy · SQLite · Jinja2 · HTML/CSS · plain JavaScript
+
+| Location | Responsibility |
+| --- | --- |
+| `app/main.py` | Application assembly, middleware and public routes |
+| `app/models.py`, `app/database.py` | Course records, database initialization and write transactions |
+| `app/security.py` | Passwords, sessions, CSRF and attendance/login limits |
+| `app/attendance.py`, `app/packages.py` | Attendance and lesson-credit rules |
+| `app/student.py`, `app/teacher.py` | Student and teacher workflows |
+| `app/question_bank/` | Question revisions, authoring, publication, practice, assignments and migrations |
+| `app/templates/`, `app/static/` | Server-rendered pages, scoped styles and progressive enhancements |
+| `app/result_content.py` | Curated public results, separate from private course records |
+| `scripts/` | Isolated verification, fictional demos, recovery and local operational tools |
+| `tests/` | Python integration/domain tests and Node behavior checks |
+| `docs/` | Backlog, design decisions, verification evidence and operator guidance |
+
+## Try it safely
+
+Requirements: Python 3.14, Git, and Node.js for JavaScript verification. The primary
+local workflow is Windows/PowerShell; use your platform's virtual-environment Python
+path if running elsewhere. The desktop launcher is Windows-specific.
 
 ```powershell
 py -3.14 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe scripts/demo_class.py
 ```
 
-If you need a teacher account, create one with a hidden password prompt:
+The demo asks for a disposable password privately, creates 30 fictional students
+and a teacher in temporary storage, and uses an isolated session secret. Open
+<http://127.0.0.1:8766>. Log in as `demo-teacher` or `demo-00` through `demo-29`
+with the password you chose. Stop with Ctrl+C. The demo does not use the working
+course database, and its data is temporary. It is a classroom walkthrough, not a
+seeded catalogue of licensed SAT questions.
+
+## Run a persistent local instance
+
+Use a fresh checkout for evaluation. For an existing course instance, follow the
+[backup and upgrade instructions](docs/backup-recovery.md) before changing versions:
+startup may apply additive schema changes.
 
 ```powershell
 .\.venv\Scripts\python.exe -m app.create_user teacher --name "Teacher" --role teacher
-```
-
-Start the local server:
-
-```powershell
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --no-proxy-headers
 ```
 
-Open http://127.0.0.1:8000/ for the welcome page, or /login for the course portal.
-The homepage shows three featured student results, with a swipeable row on phones.
-Visit `/results` for all nine Score Tickets in a two-column desktop gallery or a
-single column on mobile. Original student comments expand with native disclosure
-controls; editorial score highlights are not presented as student quotes.
-Public content and the featured selection live in `app/result_content.py`, separate
-from private attendance records. No dates or chronological ordering are inferred.
-The header links to the gallery and course portal. Stop an older server if the port is occupied.
-The proxy flag makes local login limiting use the connection address rather than
-forwarded headers. Existing accounts are preserved. No default accounts are added.
-Sprint 1 adds two tables on startup without changing existing columns or dependencies.
-See the sprint review for upgrade and recovery notes.
+Account creation prompts for a password; there are no default credentials. Create
+the teacher once, then manage students through the app. Visit
+<http://127.0.0.1:8000>. Development reload is for local work, not production.
 
-## Teacher workflow
+The existing Windows desktop shortcut uses `scripts/open_sat_factory.py` to restart
+this checkout's local server and open the browser. Restart between lessons: active
+requests can be interrupted. An unrelated process on port 8000 is not terminated.
 
-1. Create a group, such as SAT Advanced.
-2. Create a student account; passwords require 12–128 characters. Share the account
-   details privately yourself. The form can only create student accounts.
-3. Select the student and group, then enroll with 12 lessons.
-4. The roster displays `0 / 12 lessons used` and `12 remaining`.
-5. Try the same enrollment again: an error appears and no extra package is added.
-6. Click **Start a new lesson** on the group's card. Share its six-digit code with
-   the group. It lasts 15 minutes by default; starting again while it is open reuses
-   the same lesson. After expiry, the button starts a new class, not an extension
-   of the old one. To give students more time for the same class, open that lesson
-   from **Manage lessons** and use **Reopen check-in for this lesson** instead.
-7. Log in as the student in a separate browser/private window, or log out of the
-   teacher account first. Enter the code on the student page and click **Check in**.
-8. The student sees `1 / 12 lessons used`, `11 remaining`, and a history entry.
-   Refresh the teacher page to see the updated balance. Its **Attendance history**
-   link opens the individual student's history.
-9. Click **Renew package** beside a student in the group roster or on their history
-   page. Review the current balance and the preview, then confirm **add 12 lessons**.
-   This records the teacher's manual renewal; there is no checkout or payment form.
+## Verify changes
 
-An early renewal preserves unused credit: 4 remaining + 12 = 16 available, with 12
-saved in the later package. Late students can still check in after credit runs out.
-Their extra attendance increases **Lessons owed**: 2 owed + a 12-lesson renewal =
-10 available and 0 owed. Counters are separate for each group and visible to both
-teacher and student. See [renewals and counters](docs/packages.md) for the examples.
+One command runs the guarded Python suite, all Node behavior checks, dependency
+compatibility and staged/unstaged whitespace checks. It stops on the first failure.
 
-Repeat the check-in: it must show an error without using another lesson. Codes are
-sent through POST forms, never URLs. Displayed dates use Asia/Tashkent (UTC+05:00); stored timestamps remain UTC.
-See [the attendance lesson](docs/attendance.md) for the flow, configuration and
-concurrency explanation.
+```powershell
+.\.venv\Scripts\python.exe scripts/check.py
+```
 
-Group names may repeat; IDs distinguish them. Usernames are unique and lowercased.
-Inactive enrollments cannot be re-created or renewed. Use **Manage students** to
-reactivate the existing enrollment without adding a package. All teachers
-administer the same business.
+For a small backend change, begin with the relevant test module:
 
-## Student management
+```powershell
+.\.venv\Scripts\python.exe scripts/verify.py --pattern test_student_goals.py
+```
 
-Choose **Manage students** on the teacher page, search by name or username, and
-open a student's management page. This also lists students without a group.
+Do not substitute bare unittest discovery: importing the normal app can read the
+working session secret. The guarded runner redirects secrets and blocks the default
+live database engine before tests import the app. Tests use fictional databases.
+`pip check` checks dependency compatibility, not new vulnerability advisories.
 
-- **Save details** updates name and username; it keeps the same account ID and history.
-- **Reset password** requires two matching entries of 12–128 characters and signs
-  out that student's existing sessions. Share the new password privately yourself.
-- **Deactivate enrollment** blocks check-in and renewal for that group, while
-  keeping available/owed lessons and history. The student can still log in.
-- **Reactivate enrollment** restores the same membership and balance; it creates
-  no new package. Other groups are unaffected.
+The fictional 30-student simulation covers concurrent answer submissions and
+retries. It is not a substitute for real phones, classroom Wi-Fi, sustained load,
+or deployment verification. See the [current handover](docs/pilot-handover.md) for
+exact commands, results and limitations.
 
-There is no account deletion or student self-service editing in this increment.
-See [the student-management lesson](docs/student-management.md) for the code and tests.
+## Everyday development workflow
 
-## Lesson management
+1. Read the latest handover and backlog; inspect Git status before editing.
+2. Select one bounded feature or demonstrated defect. Preserve unrelated changes.
+3. Implement and run the smallest relevant isolated checks; review mobile and
+   keyboard behavior for UI changes.
+4. Run `scripts/check.py` before a shared checkpoint. Review the diff and staged
+   paths, then make a focused commit. Push only when authorized.
+5. Record evidence and the next step in the handover. Do not mark simulated checks
+   as owner acceptance or production validation.
 
-Choose **Manage lessons** on a group card, then open a lesson to see recorded
-attendees and check-in times. History is newest first, with 25 lessons per page.
-**Close check-in** stops new submissions without changing attendance or balances.
-**Reopen check-in for this lesson** creates a new code window for the same class;
-it preserves the original date and prevents duplicate attendance charges.
-Close any other open lesson in that group before reopening an earlier one.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the practical checklist.
 
-New lessons save their starting roster. Students without recorded attendance show
-as **Absent**, and become **Present** on check-in. Absence does not deduct lessons.
-Older lessons use the current roster with an explicit historical-data warning. All times use Asia/Tashkent (UTC+05:00). Refresh to see new check-ins.
-See [the lesson-management guide](docs/lesson-management.md) for the flow,
-relationships, transactions and code explanation.
+## Operations, limitations and next work
 
-## Attendance corrections
+- Teachers issue/reset student credentials and record renewals; there are no online payments.
+- Question practice requires an active enrollment. Assignment access also requires
+  saved recipient membership. Teachers share one course business; assignment reports
+  are scoped to their creator.
+- Only documented PDF layouts are supported. Imports require review; arbitrary PDFs
+  are not guaranteed to parse. The import-review cache is process-local.
+- Highlights are stored in the student's browser, not synced between devices.
+- Assignment lists show the latest 100 tasks. Long-lived history and multiple server
+  workers need further evaluation before scaling.
+- HTTPS, production secrets/cookies, host/proxy configuration, persistent storage,
+  operational backups and supervised pilot approval remain release prerequisites.
+- Performance analysis and automatic study recommendations remain future work.
 
-Open **Manage lessons**, choose a lesson, then **Mark present / review history**
-or **Review / correct attendance** beside the student. Review the balance preview,
-enter a reason and confirm. Marking present uses one lesson; reversing restores one;
-restoring a reversed entry uses one again. This also works when the balance is owed.
-Original records and every teacher correction remain in history. Reasons are teacher-only.
-A reversed entry can only be restored by a teacher, not by resubmitting a code.
-Saved lesson-roster members remain eligible after deactivation. Existing attendees
-remain correctable; older lessons without snapshots use active membership as a
-fallback and display a warning. Future lessons and other-group memberships are rejected.
-
-`app/attendance_corrections.py` handles previews and atomic audited writes;
-`app/attendance_state.py` provides the shared effective-attendance rule used by
-balances, dashboards and history. `tests/test_attendance_corrections.py` and
-`tests/test_classroom_login.py` cover the Sprint 1 behavior.
-
-## Balance corrections
-
-Use **Change balance** beside a student, then expand **Change remaining lesson
-count** in the relevant group. Enter the desired balance and a reason. Positive
-means available, negative means owed, and zero clears both. Corrections preserve
-attendance and purchases, appear in both dashboards, and work with later renewals.
-The management page keeps a correction history. Stale forms are rejected if the
-balance changed while the page was open.
-
-See [teacher conveniences](docs/teacher-convenience.md) for examples, absence
-rules and the three new tables created automatically on startup.
-
-## Concepts introduced
-
-A **transaction** saves related records together. Enrollment creates a membership
-and package in one transaction. `flush()` obtains the membership ID without
-committing it; `commit()` saves both records. If package creation fails, `rollback()`
-undoes the pending membership. A test deliberately forces that failure.
-
-A **query** derives balances from history: `net balance = total package lessons + corrections -
-effective (non-reversed) attendance`, within one enrollment. Positive credit is available; negative
-credit is shown as lessons owed. Earlier excess attendance uses credit from later
-renewals without moving historical attendance records. No separate mutable counter
-can fall out of sync with the history.
-
-## Attendance security
-
-Check-in allows ten attempts per student in a rolling minute, shared across
-server processes and preserved through restarts and new logins. Failed attempts
-count. Invalid and unauthorized codes return the same message, and sessions are
-rechecked inside the attendance write transaction. Startup adds a small attempt
-window table. See [attendance security review](docs/attendance-security.md).
-
-## Security corrections
-
-Signed cookies detect editing, but a copied cookie previously remained usable
-after logout. The browser now carries a random session token. A new SQLite
-`login_sessions` table stores its fingerprint, user, eight-hour expiry and a
-fingerprint of the password hash. Logout revokes the row. User deletion removes
-login sessions, so an old cookie cannot follow a reused user ID. Changing the
-password hash invalidates prior sessions. Attendance history keeps its existing
-no-cascade protections.
-
-Passwords still use salted Argon2. SHA-256 fingerprints are used only for already
-random session tokens and comparison against password hashes, not for passwords.
-Startup adds the session table without altering the six existing business tables.
-
-Login permits ten attempts per normalized username and 120 per connection address
-in a rolling minute. These SQLite limits survive restarts and are shared by workers.
-All attempts count; unknown usernames follow the same rules. Expired entries are
-pruned and storage is capped at 8,192 rows, failing closed when full. Incoming bodies are capped at 16 KiB before
-parsing, including streamed bodies. HTML responses restrict embedding and form
-submissions and are not cached. HTTPS deployment remains outside this local stage.
-
-## Important files
-
-| File | Purpose |
+| Guide | Purpose |
 | --- | --- |
-| `app/main.py` | App setup, login/logout, code-duration configuration and route registration |
-| `app/teacher.py` | Teacher-only routes, renewal preview/confirmation, enrollment and lessons |
-| `app/student.py` | Student-only dashboard and check-in form handling |
-| `app/student_management.py` | Teacher student search, profile updates, password resets and enrollment status |
-| `app/lesson_management.py` | Group lesson history, attendance details and close/reopen check-in |
-| `app/attendance.py` | Serialized lesson creation/check-in and student record queries |
-| `app/packages.py` | Package accounting, carried debt, renewal transaction and stale-form checks |
-| `app/web.py` | Shared template rendering and database connections per request |
-| `app/models.py` | Business tables, balance corrections, saved lesson rosters and login sessions |
-| `app/database.py` | SQLite setup, foreign keys, table creation and shared write transaction |
-| `app/security.py` | Password checks, sessions, CSRF tokens and login limiter |
-| `app/middleware.py` | Request body limit before parsing |
-| `app/create_user.py` | Reusable account creation and local teacher-account command |
-| `app/templates/teacher.html` | Forms, errors and group rosters |
-| `app/templates/renew_package.html` | Teacher renewal preview and confirmation |
-| `app/templates/lesson_balance.html` | Shared available, advance and owed counters |
-| `app/templates/students.html`, `manage_student.html` | Student directory and management forms |
-| `app/templates/lessons.html`, `lesson.html` | Lesson history and detail forms |
-| `app/templates/base.html` | Shared layout and logout form |
-| `app/static/style.css` | Responsive forms and roster styling |
-| `tests/test_teacher.py` | Teacher flow, access control, rollback and balance tests |
-| `tests/test_auth.py` | Login, sessions, revocation and request-limit tests |
-| `tests/test_database.py` | Database-integrity tests |
-| `tests/test_attendance.py` | Attendance rules, privacy, expiry, collisions and simultaneous requests |
-| `tests/test_packages.py` | Early/late renewal, debt settlement, history and concurrent requests |
-| `tests/test_student_management.py` | Management permissions, validation, password revocation and preserved records |
-| `tests/test_teacher_convenience.py` | Balance corrections, absence snapshots and regression checks |
-| `tests/test_lesson_management.py` | Lesson access, close/reopen, pagination and simultaneous requests |
+| [Product backlog](docs/product-backlog.md) | Scope, delivery updates and outstanding work |
+| [Question Bank plan](docs/question-bank-plan.md) | Question and assignment architecture/delivery |
+| [Backup and recovery](docs/backup-recovery.md) | Consistent backup, restore and rollback |
+| [Security review](docs/security-checklist-review.md) | Implemented controls and remaining requirements |
+| [PDF imports](docs/pdf-upload.md) | Supported formats and review workflow |
+| [Package accounting](docs/packages.md) | Early renewal, credit and lessons owed |
+| [Scrum agreement](docs/scrum-working-agreement.md) | Lightweight delivery and review process |
 
-## Verify and learn
+## Data and attribution
 
-```powershell
-.\.venv\Scripts\python.exe scripts/verify.py
-```
+Never commit working databases, backups, passwords, session secrets, private student
+records or local import material. Generated previews and artifacts under `output/`
+are ignored; previously tracked branding references remain in history. The public
+course content is deliberately separate from private operational records.
 
-Use the guarded runner above: direct unittest discovery imports the normal app
-and can read its local session secret. The runner redirects that secret and
-blocks default-engine connections before discovery. Tests use fictional data. Read the
-[security review](docs/security-review.md) for reproduced issues and remaining
-limits, and [dependency results](docs/dependency-audit.json) for the advisory check.
-
-Exercise: predict the balance after 14 attended lessons, one 12-lesson package,
-and then a renewal. Explain why changing a stored remaining counter would be less
-reliable than calculating from the package and attendance records.
-
-Earlier explanations are archived in [Stage 1](docs/stage-1.md),
-[Stage 2](docs/stage-2.md) and [Stage 3](docs/stage-3.md). Those describe earlier
-milestones; this README describes the current app.
-
-## School-local times (SF-03)
-
-Lesson, attendance and correction timestamps use the shared `school_time` Jinja
-filter from `app/school_time.py`. Renewal previews include recorded package dates.
-Naive SQLite timestamps are explicitly interpreted as UTC, then converted using
-Asia/Tashkent IANA rules. Every formatted time includes the timezone and offset.
-Code expiry, ordering and saved form versions remain UTC-based. No schema or data
-migration is needed. Install requirements before restarting: tzdata provides the
-IANA database on Windows. Midnight rollover and exact expiry are regression-tested.
-
-## Brand motion
-
-Homepage sections animate once as they enter view (480 ms). Score tickets and
-links have restrained hover feedback; anchor navigation uses native smooth scrolling.
-app/static/motion.js is a small local progressive enhancement loaded only on the
-homepage. Content stays readable without JavaScript. Reduced-motion preferences
-disable effects, including cancellation when the preference changes. No libraries,
-looping effects, timers or changes to attendance forms.
-
-Future work: [next-stage roadmap](docs/next-stages.md), with proposed sprint goals,
-review scenarios, dependencies and decisions required before selection.
-
-## Permanent lesson completion (SF-04)
-
-The teacher group card retains the recent lesson after its code closes or expires.
-Review/reopen continues that same unfinished lesson; Start a new lesson creates a
-separate class. Open the lesson and choose Finish or cancel lesson to review the
-permanent action and enter a note. Finishing closes check-in permanently; attendance
-corrections remain available. Cancel is only available for a class with no attendance
-history (reversed entries still count as history). Cancelled classes have no absences
-or charges. Old lessons without saved rosters freeze their current active roster on
-finish, with a warning in the preview. No existing lesson is automatically finished.
-
-Startup adds lesson_closures with teacher, timestamp, status and note. No existing
-columns are changed. Back up SQLite before upgrade; an isolated additive-upgrade and
-restore check verifies permanent closure survives recovery. Do not run old code on
-new closure data: old code could reopen a finished class. Restore matching code and
-database backups together if rolling back. Live refresh is implemented; see SF-09 below.
-
-
-## Live lesson feedback (SF-09)
-
-The teacher lesson detail page refreshes attendance and check-in status every ten
-seconds. It displays the last successful update and warns when the connection
-fails. Updates pause while hidden, offline or using lesson controls with keyboard
-focus; failures back off to a maximum of one minute. The manual refresh link works
-without JavaScript. The main teacher dashboard still uses manual refresh.
-
-Student confirmations identify the group and lesson. Each check-in form has a
-random retry token. A receipt is saved atomically with attendance, so resubmitting
-the same form after a lost response confirms the existing attendance, even after
-code expiry or permanent finish. Reversed entries still require teacher review.
-Opening a fresh form discards that retry token; use attendance history to confirm
-an older submission if its code has closed. Rate limits remain in force and now
-show a retry time alongside the student's history.
-
-Startup adds the `check_in_receipts` table without modifying existing tables.
-Back up SQLite before upgrading, then restart the server. Isolated tests cover
-upgrade, receipt rollback and backup/restore. Keep database files, backups and
-`.session-secret` local; Git excludes them.
-
-Run the browser polling logic checks with Node.js (no npm dependencies):
-
-```powershell
-node --test tests/test_lesson_live.cjs
-```
-
-See [Stage 1 verification](docs/stage-1-class-workflow.md) for the review scope.
-
-
-## Desktop launcher (Windows)
-
-The local desktop shortcut **SAT Factory** runs `scripts/open_sat_factory.py`
-with this project's `pythonw.exe`. Double-click it to start or restart the local
-server and open the results wall in your default browser. No terminal window or
-administrator access is needed. It waits for the homepage to respond before
-opening; rapid repeated clicks share a lock. The shortcut is local to this PC.
-
-It only stops servers identified by this exact checkout's `--app-dir`, module,
-host and port. If a manually started or unrelated server holds port 8000, close
-that server yourself first. It never kills a process simply because it owns the
-port. Server output is kept in `%LOCALAPPDATA%\SAT Factory\<checkout-id>\server.log`;
-startup errors show a dialog. A restart interrupts active requests, so use it
-between lessons. The server remains local to 127.0.0.1; this does not publish it.
-
-Verification: started from stopped, restarted the matching server, checked the
-updated homepage in the browser, and checked ownership rejection with a mocked
-unrelated port listener. No attendance or database content was inspected.
-
-## Isolated pilot and recovery tools
-
-Run `python scripts/rehearse.py` with the project interpreter for the fictional
-class rehearsal. Run `python scripts/recovery_drill.py` for a temporary backup and
-restore drill. Use [backup/recovery instructions](docs/backup-recovery.md) before
-any operator use; no real backup schedule is enabled. Current delivery status and
-remaining gates are in [the handover](docs/pilot-handover.md).
-
-For a disposable browser walkthrough, run `python scripts/demo_class.py` with the
-project interpreter. Choose a temporary demo password at its hidden prompt, then
-open port 8766. See [mobile classroom review](docs/mobile-classroom-review.md).
-
-## First-class help (SF-14)
-
-Login offers expandable first-login and forgotten-account help. Teachers continue
-to issue/reset passwords privately after confirming identity. Students see guidance
-for missing/inactive enrollment and uncertain or rejected check-ins. See
-[onboarding review](docs/onboarding-review.md) for delivery evidence and the pending
-real-user check.
-
-## Question Bank foundation
-
-The Question Bank is being delivered in bounded phases. The schema/taxonomy and
-recovery-compatible migration and teacher draft editor/preview are implemented.
-Teachers can open Question library from their dashboard and publish, unpublish or
-archive reviewed questions. Actively enrolled students can open Question practice,
-submit answers, see explanations and bookmark questions. Grading runs on the server;
-retries preserve one attempt. See [Question Bank plan](docs/question-bank-plan.md) for scope,
-the selected question-screen layout, verification and migration/rollback guidance.
-The next normal app startup applies the version-3 schema (optional explanations). Back up before
-an operational upgrade and rehearse on a separate restored copy first.
-
-
-Question creation uses four answer slots (A–D). Explanation and every source field
-are optional, including for publication. Question text, category and difficulty
-remain required. Drafts may be unfinished; publication requires all four answer
-texts and a correct answer. Existing question snapshots are preserved.
-
-
-Teachers can use **Question library → Import PDF** to review and import supported
-SQB Boundaries/Transitions answer PDFs locally, without AI. Nothing is imported
-until the teacher chooses drafts or publication. See [PDF upload](docs/pdf-upload.md)
-for supported formats, duplicate behavior, size limits and review expiry.
-
-
-Production security mode is prepared but disabled locally. See [security checklist
-review](docs/security-checklist-review.md) for required external secret/host settings,
-HTTPS/proxy prerequisites and the status of all 20 checklist items.
-
-## Student SAT goals
-
-On the student dashboard, open **Set target** / **Edit target** to save a target
-score from 400 to 1600 in steps of 10. Leave it blank to clear. The compact card
-keeps its form collapsed until editing. Exam dates and countdowns were removed
-at the owner's request; this is a personal target, not a predicted score.
-Targets are private to each account.
-
-This release adds the `student_goals` table on startup. Follow the additive-upgrade
-note in `docs/backup-recovery.md` before activating against existing records.
+This portfolio demonstrates the application's engineering. It does not grant
+redistribution rights to third-party questions, source PDFs, student statements or
+branding. Bundled third-party assets retain their accompanying license notices.
