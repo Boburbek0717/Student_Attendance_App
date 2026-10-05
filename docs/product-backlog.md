@@ -853,3 +853,40 @@ real-device or owner acceptance. No live records read, no push/deployment.
 Only this visual slice committed; unrelated untracked outputs preserved.
 Next proposed step: student progress visibility using existing records, keeping
 assignment results separate from independent practice. Owner review remains pending.
+
+## Student dashboard goals — 2026-10-05
+
+Owner requested a dashboard structured like the supplied reference, with editable
+Target score, Exam date and Exam countdown. Implemented a calm two-column welcome
+and goal area, white goal panel, lime study action, existing colored shortcuts and
+separate assignment/check-in panels. Mobile stacks these panels. No invented
+analytics, score forecasts, study-plan engine or additional dependencies.
+
+Each student can set/edit/clear either field. Target score is 400–1600 in steps of
+10 (College Board score scale); date is a calendar date chosen by the student, not
+an official test-date picker/registration. Countdown recalculates on dashboard
+requests using Asia/Tashkent calendar dates. Empty, future, today and past states
+have explicit messages. No ticking timer or recurring job. Other students and
+teachers cannot change the goal via this route. CSRF, server validation, session
+reauthorization within the transaction and a version field prevent unauthorized
+writes and stale-tab overwrites. Values survive validation errors.
+
+Schema: additive student_goals table (student PK/FK, nullable target_score/date,
+version). Existing initializer creates it idempotently. Backup inspector supports
+both pre-goal and current schemas and validates/reconciles new goals. Upgrade and
+rollback guidance is in docs/backup-recovery.md. No working DB migration/restart
+performed during development; all simulation data is fictional and isolated.
+
+Design/requirements references: owner screenshot; existing portal-experience
+palette and native disclosure/forms; College Board score definition:
+https://satsuite.collegeboard.org/scores/what-scores-mean
+https://research.collegeboard.org/media/pdf/sat-suite-assessments-technical-manual.pdf
+Browser static previews at 390px and 1440px: no horizontal overflow; keyboard
+opens editor; labelled target/date fields and empty state verified. Preview:
+output/student-goal-preview/dashboard.png. HTTP tests verify actual saves; static
+browser preview does not constitute real-phone acceptance.
+
+Verification: final isolated full suite 246 passed (97.871s), including five goal
+scenarios. Two old expectations (welcome copy and schema table list) were updated
+before the passing run. `git diff --check` passed. Local commit only; backed-up
+server activation and owner review remain pending.

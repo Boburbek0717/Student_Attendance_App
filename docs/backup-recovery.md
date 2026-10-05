@@ -101,3 +101,20 @@ Implementation references: Python sqlite3 Connection.backup
 (https://docs.python.org/3/library/sqlite3.html#sqlite3.Connection.backup) and
 SQLAlchemy SQLite pooling
 (https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#disabling-connection-pooling-for-file-databases).
+
+## Student goals additive upgrade — 2026-10-05
+
+Before activating goal-enabled code, make a consistent backup with the current
+backup tool to the authorized local destination. The inspector accepts old databases
+without student_goals as well as the new schema. Normal application initialization
+creates this table without changing users, attendance, packages or question history.
+Do not manually alter the live database during tests. Rehearse using a separate copy.
+Goal backup fingerprints include target, date and version; restores continue to
+revoke login sessions. The isolated goal test proves old-schema recognition,
+idempotent table creation, new data reconciliation and separate-destination restore.
+
+For rollback use the pre-upgrade backup in a separate destination with matching
+previous code. Preserve the upgraded database before switching: reverting to an old
+backup loses goals and any subsequent attendance/work. Never drop the live goal
+table to make an old inspector accept the database. No production activation or
+real-data backup was performed for this change.

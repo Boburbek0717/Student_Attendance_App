@@ -834,3 +834,27 @@ real-device or owner acceptance. No live records read, no push/deployment.
 Only this visual slice committed; unrelated untracked outputs preserved.
 Next proposed step: student progress visibility using existing records, keeping
 assignment results separate from independent practice. Owner review remains pending.
+
+## Student dashboard + personal goal — 2026-10-05
+
+Baseline 2fe9bf0, tracked working tree clean; existing unrelated output preserved.
+Scope: owner screenshot adaptation plus persistent target score, exam date and
+Tashkent calendar-day countdown. Goal editing is student-only, CSRF protected,
+re-authorized inside serialized writes, and versioned against concurrent/stale tabs.
+Includes empty/today/past states and optional field clearing. No predictive analytics.
+Additive student_goals table; old/new backup schemas supported and goal fingerprints
+reconcile on restore. Existing homepage, attendance and assignment semantics retained.
+Read docs/product-backlog.md latest entry and docs/backup-recovery.md upgrade note.
+Static fictional previews at 390/1440px passed overflow and keyboard checks;
+output/student-goal-preview/dashboard.png. Live database/secrets not read; no live
+migration, restart, deployment or remote push. Owner/real-device review pending.
+Next: authorized backed-up local activation, then owner reviews student goal flow.
+
+Final verification: `.venv\Scripts\python.exe scripts/verify.py` — 246 passed in
+97.871s, including five new goal scenarios and existing attendance, assignment,
+authentication, migration and backup tests. First full run exposed two expected
+fixture updates (welcome copy/table list); fixed and final full suite passed.
+Goal tests cover save/edit/clear, validation/CSRF/roles, privacy, simultaneous/stale
+updates, Tashkent midnight/today/past, legacy table creation and backup/restore.
+`git diff --check` passed. No new JavaScript; no extra Node rerun. Test evidence:
+output/student-goal-preview/verification.txt. Activation and owner review pending.

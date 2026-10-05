@@ -60,7 +60,7 @@ class DatabaseTests(unittest.TestCase):
 
     def test_tables_and_foreign_keys(self):
         self.assertEqual(set(inspect(self.engine).get_table_names()), {
-            "users", "groups", "enrollments", "lesson_packages", "lessons", "attendance", "login_sessions",
+            "users", "student_goals", "groups", "enrollments", "lesson_packages", "lessons", "attendance", "login_sessions",
             "balance_adjustments", "lesson_roster_snapshots", "lesson_roster", "attendance_attempt_windows", "login_attempt_windows", "attendance_corrections", "lesson_closures", "check_in_receipts",
             "qb_schema_versions", "qb_banks", "qb_sections", "qb_domains", "qb_skills",
             "qb_sources", "qb_media", "qb_questions", "qb_revisions", "qb_choices",

@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import JSON, Float, Boolean, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, String, UniqueConstraint
+from sqlalchemy import JSON, Float, Boolean, CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -168,3 +168,15 @@ class CheckInReceipt(Base):
     code_hash: Mapped[str] = mapped_column(String(64))
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     attendance_id: Mapped[int] = mapped_column(ForeignKey("attendance.id"))
+
+
+class StudentGoal(Base):
+    __tablename__ = "student_goals"
+    __table_args__ = (
+        CheckConstraint("target_score IS NULL OR (target_score BETWEEN 400 AND 1600 AND target_score % 10 = 0)", name="valid_target_score"),
+        CheckConstraint("version > 0", name="positive_goal_version"),
+    )
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    target_score: Mapped[int | None] = mapped_column(nullable=True)
+    exam_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    version: Mapped[int] = mapped_column(default=1)

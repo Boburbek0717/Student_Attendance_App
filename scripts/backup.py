@@ -58,6 +58,7 @@ def inspect_database(path):
             qb_version = versions[-1][0]
         expected = {name: table for name, table in Base.metadata.tables.items()
                     if (any(n.startswith('qb_') for n in actual) or not name.startswith('qb_'))
+                    and (name != 'student_goals' or 'student_goals' in actual)
                     and (qb_version >= 2 or name != 'qb_publication_events')
                     and (qb_version >= 4 or name not in {'qb_assignments','qb_assignment_items','qb_assignment_recipients','qb_assignment_attempts'})}
         if actual != set(expected):
@@ -84,6 +85,14 @@ def inspect_database(path):
             "SELECT 1 FROM lesson_closures c JOIN users u ON u.id=c.teacher_id WHERE u.role != 'teacher' LIMIT 1",
             "SELECT 1 FROM lesson_roster r JOIN lessons l ON l.id=r.lesson_id JOIN enrollments e ON e.id=r.enrollment_id WHERE l.group_id != e.group_id LIMIT 1",
         ]
+        if 'student_goals' in actual:
+            violations.append("SELECT 1 FROM student_goals g JOIN users u ON u.id=g.student_id WHERE u.role != 'student' OR g.version < 1 OR (g.target_score IS NOT NULL AND (g.target_score < 400 OR g.target_score > 1600 OR g.target_score % 10 != 0)) LIMIT 1")
+            from datetime import date
+            try:
+                for (value,) in db.execute('SELECT exam_date FROM student_goals WHERE exam_date IS NOT NULL'):
+                    date.fromisoformat(value)
+            except (ValueError, TypeError):
+                raise ValueError('Invalid student exam date.') from None
         if any(db.execute(query).fetchone() for query in violations):
             raise ValueError('Business relationship validation failed.')
         ids = [row[0] for row in db.execute('SELECT id FROM enrollments ORDER BY id')]

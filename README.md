@@ -382,3 +382,14 @@ for supported formats, duplicate behavior, size limits and review expiry.
 Production security mode is prepared but disabled locally. See [security checklist
 review](docs/security-checklist-review.md) for required external secret/host settings,
 HTTPS/proxy prerequisites and the status of all 20 checklist items.
+
+## Student SAT goals
+
+On the student dashboard, open **Set your goal** / **Edit goal** to save a target
+score and exam date. Either can be left blank or cleared. The countdown is based on
+Asia/Tashkent calendar dates and updates when the dashboard loads. It shows a
+specific message on exam day and after the date passes. This is a personal planning
+tool, not exam registration or a predicted score. Goals are private to each account.
+
+This release adds the `student_goals` table on startup. Follow the additive-upgrade
+note in `docs/backup-recovery.md` before activating against existing records.
