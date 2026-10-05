@@ -1,28 +1,21 @@
 /* Student home: a calm overview, one personal goal and clear daily actions. */
 .portal-experience:has(.student-dashboard) { background:#f8f9fb; }
-.student-overview { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:clamp(1.5rem,4vw,4rem); margin:2.5rem 0; align-items:start; }
+.student-overview { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,22rem); gap:clamp(1.5rem,4vw,4rem); margin:1.5rem 0; align-items:center; }
 .student-intro { padding:1.5rem 0; }
 .student-intro h1 { font-size:clamp(2rem,3.4vw,3.25rem); line-height:1.1; letter-spacing:-.045em; margin:.7rem 0 1rem; overflow-wrap:anywhere; }
 .student-intro h1 span { color:#536357; }
 .student-intro > p:not(.eyebrow) { max-width:28rem; color:#586575; line-height:1.7; margin-bottom:1.7rem; }
 .student-intro .text-action { display:inline-block; margin:1rem 0 0 1rem; }
 .sat-goal { background:#fff; border:1px solid #dce0e7; border-radius:14px; padding:clamp(1.2rem,3vw,1.8rem); min-width:0; }
-.goal-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
-.goal-heading h2 { margin:0; font-size:1.1rem; }
-.goal-label { font-size:.65rem; font-weight:700; letter-spacing:.08em; color:#506040; background:#edf5e3; border-radius:4px; padding:.3rem .5rem; }
-.goal-countdown { padding:1.5rem 0 1rem; }
-.goal-countdown > strong { display:block; font-size:clamp(1.7rem,3vw,2.5rem); letter-spacing:-.04em; line-height:1.15; font-variant-numeric:tabular-nums; }
-.goal-countdown strong span { font-size:1.2rem; font-weight:500; color:#536357; letter-spacing:0; }
-.goal-countdown p { color:#586575; font-size:.9rem; margin:.6rem 0; }
-.goal-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-top:1px solid #e5e8ed; border-bottom:1px solid #e5e8ed; padding:1rem 0; gap:1rem; margin:0 0 1rem; }
-.goal-metrics dt { color:#586575; font-size:.8rem; }
-.goal-metrics dd { margin:.5rem 0 0; font-size:1.2rem; font-weight:650; }
-.goal-metrics small { font-size:.8rem; color:#586575; font-weight:400; }
+.sat-goal h2 { margin:0; font-size:.9rem; color:#586575; font-weight:500; }
+.target-score-value { font-size:2.6rem; font-weight:650; line-height:1.15; letter-spacing:-.04em; margin:.5rem 0 .75rem; font-variant-numeric:tabular-nums; }
+.target-score-value small { font-size:.9rem; font-weight:400; color:#586575; letter-spacing:0; }
 .goal-editor { margin:0; padding:0; border:0; background:transparent; }
-.goal-editor summary { min-height:32px; color:#33452c; font-weight:600; cursor:pointer; }
-.goal-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:.75rem; }
-.goal-fields > div { min-width:0; }
-.goal-fields input { width:100%; min-width:0; box-sizing:border-box; }
+.goal-editor summary { min-height:44px; display:flex; align-items:center; gap:.4rem; color:#33452c; font-weight:600; cursor:pointer; }
+.goal-fields { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.5rem; margin-top:.5rem; }
+.goal-fields button { margin:0; }
+.goal-fields input { margin:0; min-height:44px; width:100%; min-width:0; box-sizing:border-box; }
+.goal-editor form { margin-top:.75rem; }
 .goal-editor .hint { font-size:.78rem; line-height:1.6; }
 .student-workgrid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1.25rem; align-items:start; margin:1.25rem 0; }
 .student-panel { min-width:0; background:#fff; border:1px solid #dce0e7; border-radius:14px; padding:clamp(1.2rem,3vw,2rem); }

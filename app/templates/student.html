@@ -2,19 +2,19 @@
 {% block main_class %}student-dashboard{% endblock %}
 {% block title %}Student · SAT Factory{% endblock %}
 {% block body_class %}portal-experience{% endblock %}
-{% block extra_styles %}<link rel="stylesheet" href="/static/portal-experience.css?v=1"><link rel="stylesheet" href="/static/student-dashboard.css?v=1">{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="/static/portal-experience.css?v=1"><link rel="stylesheet" href="/static/student-dashboard.css?v=2">{% endblock %}
 {% block content %}
 <div class="student-overview">
 <header class="student-intro"><p class="eyebrow">YOUR LEARNING SPACE</p><h1>Welcome back,<br><span>{{ user.display_name }}</span></h1><p>Make room for your next step. Your practice, assignments and lessons start here.</p><a class="button" href="/student/questions">Start practicing <span aria-hidden="true">↗</span></a><a class="text-action" href="#check-in-heading">Lesson check-in →</a></header>
-<section id="sat-goal" class="sat-goal" aria-labelledby="goal-heading"><div class="goal-heading"><h2 id="goal-heading">Your SAT goal</h2><span class="goal-label">PERSONAL GOAL</span></div>
+<section id="sat-goal" class="sat-goal" aria-labelledby="goal-heading">
+<h2 id="goal-heading">Target score</h2>
+<p class="target-score-value">{{ goal.target_score if goal and goal.target_score else '—' }}<small> / 1600</small></p>
 {% if goal_notice %}<p class="notice" role="status">{{ goal_notice }}</p>{% endif %}
-<div class="goal-countdown">{% if days_left is none %}<strong>What’s your next milestone?</strong><p>Choose an exam date to start your countdown.</p>{% elif days_left > 0 %}<strong>{{ days_left }} <span>{{ 'day' if days_left == 1 else 'days' }} to go</span></strong><p>Until your chosen exam date. Keep taking it one step at a time.</p>{% elif days_left == 0 %}<strong>Today is the day.</strong><p>Your chosen exam date is today. You’ve got this.</p>{% else %}<strong>Ready for what’s next?</strong><p>Your exam date has passed. Update your goal when you’re ready.</p>{% endif %}</div>
-<dl class="goal-metrics"><div><dt>Target score</dt><dd>{{ goal.target_score if goal and goal.target_score else 'Not set' }}{% if goal and goal.target_score %}<small> / 1600</small>{% endif %}</dd></div><div><dt>Exam date</dt><dd>{{ goal.exam_date.strftime('%d %b %Y') if goal and goal.exam_date else 'Not set' }}</dd></div></dl>
-<details class="goal-editor" {% if goal_error or not goal %}open{% endif %}><summary>{{ 'Edit goal' if goal else 'Set your goal' }}</summary>
+<details class="goal-editor" {% if goal_error %}open{% endif %}><summary><span aria-hidden="true">✎</span> {{ 'Edit target' if goal and goal.target_score else 'Set target' }}</summary>
 {% if goal_error %}<p class="error" id="goal-error" role="alert">{{ goal_error }}</p>{% endif %}
 <form method="post" action="/student/goal"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="version" value="{{ goal_values.version }}">
-<div class="goal-fields"><div><label for="target-score">Target score</label><input id="target-score" name="target_score" type="number" min="400" max="1600" step="10" inputmode="numeric" placeholder="e.g. 1400" value="{{ goal_values.target_score }}" aria-describedby="goal-help{% if goal_error %} goal-error{% endif %}"></div><div><label for="exam-date">Exam date</label><input id="exam-date" name="exam_date" type="date" value="{{ goal_values.exam_date }}" aria-describedby="goal-help{% if goal_error %} goal-error{% endif %}"></div></div>
-<p class="hint" id="goal-help">Both fields are optional. Clear a field to remove it. Countdown uses Asia/Tashkent dates; this does not register you for an exam.</p><button type="submit">Save goal</button></form></details></section></div>
+<label for="target-score">Target score</label><div class="goal-fields"><input id="target-score" name="target_score" type="number" min="400" max="1600" step="10" inputmode="numeric" placeholder="e.g. 1400" value="{{ goal_values.target_score }}" aria-describedby="goal-help{% if goal_error %} goal-error{% endif %}"><button type="submit">Save</button></div>
+<p class="hint" id="goal-help">400–1600, in steps of 10. Leave blank to clear.</p></form></details></section></div>
 <nav class="student-shortcuts" aria-label="Student tools"><a href="/student/questions"><span>QUESTION LIBRARY</span><strong>Keep practicing ↗</strong><small>Choose a category and build your skills.</small></a><a href="/student/assignments"><span>YOUR ASSIGNMENTS</span><strong>Continue your work ↗</strong><small>Find the tasks your teacher has shared.</small></a></nav>
 <div class="student-workgrid"><section class="student-panel" aria-labelledby="assignments-heading"><h2 id="assignments-heading">Your assignments</h2>{% for a in assignments %}<p><a href="/student/assignments/{{ a.id }}">{{ a.title }}</a>{% if a.due_at %} · Due {{ a.due_at|school_time }}{% endif %}</p>{% else %}<p class="hint">No assignments yet. Your teacher will share your next task here.</p>{% endfor %}</section>
 

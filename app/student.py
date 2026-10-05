@@ -1,8 +1,6 @@
 import secrets
 import re
-from datetime import date, timezone
 from app.database import write_transaction
-from app.school_time import SCHOOL_ZONE
 from app.school_time import school_time
 
 from fastapi import APIRouter, Depends, Form, Request
@@ -11,7 +9,7 @@ from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 
 from app.attendance import check_in, student_records
-from app.models import User, StudentGoal, utc_now
+from app.models import User, StudentGoal
 from app.security import current_user, verify_csrf, limit_attendance_attempt
 from app.web import get_db, render
 
@@ -35,13 +33,10 @@ def dashboard(request: Request, db: Session, user: User, error=None, status_code
         AssignmentRecipient.assignment_id == Assignment.id).where(AssignmentRecipient.student_id == user.id)
         .order_by(Assignment.id.desc()).limit(3)).all()
     goal = db.get(StudentGoal, user.id)
-    today = utc_now().replace(tzinfo=timezone.utc).astimezone(SCHOOL_ZONE).date()
-    days_left = (goal.exam_date - today).days if goal and goal.exam_date else None
     return render(request, "student.html", status_code or (400 if error else 200), user=user, error=error, assignments=assignments,
-                  goal=goal, days_left=days_left, goal_error=goal_error,
+                  goal=goal, goal_error=goal_error,
                   goal_values=goal_values if goal_values is not None else dict(
                       target_score=goal.target_score if goal and goal.target_score else '',
-                      exam_date=goal.exam_date.isoformat() if goal and goal.exam_date else '',
                       version=goal.version if goal else 0),
                   goal_notice=request.session.pop("goal_notice", None),
                   retry_key=retry_key or secrets.token_urlsafe(32),
@@ -82,25 +77,17 @@ def submit_attendance(
 
 
 @router.post("/goal", response_class=HTMLResponse)
-def save_goal(request: Request, target_score: str = Form(''), exam_date: str = Form(''),
+def save_goal(request: Request, target_score: str = Form(''),
               version: str = Form(''), csrf: str = Form(''), db: Session = Depends(get_db),
               user: User = Depends(require_student)):
     verify_csrf(request, csrf)
-    values = dict(target_score=target_score, exam_date=exam_date, version=version)
+    values = dict(target_score=target_score, version=version)
     try:
         if target_score and (not re.fullmatch(r'[0-9]{3,4}', target_score)
                 or not 400 <= int(target_score) <= 1600 or int(target_score) % 10):
             raise ValueError('Choose a target score from 400 to 1600, in steps of 10.')
         if not re.fullmatch(r'[0-9]{1,10}', version):
             raise ValueError('Reload the dashboard before saving your goal.')
-        chosen_date = None
-        if exam_date:
-            try:
-                if not re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}', exam_date):
-                    raise ValueError()
-                chosen_date = date.fromisoformat(exam_date)
-            except ValueError:
-                raise ValueError('Enter a valid exam date.') from None
         with write_transaction(request.app.state.database_engine) as tx:
             current = require_student(request, tx)
             goal = tx.get(StudentGoal, current.id)
@@ -112,9 +99,8 @@ def save_goal(request: Request, target_score: str = Form(''), exam_date: str = F
             else:
                 goal.version += 1
             goal.target_score = int(target_score) if target_score else None
-            goal.exam_date = chosen_date
     except ValueError as error:
         db.expire_all()
         return dashboard(request, db, user, goal_error=str(error), goal_values=values, status_code=400)
-    request.session['goal_notice'] = 'Your SAT goal has been saved.'
+    request.session['goal_notice'] = 'Your target score has been saved.'
     return RedirectResponse('/student#sat-goal', status_code=303)

@@ -899,3 +899,11 @@ pressed state, keyboard activation and screen-reader feedback; no auto-rotation.
 Isolated homepage rendering, `node --check app/static/spotlight.js`, browser switching
 and 390px overflow checks passed. Handover records limits and preview. No deployment,
 remote push or DB changes; application restart needed for new context.
+
+### Target score simplification — 2026-10-05
+
+Owner supersedes earlier exam-date/countdown scope: only a compact target score
+card remains, with a collapsed score editor. Date UI/calculation and date writes
+removed; existing storage preserved for compatibility. Five focused goal tests
+passed, including privacy/stale changes/backup and ignored legacy date input.
+Desktop/mobile keyboard review passed. See latest handover for evidence.

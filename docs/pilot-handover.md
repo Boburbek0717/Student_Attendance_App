@@ -882,3 +882,18 @@ with a 48px circular Next student result button. Cycles 1470 → 1420 → 1380 �
 retains native keyboard activation and polite announcement, without auto-rotation.
 JS syntax, Node VM cycle/wrap/one-visible-card check and git diff --check passed.
 No backend/database change or fresh browser review for this small adjustment.
+
+## Compact target score — 2026-10-05
+
+Owner removed the exam date/countdown feature. Dashboard now shows a compact
+22rem-max target card with score and native Edit/Set target disclosure, collapsed
+by default even when unset; errors expand it. Date inputs, countdown display and
+calculation removed, and goal POST no longer accepts date changes. Existing nullable
+exam_date column/values retained solely for backward schema/backup compatibility;
+no destructive migration. Personal target validation, CSRF, privacy, atomic writes
+and stale-tab guard retained. README reflects current behavior.
+Verification: isolated `scripts/verify.py --pattern test_student_goals.py`: five
+passed (2.224s), including ignored date submissions and hidden legacy dates.
+Desktop/390px fictional previews and native keyboard disclosure checked; no overflow.
+Screenshot: output/compact-target-preview/desktop.png. `git diff --check` passed.
+No live DB access, restart, remote push or full-suite repeat. Runtime reload needed.
