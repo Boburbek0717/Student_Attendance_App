@@ -926,3 +926,27 @@ These are automated checks, not owner acceptance, real-device testing or deploym
 Next action: commit this documentation/workflow checkpoint and push master normally,
 then confirm the remote branch matches the local commit. External pilot/release
 choices remain separate from this repository publication.
+
+## SF-13 portfolio demo preparation — 2026-10-06
+
+Owner postponed the real course and selected a free portfolio demonstration.
+Baseline 0a0a718, clean tree. Added scripts/portfolio_demo.py: loopback-only disposable
+sandbox with guarded imports, separate cookie/secret/database, six fictional
+students, completed lesson/history, three original questions published through the
+publication service, and a recipient-snapshotted assignment. Demo-only access guards
+block profile/password/enrollment-status changes. Normal startup is unaffected.
+Banner and public fictional login guidance added; README links portfolio-demo.md.
+
+Verification: `.venv\Scripts\python.exe scripts/verify.py --pattern test_portfolio_demo.py`
+3 passed (1.578s); `--pattern test_auth.py` 24 passed (12.309s); git diff --check passed.
+Browser keyboard login and 396px layout inspected; content width 381px, no horizontal
+overflow. Preview output/portfolio-demo/student.png is ignored. No real-device test.
+Local review server started at 127.0.0.1:8767 (process 6172); it remains available
+for owner review. Its initial history timestamps predate the final fixture alignment;
+restart the launcher to load the final seed. Normal port 8000 and live data untouched.
+No public deployment, external resources, schedules or remote push in this chunk.
+
+Next bounded task: free-host entry point and configuration with HTTPS, host/proxy
+validation, health checks and resource/abuse controls. Shared visitor state, login
+throttling, uploads and content edits require public-demo review before exposure.
+Local demo preparation is implemented; SF-13 public release remains incomplete.

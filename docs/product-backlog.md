@@ -917,3 +917,13 @@ Added CONTRIBUTING.md and one fail-fast scripts/check.py command combining guard
 Python, Node, dependency compatibility and whitespace checks. Generated local
 output/logs ignored; reviewed fictional dashboard screenshot deliberately included.
 No application behavior or deployment changes. Evidence in latest pilot handover.
+
+## SF-13 portfolio sandbox slice — 2026-10-06
+
+Owner postponed the course launch and approved local preparation for a free demo.
+Implemented a separate resettable fictional sandbox with visible credentials,
+questions, assignment and attendance history, protecting shared account access.
+Acceptance evidence: 3 demo and 24 auth tests passed; narrow-screen browser and
+keyboard login checked. See portfolio-demo.md and latest handover. Public hosting,
+abuse/resource limits and simultaneous-visitor experience are the next slice;
+no public deployment or real-course readiness is claimed.

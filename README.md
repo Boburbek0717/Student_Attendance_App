@@ -189,3 +189,13 @@ course content is deliberately separate from private operational records.
 This portfolio demonstrates the application's engineering. It does not grant
 redistribution rights to third-party questions, source PDFs, student statements or
 branding. Bundled third-party assets retain their accompanying license notices.
+
+
+### Resettable portfolio sandbox
+
+Run `.venv\Scripts\python.exe scripts/portfolio_demo.py`, then open
+<http://127.0.0.1:8767/login>. Demo access is shown on the login page.
+This creates a separate temporary database with six fictional students, a teacher,
+attendance history, three original sample questions and an assignment. Stop and
+restart it to reset all demo activity. No existing accounts or database are used.
+See [demo instructions and hosting limits](docs/portfolio-demo.md).

@@ -541,3 +541,9 @@ main.qb-workspace { max-width: 76rem; }
 
 .practice-highlight { background: #f4df72; color: #20251f; padding: 0; }
 [data-highlight-region] { user-select: text; -webkit-user-select: text; }
+
+/* Explicit sandbox notice; never enabled by normal application startup. */
+.demo-notice { padding: 12px 20px; background: #edf5d9; color: #223018; font-size: 14px; line-height: 1.5; text-align: center; overflow-wrap: anywhere; }
+.demo-notice a { color: inherit; text-decoration: underline; }
+.demo-access { padding: 16px; margin-block: 16px; border: 1px solid #ccd6bd; border-radius: 8px; }
+.demo-access code { overflow-wrap: anywhere; }
