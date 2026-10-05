@@ -3,7 +3,7 @@
 {% block main_class %}welcome-page home-page{% endblock %}
 {% block body_class %}public-site home-experience{% endblock %}
 {% block brand_header %}{% set public_page = 'home' %}{% include "public_header.html" %}{% endblock %}
-{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', path='/home.css') }}?v=3">{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', path='/home.css') }}?v=4">{% endblock %}
 {% block content %}
 <section class="factory-hero home-intro" aria-labelledby="welcome-heading">
     <div class="hero-copy">
@@ -12,18 +12,26 @@
 
         <a class="hero-action" href="/results">Explore student results <span aria-hidden="true">&#8599;</span></a>
     </div>
-    {% if featured %}{% set spotlight = featured[0] %}
-    <div class="score-scene">
+    {% if spotlights %}
+    <div class="score-scene" data-spotlight aria-label="Student result spotlight">
         <div class="score-orbit orbit-one" aria-hidden="true"></div>
         <div class="score-orbit orbit-two" aria-hidden="true"></div>
         <span class="scene-spark" aria-hidden="true">✳</span>
-        <a class="spotlight-ticket" href="/results#result-{{ spotlight.id }}" aria-label="{{ spotlight.name }}, SAT {{ spotlight.ebrw + spotlight.math }}. View result.">
+        <div class="spotlight-cards">
+        {% for spotlight in spotlights %}
+        <a id="spotlight-{{ loop.index }}" {% if not loop.first %}hidden{% endif %} class="spotlight-ticket" href="/results#result-{{ spotlight.id }}" aria-label="{{ spotlight.name }}, SAT {{ spotlight.ebrw + spotlight.math }}. View result.">
             <span class="spotlight-top">SAT FACTORY <span aria-hidden="true">↗</span></span>
             <span class="spotlight-caption">Student spotlight</span>
             <strong class="spotlight-score">{{ spotlight.ebrw + spotlight.math }}<small>/ 1600</small></strong>
             <span class="spotlight-name">{{ spotlight.name }}</span>
             <span class="spotlight-split"><span>EBRW <b>{{ spotlight.ebrw }}</b></span><span>Math <b>{{ spotlight.math }}</b></span></span>
         </a>
+        {% endfor %}
+        </div>
+        <div class="spotlight-controls" role="group" aria-label="Choose a student result" hidden>
+            {% for spotlight in spotlights %}<button type="button" aria-controls="spotlight-{{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}" aria-label="Show {{ spotlight.name }}, SAT {{ spotlight.ebrw + spotlight.math }}">{{ spotlight.ebrw + spotlight.math }}</button>{% endfor %}
+        </div>
+        <span class="sr-only" data-spotlight-status role="status" aria-live="polite" aria-atomic="true"></span>
     </div>{% endif %}
 </section>
 <section id="results" class="featured-results" aria-labelledby="featured-heading">
@@ -58,4 +66,4 @@
 <footer class="home-footer"><strong>SAT Factory.</strong></footer>
 {% endblock %}
 
-{% block scripts %}<script src="{{ url_for('static', path='/home-motion.js') }}?v=2" defer></script>{% endblock %}
+{% block scripts %}<script src="/static/spotlight.js?v=1" defer></script><script src="{{ url_for('static', path='/home-motion.js') }}?v=2" defer></script>{% endblock %}

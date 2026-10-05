@@ -62,3 +62,5 @@ RESULTS = [{'name': 'Asilbek Shukurov',
   'id': 9}]
 
 FEATURED_RESULTS = [next(row for row in RESULTS if row["id"] == key) for key in (6, 9, 5)]
+
+SPOTLIGHT_RESULTS = [next(row for row in RESULTS if row["id"] == key) for key in (6, 9, 7)]

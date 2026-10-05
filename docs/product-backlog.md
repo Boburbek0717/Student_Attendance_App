@@ -890,3 +890,12 @@ Verification: final isolated full suite 246 passed (97.871s), including five goa
 scenarios. Two old expectations (welcome copy and schema table list) were updated
 before the passing run. `git diff --check` passed. Local commit only; backed-up
 server activation and owner review remain pending.
+
+## Homepage spotlight selection — 2026-10-05
+
+Delivered owner-requested manual switching among 1470/1420/1380 score tickets,
+preserving the existing hero design and full-result links. Native buttons with
+pressed state, keyboard activation and screen-reader feedback; no auto-rotation.
+Isolated homepage rendering, `node --check app/static/spotlight.js`, browser switching
+and 390px overflow checks passed. Handover records limits and preview. No deployment,
+remote push or DB changes; application restart needed for new context.

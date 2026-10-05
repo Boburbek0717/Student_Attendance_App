@@ -858,3 +858,19 @@ Goal tests cover save/edit/clear, validation/CSRF/roles, privacy, simultaneous/s
 updates, Tashkent midnight/today/past, legacy table creation and backup/restore.
 `git diff --check` passed. No new JavaScript; no extra Node rerun. Test evidence:
 output/student-goal-preview/verification.txt. Activation and owner review pending.
+
+## Switchable homepage spotlight — 2026-10-05
+
+Owner requested equal spotlight treatment for 1470, 1420 and 1380 while preserving
+the existing single-ticket design. Added manual score selector buttons for
+Allonazarov Javohir (680+790), Go'zal Anvarova (660+760) and Nurmuhammadov
+Bekmuhammad (650+730). All content remains server-rendered and links to the matching
+full result. Existing featured row remains unchanged. No auto-rotation/dependency.
+Buttons support native keyboard activation, pressed state and a polite screen-reader
+announcement. Nonselected cards are hidden from navigation. Without JS, first card
+and full results link remain available. Checked isolated homepage render, JS syntax,
+browser click/Enter switching, visible card count and score breakdowns, and 390px
+layout without overflow. Corrected an initially visible screen-reader announcement
+during review. Static screenshot: output/spotlight-switch-preview/desktop.png.
+No DB/secret access or server restart. New render context requires application
+reload/restart; owner acceptance pending. No full-suite rerun for this UI-only change.
