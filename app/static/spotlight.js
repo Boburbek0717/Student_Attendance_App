@@ -1,18 +1,17 @@
-// Manual switching preserves the server-rendered links and score breakdowns.
+// Cycle manually; leave the server-rendered first result available without JS.
 (() => {
     for (const scene of document.querySelectorAll('[data-spotlight]')) {
         const controls = scene.querySelector('.spotlight-controls');
-        const buttons = Array.from(controls.querySelectorAll('button'));
+        const button = controls.querySelector('button');
         const cards = Array.from(scene.querySelectorAll('.spotlight-ticket'));
         const status = scene.querySelector('[data-spotlight-status]');
-        for (const button of buttons) {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('aria-controls');
-                for (const card of cards) card.hidden = card.id !== id;
-                for (const item of buttons) item.setAttribute('aria-pressed', String(item === button));
-                status.textContent = button.getAttribute('aria-label').replace(/^Show /, 'Showing ');
-            });
-        }
+        if (cards.length < 2) continue;
+        let index = 0;
+        button.addEventListener('click', () => {
+            index = (index + 1) % cards.length;
+            cards.forEach((card, position) => { card.hidden = position !== index; });
+            status.textContent = `Showing result ${index + 1} of ${cards.length}: ${cards[index].getAttribute('aria-label')}`;
+        });
         controls.hidden = false;
     }
 })();

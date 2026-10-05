@@ -874,3 +874,11 @@ layout without overflow. Corrected an initially visible screen-reader announceme
 during review. Static screenshot: output/spotlight-switch-preview/desktop.png.
 No DB/secret access or server restart. New render context requires application
 reload/restart; owner acceptance pending. No full-suite rerun for this UI-only change.
+
+### Spotlight control simplification — 2026-10-05
+
+Owner requested a single arrow instead of three score choices. Replaced selectors
+with a 48px circular Next student result button. Cycles 1470 → 1420 → 1380 → 1470;
+retains native keyboard activation and polite announcement, without auto-rotation.
+JS syntax, Node VM cycle/wrap/one-visible-card check and git diff --check passed.
+No backend/database change or fresh browser review for this small adjustment.
