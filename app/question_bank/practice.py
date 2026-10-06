@@ -76,14 +76,14 @@ def theme_library(skill_id: int, request: Request, page: int = 1, db: Session = 
                   statuses=practice_statuses(db, user.id, rows[:20]))
 
 
-def question_page(request, db, user, question_id, attempt_id=None, error=None, retry_key=None, fresh_feedback=False):
+def question_page(request, db, user, question_id, attempt_id=None, error=None, retry_key=None, fresh_feedback=False, guest_result=None, public_mode=False):
     q = published(db, question_id)
-    attempt = None
+    attempt = guest_result if public_mode else None
     if attempt_id is not None:
         attempt = db.get(Attempt, attempt_id) if 0 < attempt_id < 2**63 else None
         if not attempt or attempt.student_id != user.id or attempt.question_id != q.id:
             raise HTTPException(404, 'Attempt not found.')
-    revision = db.get(Revision, attempt.revision_id if attempt else q.published_revision_id)
+    revision = db.get(Revision, attempt.revision_id if attempt and not public_mode else q.published_revision_id)
     # Explicit public projection: the full revision/key never enter pre-answer HTML.
     content = dict(id=revision.id, stem=revision.stem, passage=revision.passage, difficulty=revision.difficulty)
     taxonomy=db.execute(select(Bank.name,Section.name,Skill.name).select_from(Skill)
@@ -93,7 +93,9 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
     # Count saved submissions for this revision, not the question's lifetime
     # attempt number. A newly published revision gets its own first try.
     reveal_answer = False
-    if attempt:
+    if attempt and public_mode:
+        reveal_answer = attempt.is_correct or attempt.number >= 2
+    elif attempt:
         revision_attempts = db.scalar(select(func.count()).select_from(Attempt).where(
             Attempt.student_id == user.id, Attempt.revision_id == revision.id,
             Attempt.number <= attempt.number))
@@ -114,11 +116,12 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
         Question.published_revision_id == Revision.id).where(Question.status == 'published',
         Revision.skill_id == theme.id).order_by(Question.id).offset(grid_offset).limit(20)).all()
     return render(request, 'practice_question.html', 400 if error else 200, user=user, question=q,
-        grid_rows=grid_rows, grid_offset=grid_offset, statuses=practice_statuses(db, user.id, grid_rows),
+        grid_rows=grid_rows, grid_offset=grid_offset, statuses={} if public_mode else practice_statuses(db, user.id, grid_rows),
+        public_mode=public_mode, practice_root="/questions" if public_mode else "/student/questions",
         content=content, taxonomy=taxonomy, theme=theme, fresh_feedback=fresh_feedback, choices=choices, attempt=attempt, answer=key,
         explanation=revision.explanation if reveal_answer else None, previous=previous, following=following,
         error=error, retry_key=retry_key or secrets.token_urlsafe(32),
-        saved=db.get(Bookmark,(user.id,q.id)) is not None)
+        saved=False if public_mode else db.get(Bookmark,(user.id,q.id)) is not None)
 
 
 @router.get('/{question_id}')

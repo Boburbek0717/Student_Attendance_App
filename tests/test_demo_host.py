@@ -52,7 +52,7 @@ class HostedDemoTests(unittest.TestCase):
                 await guard({'type':'http','method':method,'path':path},receive,send)
                 return messages[0]['status']
             self.assertEqual(await request('/teacher/questions/import'),403)
-            self.assertEqual(await request('/login'),200)
+            self.assertEqual(await request('/questions/1/answer'),200)
             self.assertEqual(await request('/login'),200)
             self.assertEqual(await request('/login'),429)
             now[0]=61

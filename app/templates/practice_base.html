@@ -2,4 +2,6 @@
 {% block body_class %}student-practice{% endblock %}
 {% block main_class %}qb-workspace practice-shell{% endblock %}
 {% block extra_styles %}<link rel="stylesheet" href="/static/practice.css?v=2">{% endblock %}
-{% block brand_header %}<header class="practice-header"><a class="practice-brand" href="/student/questions" aria-label="SAT Factory question bank"><img src="/static/branding/sat-factory-logo.png" alt="SAT Factory" width="56" height="56"><span>Practice room</span></a><a class="practice-dashboard" href="/student">Student dashboard <span aria-hidden="true">↗</span></a></header>{% endblock %}
+{% block brand_header %}<header class="practice-header"><a class="practice-brand" href="{{ practice_root|default('/student/questions') }}" aria-label="SAT Factory question bank"><img src="/static/branding/sat-factory-logo.png" alt="SAT Factory" width="56" height="56"><span>Practice room</span></a>{% if public_mode %}<a class="practice-dashboard" href="/login">Course portal ↗</a>{% else %}<a class="practice-dashboard" href="/student">Student dashboard <span aria-hidden="true">↗</span></a>{% endif %}</header>{% if public_mode %}<p class="hint" id="guest-storage-note">Free guest practice. Progress and bookmarks stay in this browser, not your course account. <a href="/">Study with SAT Factory</a></p>{% endif %}{% endblock %}
+
+{% block scripts %}{% if public_mode %}<script src="/static/guest-practice.js?v=1" defer></script>{% endif %}{% endblock %}

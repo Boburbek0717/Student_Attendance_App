@@ -157,7 +157,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the practical checklist.
 ## Operations, limitations and next work
 
 - Teachers issue/reset student credentials and record renewals; there are no online payments.
-- Question practice requires an active enrollment. Assignment access also requires
+- Public guest practice is available at `/questions` without login. Account-saved
+  practice still requires active enrollment. Assignment access also requires
   saved recipient membership. Teachers share one course business; assignment reports
   are scoped to their creator.
 - Only documented PDF layouts are supported. Imports require review; arbitrary PDFs
@@ -199,3 +200,33 @@ This creates a separate temporary database with six fictional students, a teache
 attendance history, three original sample questions and an assignment. Stop and
 restart it to reset all demo activity. No existing accounts or database are used.
 See [demo instructions and hosting limits](docs/portfolio-demo.md).
+
+
+### Public Question Library
+
+The homepage Free practice link opens `/questions`. Only published revisions are
+visible. Guests can browse categories and answer questions without an account;
+answers/explanations stay hidden until a correct answer or a second submission.
+Explanations remain collapsed. Publishing a question now makes it public, including
+already published questions. Review permission to redistribute imported material
+before any public deployment; no rights verification is implied by publication.
+
+Guest results and bookmarks use browser localStorage (latest 2,000 revisions and
+1,000 bookmarks), shared by people using the same browser profile. They do not sync
+or merge into student accounts. Clearing browser storage removes them. A bounded
+signed session cookie retains the last six question checks for retry/disclosure;
+its loss/expiry or eviction resets that short-term check history. Guest history is
+for self-study, not grades; concurrent tabs/cookie replay are not authoritative.
+No guest attempts or bookmarks are inserted into the course database.
+
+Enrolled students entering `/questions` are redirected to existing account-saved
+practice. Other visitors (including teachers) use guest mode. Assignments,
+attendance and teacher authoring keep existing authorization rules.
+
+Public requests are bounded per process/IP: 240 reads or 30 answer submissions per
+minute, maximum 10,000 active limiter buckets. Cookies cannot reset this budget.
+Limits reset on restart, may be shared behind NAT, and are not distributed across
+workers. Configure trusted proxy addresses at the host; do not trust arbitrary
+forwarding headers. The demo host keeps its additional global/lifetime limits and
+allows only the new public answer POST, not authoring. No deployment is performed.
+Restart the normal server to register new routes; no database migration is needed.

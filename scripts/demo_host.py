@@ -16,7 +16,7 @@ class DemoLimits:
     Rejected requests do not allocate per-client state or consume request bodies.
     """
     allowed = re.compile(
-        r'/(?:login|logout|student/(?:goal|check-in|questions/[0-9]+/(?:answer|bookmark)|'
+        r'/(?:login|logout|questions/[0-9]+/answer|student/(?:goal|check-in|questions/[0-9]+/(?:answer|bookmark)|'
         r'assignments/[0-9]+/questions/[0-9]+/answer)|teacher/(?:'
         r'groups/[0-9]+/lessons|lessons/[0-9]+/(?:close|reopen|finish)|'
         r'enrollments/[0-9]+/renew))')

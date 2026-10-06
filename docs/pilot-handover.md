@@ -976,3 +976,36 @@ Next: owner-authorized publication, push reviewed commits and run Render build/H
 smoke checks including restart/session reset. Linux wheel availability and actual
 health-proxy behavior are unverified. Shared-state/rate-limit interference is an
 explicit demo limitation, not suitable for real course operation.
+
+
+## Public guest Question Library — 2026-10-06
+
+Owner authorized opening published practice to everyone. Baseline 32b5d2e; clean
+working tree at start. Added separate /questions routes, shared page rendering,
+homepage Free practice link, guest browser progress/bookmarks and explicit teacher
+public-publication label. No course data writes or migrations. Enrolled student
+visits redirect to existing saved practice; protected assignment/attendance paths
+retain original access checks. Guest checking uses CSRF, revision/choice validation,
+bounded signed-cookie recent checks and per-process/IP request limits. First wrong
+answer does not disclose key/explanation; repeated identical submission does not
+advance disclosure. Demo allowlist admits only public answer POST additionally.
+
+Verification (guarded fictional engines/secrets):
+- scripts/verify.py --pattern test_public_practice.py: 5 passed, 6.802s.
+- scripts/verify.py --pattern test_question_practice.py: 15 passed, 26.667s.
+- scripts/verify.py --pattern test_assignments.py: 14 passed, 33.841s.
+- scripts/verify.py --pattern test_demo_host.py: 3 passed, final 1.581s.
+All commands use .venv/Scripts/python.exe.
+- node --test tests/test_guest_practice.cjs: 4 passed; node --check guest script passed.
+- Browser fictional demo on isolated port 8772: homepage link, category/question,
+  bookmark retained across answer navigation, first wrong hidden key, correct retry,
+  collapsed explanation, persistent yellow grid badge. 390px homepage/library had
+  no overflow. No real account data accessed. git diff --check passed.
+
+Limits: guest progress is self-study/browser-local, no account merge; last-six
+cookie check state can reset/evict and concurrent tabs are not durable records.
+Per-process throttles need host proxy/scaling review before course deployment.
+Redistribution permissions for actual imported PDFs were not verified. No live
+server restart, remote push or public deployment. Normal server needs restart to
+load routes. Fictional review server stopped after checks. Owner acceptance pending.
+Next: owner review of guest experience; public content rights review before launch.
