@@ -968,3 +968,21 @@ Redistribution permissions for actual imported PDFs were not verified. No live
 server restart, remote push or public deployment. Normal server needs restart to
 load routes. Fictional review server stopped after checks. Owner acceptance pending.
 Next: owner review of guest experience; public content rights review before launch.
+
+
+## Zero-token PDF workflow clarification — 2026-10-07
+
+Owner requested repeatable PDF extraction/publication with minimal token use.
+Inspection confirmed the teacher uploader already performs local deterministic
+extraction, review, duplicate checks and transactional publication. Avoided building
+a second importer. Offline extraction CLI now defaults to the same per-page auto
+profile detection; explicit profiles remain supported. Teacher upload/review copy
+clarifies zero AI use, source-provided difficulty/answers and public publication.
+Added docs/pdf-question-workflow.md with everyday steps, offline command, limits
+and future format-extension path. No PDF supplied or published in this turn.
+Verification: guarded test_sqb_pdf_extract.py 5 passed (2.897s),
+test_question_import.py 9 passed (14.089s), CLI --help and git diff --check passed.
+No live database/credentials accessed, deployment or remote push. Scope remains
+Boundaries/Transitions SQB layouts; OCR/general PDF or diagram parsing is not added.
+Next for broader support: inspect one representative new layout and add a tested
+profile; do not infer missing difficulty or automatically publish uncertain pages.

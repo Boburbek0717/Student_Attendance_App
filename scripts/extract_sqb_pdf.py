@@ -1,6 +1,6 @@
 """Bounded, read-only extractor for reviewed SQB Boundaries and Transitions layouts.
 
-Use the bundled PDF runtime (pypdf). Does not import the app, contact services,
+Use the project virtual environment (pypdf). Does not import the app, contact services,
 execute PDF actions, write a database or publish questions. Unsupported pages
 are quarantined for review instead of guessing structure.
 """
@@ -107,7 +107,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
-    parser.add_argument('--profile', choices=(PROFILE, TRANSITIONS_PROFILE), default=PROFILE)
+    parser.add_argument('--profile', choices=('auto', PROFILE, TRANSITIONS_PROFILE), default='auto')
     args = parser.parse_args()
     result = extract(args.source, args.profile)
     args.output.parent.mkdir(parents=True, exist_ok=True)
