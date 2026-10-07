@@ -70,7 +70,7 @@ def parse_pdf(payload, store):
             except subprocess.TimeoutExpired:
                 raise ValueError('PDF processing took too long. Try a smaller supported PDF.') from None
             if process.returncode or not output.exists() or output.stat().st_size > 2*1024*1024:
-                raise ValueError('This PDF could not be read. Use an unencrypted, text-based answer PDF with up to 100 pages.')
+                raise ValueError('This PDF could not be read. Use an unencrypted, text-based answer PDF with up to 200 pages.')
             return json.loads(output.read_text(encoding='utf-8'))
     finally:
         store.parser.release()

@@ -3,7 +3,7 @@
 ## Everyday use
 
 1. Sign in as a teacher. Open Question library → Import PDF.
-2. Upload the original text-based SQB answer PDF (10 MB / 100 pages maximum).
+2. Upload the original text-based SQB answer PDF (10 MB / 200 pages maximum).
 3. Review the extracted question count, duplicate count and flagged pages.
    Expand questions to check passage, prompt, A–D choices, supplied answer,
    difficulty and explanation against the PDF.
@@ -80,6 +80,25 @@ and Prompt: labels are separated. Explanation:/Rationale: is optional. Generated
 source IDs hash the extracted prompt/passage/options; changing those creates a new
 identity, while changing only answers/difficulty triggers a duplicate conflict.
 Separate keys require unique question numbers throughout the document. Extra key
-entries are flagged. Questions spanning pages, columns with ambiguous reading
+entries are flagged. Numbered worksheet questions spanning pages, columns with ambiguous reading
 order, missing labels and image-based mathematics still require review. This is
 broader automatic recognition, not a claim of universal PDF understanding.
+
+
+## Command of Evidence reference standard (2026-10-07)
+
+SQB question records now span up to four consecutive pages, grouped from each
+Question ID header to the next. One metadata block is required and is normalized
+from its extracted position (including before a continued answer). Matching source
+IDs remain mandatory. The upload limit is 200 pages, with existing 10 MB, 25-second
+worker and 2 MB output bounds retained. The review shows source page ranges.
+Scientific initials such as O. vulgaris no longer count as extra SQB choices.
+
+Measured on the supplied 101-page PSAT 10 Command of Evidence PDF: 70 records
+accounted for, 35 text candidates and 35 graph/table-reference flags. The real
+subprocess upload parser finished in 7.0 seconds locally. No questions imported.
+Graph/table references are conservatively blocked because text cannot preserve the
+visual information. This file remains blocked for batch publication: attached visual
+storage, rendering, backup and access handling are not implemented in this slice.
+Clear visual-content diagnostics replace the generic unsupported-format message.
+This is multi-page SQB support, not complete visual-question support.

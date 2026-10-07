@@ -1054,3 +1054,23 @@ ambiguous reading order and cross-page question continuations remain unsupported
 Unlabelled metadata/difficulty is not guessed. Review remains mandatory before
 publication; a flagged page blocks the batch. Next: evaluate representative owner
 PDFs against the new recognizer before claiming broad real-document coverage.
+
+
+## Command of Evidence multi-page standard — 2026-10-07
+
+Owner selected supplied 101-page PDF as parser reference. Added bounded 200-page
+support; SQB grouping by Question ID (up to four pages/question), metadata relocation
+and preserved source page ranges. SQB-specific option parsing avoids scientific
+initial false positives. Kept answer-ID matching, image/difficulty checks and batch
+blocking. Added explicit graph/table-reference flags so vector visuals cannot be
+silently flattened into publishable text. Worker exposes only allowlisted diagnostics.
+
+Verification: guarded flexible parser 10 passed (1.422s), SQB regressions 5 passed
+(1.891s), question import 10 passed. Exact supplied PDF through real isolated worker:
+101 pages, 35 text candidates + 35 visual flags, 7.0 seconds. No writes/publication.
+Page 1 rendered and visually inspected. No real data/secrets accessed or remote push.
+
+Not complete visual import: all 70 question records are accounted for, but 35 visual
+questions block batch publication. Next needed implementation is faithful diagram/
+table attachments across extraction, private storage, review, student display and
+backup/recovery. Do not label this PDF fully importable until that path is verified.

@@ -86,3 +86,31 @@ class FlexiblePdfTests(unittest.TestCase):
         self.assertEqual(item['assessment'],'SAT')
         self.assertEqual(item['source_id'],'abcdef12')
         self.assertEqual(item['answer'],1)
+
+    def test_sqb_continuation_metadata_moved_before_answer(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        from test_sqb_pdf_extract import page_text
+        from scripts.extract_sqb_pdf import extract
+        raw=page_text()
+        question,tail=raw.split('ID: abcdef12 Answer')
+        answer,metadata=tail.split('Assessment')
+        pages=[SimpleNamespace(extract_text=lambda:question+'Assessment'+metadata,images=[]),
+               SimpleNamespace(extract_text=lambda:'ID: abcdef12 Answer'+answer,images=[])]
+        with TemporaryDirectory() as d:
+            source=Path(d)/'fictional.pdf';source.write_bytes(b'%PDF-fictional')
+            with patch('pypdf.PdfReader',return_value=SimpleNamespace(is_encrypted=False,pages=pages)):
+                result=extract(source,'auto')
+                self.assertEqual(result['rejected'],[])
+                self.assertEqual(len(result['candidates']),1)
+                self.assertEqual(result['candidates'][0]['page_end'],2)
+                pages[1].extract_text=lambda:'ID: 12345678 Answer'+answer
+                self.assertTrue(extract(source,'auto')['rejected'])
+
+    def test_sqb_scientific_initial_is_not_an_option(self):
+        from test_sqb_pdf_extract import page_text
+        from scripts.flexible_pdf import parse_labelled_sqb
+        item=parse_labelled_sqb(page_text().replace('A. and','A. \nO. fictional species'),1)
+        self.assertEqual(item['choices'][0],'O. fictional species')

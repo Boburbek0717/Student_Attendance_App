@@ -71,7 +71,7 @@ def extract(source, profile=PROFILE):
     if source.stat().st_size > 10*1024*1024:
         raise ValueError('Use a PDF smaller than 10 MB for this rehearsal.')
     reader = PdfReader(source)
-    if reader.is_encrypted or not 1 <= len(reader.pages) <= 100:
+    if reader.is_encrypted or not 1 <= len(reader.pages) <= 200:
         raise ValueError('Use an unencrypted PDF with 1–100 pages.')
     try:
         from scripts.flexible_pdf import parse_questions, answer_key, parse_labelled_sqb
@@ -95,10 +95,27 @@ def extract(source, profile=PROFILE):
             except ValueError as error:
                 rejected.append(dict(page=number, reason=str(error)))
                 key_pages.add(number)
-    for number, page in enumerate(reader.pages, 1):
+    records = [(i, i, p, texts.get(i)) for i,p in enumerate(reader.pages,1)]
+    if profile == 'auto' and re.match(r'Question ID [a-fA-F0-9]{8}',texts.get(1,'')):
+        from types import SimpleNamespace
+        starts=[i for i,t in texts.items() if re.match(r'Question ID [a-fA-F0-9]{8}',t)]
+        records=[]
+        metadata_pattern = re.compile(r'Assessment\s+.*?\s+Test\s+.*?\s+Domain\s+.*?\s+Skill\s+.*?\s+Difficulty[ \t]*(?=\n|$)',re.S)
+        for offset,start in enumerate(starts):
+            end=starts[offset+1]-1 if offset+1<len(starts) else len(reader.pages)
+            if end-start>=4 or any(i not in texts for i in range(start,end+1)):
+                rejected.append(dict(page=start,reason='Question spans too many pages or includes unreadable pages.'));continue
+            raw='\n'.join(texts[i] for i in range(start,end+1))
+            headers=metadata_pattern.findall(raw)
+            if len(headers)!=1:
+                rejected.append(dict(page=start,reason='Missing or repeated SQB metadata.'));continue
+            raw=metadata_pattern.sub('',raw).strip()+'\n'+headers[0]
+            images=[image for i in range(start,end+1) for image in reader.pages[i-1].images]
+            records.append((start,end,SimpleNamespace(images=images),raw))
+    for number, end_page, page, record_text in records:
         try:
             if profile == 'auto' and (number in key_pages or number not in texts): continue
-            raw = texts[number] if profile == 'auto' else page.extract_text() or ''
+            raw = record_text if profile == 'auto' else page.extract_text() or ''
             if profile == 'auto':
                 item = None
                 for known in (PROFILE, TRANSITIONS_PROFILE):
@@ -112,6 +129,10 @@ def extract(source, profile=PROFILE):
                 items = [item] if item is not None else parse_questions(raw, number, keys)
             else:
                 items = [parse_page(raw, number, profile)]
+            for item in items:
+                item['page_end'] = end_page
+                if re.search(r'\b(?:graph|table|chart|figure)\b',item['stem'],re.I):
+                    raise ValueError('Question uses a graph or table; visual content must be preserved before import.')
             for image in page.images:
                 if len(items) != 1 or DIFFICULTY_ICONS.get(hashlib.sha256(image.data).hexdigest()) != items[0]['difficulty']:
                     raise ValueError('Unknown image or difficulty mismatch; manual visual review is required.')

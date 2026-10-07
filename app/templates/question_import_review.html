@@ -12,7 +12,7 @@
 {% if problems %}<section class="error" role="alert"><h2>Review needed before import</h2><p>No questions will be imported while pages are flagged. Correct the PDF or enter those questions manually, then upload a supported PDF.</p><ul>{% for problem in problems %}<li>Page {{ problem.page }}: {{ problem.reason }}</li>{% endfor %}</ul></section>{% endif %}
 <p class="hint">Answers, difficulty and categories come from the PDF. Exact duplicates are skipped, including drafts or archived questions; their status stays unchanged. Check the text and answer keys below. Publishing makes these questions available to everyone; only publish material you have permission to share publicly. Original styling such as italics may not be preserved.</p>
 {% for row in rows %}{% set item = row.item %}
-<details class="qb-import-item"><summary>Page {{ item.page }} · {{ item.skill }} · {{ item.difficulty|capitalize }}{% if row.duplicate %} · Already in library{% endif %}</summary>
+<details class="qb-import-item"><summary>Page {{ item.page }}{% if item.page_end and item.page_end != item.page %}–{{ item.page_end }}{% endif %} · {{ item.skill }} · {{ item.difficulty|capitalize }}{% if row.duplicate %} · Already in library{% endif %}</summary>
 {% if item.extraction_method %}<p class="hint">Auto-detected numbered worksheet · {{ item.evidence }}</p>{% endif %}
 <p class="hint">{{ item.assessment }} · {{ item.domain }} · ID {{ item.source_id }}</p>
 {% if row.existing_id %}<p><a href="/teacher/questions/{{ row.existing_id }}/preview">View existing question</a></p>{% endif %}

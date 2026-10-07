@@ -98,11 +98,21 @@ def parse_labelled_sqb(text, page):
         r'Assessment\s+(?P<assessment>.*?)\s+Test\s+(?P<section>.*?)\s+Domain\s+'
         r'(?P<domain>.*?)\s+Skill\s+(?P<skill>.*?)\s+Difficulty',text.strip(),re.S)
     if not match: return None
-    labels='\n'.join(f"{name.capitalize()}: {' '.join(match[name].split())}" for name in
-                     ('assessment','section','domain','skill','difficulty'))
-    raw=labels+'\nQuestion 1\n'+match['body']+'\nAnswer: '+match['answer']+'\nExplanation: '+match['explanation']
-    items=parse_questions(raw,page)
-    if len(items)!=1: raise ValueError('Ambiguous SQB question boundaries.')
-    item=items[0];item['source_id']=match['id'].lower();item.pop('source_number',None)
-    item['evidence']='Explicit SQB metadata and supplied answer; verify extracted reading order.'
-    return item
+    # SQB options may start on their own line. Restrict labels to A-D so
+    # scientific names such as "O. vulgaris" are not mistaken for option O.
+    body=match['body']
+    options=list(re.finditer(r'^([A-D])\.[ \t]*(?:\n|(?=\S))',body,re.M))
+    if [m[1] for m in options] != list('ABCD'):
+        raise ValueError('Expected exactly four ordered A-D choices on separate lines.')
+    if re.search(r'^E\.[ \t]*$',body,re.M):
+        raise ValueError('Extra option label in SQB question.')
+    stem=body[:options[0].start()].strip()
+    choices=[body[m.end():options[i+1].start() if i<3 else len(body)].strip() for i,m in enumerate(options)]
+    if not stem or not all(choices): raise ValueError('Empty question or choice.')
+    return dict(source_id=match['id'].lower(),page=page,
+        assessment=' '.join(match['assessment'].split()),section=' '.join(match['section'].split()),
+        domain=' '.join(match['domain'].split()),skill=' '.join(match['skill'].split()),
+        difficulty=match['difficulty'].lower(),stem=stem,passage='',choices=choices,
+        answer=ord(match['answer'])-ord('A'),explanation=match['explanation'].strip(),
+        extraction_method='labelled-text',review_status='needs_review',
+        evidence='Explicit SQB metadata and supplied answer; verify extracted reading order.')
