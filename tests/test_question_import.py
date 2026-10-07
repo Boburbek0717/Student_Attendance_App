@@ -140,3 +140,19 @@ class QuestionImportTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'too long'): parse_pdf(b'%PDF-fixture',ReviewStore())
         with self.assertRaisesRegex(ValueError,'could not be read'):
             parse_pdf(b'%PDF-malformed',ReviewStore())
+
+    def test_flexible_new_math_category_publishes_and_reimport_skips(self):
+        from scripts.flexible_pdf import parse_questions
+        data=sample()
+        data['candidates']=parse_questions('Assessment: Fictional SAT\nSection: Math\nDomain: Algebra\nCategory: New linear topic\nDifficulty: Easy\nQuestion 1\nSolve x + 2 = 5.\nA) 1\nB) 2\nC) 3\nD) 4\nAnswer: C',1)
+        location=self.upload(data)
+        response=self.confirm(location,'publish')
+        self.assertEqual(response.status_code,200)
+        with Session(self.engine) as db:
+            q=db.scalar(select(Question));self.assertEqual(q.status,'published')
+            skill=db.get(Skill,db.get(Revision,q.current_revision_id).skill_id)
+            self.assertEqual(skill.name,'New linear topic')
+        response=self.confirm(self.upload(data),'publish')
+        self.assertIn('1 existing questions skipped',response.text)
+        with Session(self.engine) as db:
+            self.assertEqual(db.scalar(select(func.count()).select_from(Question)),1)

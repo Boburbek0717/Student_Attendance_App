@@ -20,12 +20,24 @@ imports. Repeating the same confirmation does not create another batch.
 
 - SQB PSAT 8/9 Boundaries answer exports.
 - SQB PSAT/NMSQT & PSAT 10 Transitions answer exports.
-- The upload tool auto-detects these layouts per page.
+- Additional SQB-style exports with explicit assessment/section/domain/skill metadata,
+  without hardcoded category names or prompt wording.
+- Numbered text worksheets with `Question 1`, `Q1` or `1.` boundaries; A–D
+  choices labelled `A.`, `A)` or `(A)` on separate lines; multiple questions per page.
+- Inline `Answer: C` / `Correct Answer: C`, or separate `Answer Key` / `Answers`
+  pages containing one numbered answer per line, such as `1. C`.
+- Explicit colon-labelled Assessment, Section (or Test), Domain, Category (or
+  Skill/Topic), Difficulty (or Question Difficulty). Page-level labels before the
+  first question provide defaults; question-level labels override them.
+- New category names are created automatically from these labels; exact existing
+  category names in the same hierarchy are reused. No parser configuration needed.
+- The upload tool tries exact SQB profiles first, then the labelled-text fallback.
+  Known profiles retain stricter format checks.
 - Difficulty is copied from explicit Easy/Medium/Hard metadata. Recognized image
   indicators must agree with it. Missing or unknown difficulty is not estimated.
 - The correct answer comes from the answer key; the script does not solve questions.
 
-Scans, other layouts, unfamiliar images/diagrams, missing metadata and ambiguous
+Scans, unrecognized layouts, unfamiliar images/diagrams, missing metadata and ambiguous
 pages are flagged. Any flagged page blocks that batch's import. No silent skipping.
 Use manual entry or add a tested parser profile for a recurring new format. Layout
 styling such as italics is not guaranteed; review is still necessary.
@@ -60,3 +72,14 @@ uploads are removed after parsing. The parser has size/page/output/time bounds a
 runs in a separate process. Public portfolio-demo hosting intentionally disables
 teacher imports. Use the normal teacher application. Verify permission to distribute
 the source material before public publication.
+
+
+The fallback preserves line breaks and keeps unlabeled passage/prompt text together
+in the question stem rather than guessing where to split it. Explicit Passage:
+and Prompt: labels are separated. Explanation:/Rationale: is optional. Generated
+source IDs hash the extracted prompt/passage/options; changing those creates a new
+identity, while changing only answers/difficulty triggers a duplicate conflict.
+Separate keys require unique question numbers throughout the document. Extra key
+entries are flagged. Questions spanning pages, columns with ambiguous reading
+order, missing labels and image-based mathematics still require review. This is
+broader automatic recognition, not a claim of universal PDF understanding.

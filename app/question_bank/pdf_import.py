@@ -70,7 +70,7 @@ def parse_pdf(payload, store):
             except subprocess.TimeoutExpired:
                 raise ValueError('PDF processing took too long. Try a smaller supported PDF.') from None
             if process.returncode or not output.exists() or output.stat().st_size > 2*1024*1024:
-                raise ValueError('This PDF could not be read. Use an unencrypted, text-based SQB answer PDF with up to 100 pages.')
+                raise ValueError('This PDF could not be read. Use an unencrypted, text-based answer PDF with up to 100 pages.')
             return json.loads(output.read_text(encoding='utf-8'))
     finally:
         store.parser.release()
@@ -78,9 +78,17 @@ def parse_pdf(payload, store):
 
 def classification(item):
     key = (item['assessment'], item['domain'], item['skill'])
-    if item['section'] != 'Reading and Writing' or key not in TAXONOMY:
+    if item['section'] == 'Reading and Writing' and key in TAXONOMY:
+        return TAXONOMY[key]
+    if item.get('extraction_method') != 'labelled-text' or item['section'] not in ('Math','Reading and Writing'):
         raise ValueError('Unsupported question category.')
-    return TAXONOMY[key]
+    for field, limit in (('assessment',120),('domain',160),('skill',200)):
+        value = item.get(field)
+        if not isinstance(value,str) or not value.strip() or len(value)>limit or any(ord(c)<32 for c in value):
+            raise ValueError('Invalid PDF category metadata.')
+    return tuple('pdf-'+hashlib.sha256(item[field].encode()).hexdigest()[:24]
+                 for field in ('assessment','domain','skill'))
+
 
 
 def values_for(item, skill_id, data):
@@ -103,10 +111,10 @@ def existing_question(db, item):
     question, revision = matches[0]
     choices = db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all()
     answer = db.get(AnswerKey, revision.id)
-    taxonomy = db.execute(select(Bank.name, Domain.name, Skill.name).select_from(Skill)
+    taxonomy = db.execute(select(Bank.name, Section.name, Domain.name, Skill.name).select_from(Skill)
         .join(Domain, Skill.domain_id == Domain.id).join(Section, Domain.section_id == Section.id)
         .join(Bank, Section.bank_id == Bank.id).where(Skill.id == revision.skill_id)).one()
-    if (tuple(taxonomy) != (item['assessment'], item['domain'], item['skill'])
+    if (tuple(taxonomy) != (item['assessment'], item['section'], item['domain'], item['skill'])
         or any(getattr(revision,k) != item[k] for k in ('stem','passage','explanation','difficulty'))
         or [c.text for c in choices] != item['choices'] or not answer
         or answer.choice_id != choices[item['answer']].id):
@@ -132,14 +140,21 @@ def ensure_category(db, item):
     bank_code, domain_code, skill_code = classification(item)
     bank = db.scalar(select(Bank).where(Bank.code == bank_code))
     if not bank:
+        bank = db.scalar(select(Bank).where(Bank.name == item['assessment']).order_by(Bank.id).limit(1))
+    if not bank:
         bank = Bank(code=bank_code, name=item['assessment']); db.add(bank); db.flush()
-    section = db.scalar(select(Section).where(Section.bank_id == bank.id, Section.code == 'reading-writing'))
+    section_code = 'math' if item['section'] == 'Math' else 'reading-writing'
+    section = db.scalar(select(Section).where(Section.bank_id == bank.id, Section.code == section_code))
     if not section:
-        section = Section(bank_id=bank.id, code='reading-writing', name=item['section']); db.add(section); db.flush()
+        section = Section(bank_id=bank.id, code=section_code, name=item['section']); db.add(section); db.flush()
     domain = db.scalar(select(Domain).where(Domain.section_id == section.id, Domain.code == domain_code))
+    if not domain:
+        domain = db.scalar(select(Domain).where(Domain.section_id == section.id, Domain.name == item['domain']).order_by(Domain.id).limit(1))
     if not domain:
         domain = Domain(section_id=section.id, code=domain_code, name=item['domain']); db.add(domain); db.flush()
     skill = db.scalar(select(Skill).where(Skill.domain_id == domain.id, Skill.code == skill_code))
+    if not skill:
+        skill = db.scalar(select(Skill).where(Skill.domain_id == domain.id, Skill.name == item['skill']).order_by(Skill.id).limit(1))
     if not skill:
         skill = Skill(domain_id=domain.id, code=skill_code, name=item['skill']); db.add(skill); db.flush()
     return skill.id

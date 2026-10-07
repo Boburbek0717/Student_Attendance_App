@@ -73,10 +73,32 @@ def extract(source, profile=PROFILE):
     reader = PdfReader(source)
     if reader.is_encrypted or not 1 <= len(reader.pages) <= 100:
         raise ValueError('Use an unencrypted PDF with 1–100 pages.')
+    try:
+        from scripts.flexible_pdf import parse_questions, answer_key, parse_labelled_sqb
+    except ModuleNotFoundError:
+        from flexible_pdf import parse_questions, answer_key, parse_labelled_sqb
     candidates, rejected, seen = [], [], set()
+    texts, keys, key_pages, numbered = {}, {}, set(), set()
+    if profile == 'auto':
+        for number, page in enumerate(reader.pages, 1):
+            raw = (page.extract_text() or '').translate(LIGATURES).replace('\r\n','\n')
+            if len(raw) > 50000:
+                rejected.append(dict(page=number, reason='Page text exceeds supported limits.'))
+                continue
+            texts[number] = raw
+            try:
+                found = answer_key(raw)
+                if found is not None:
+                    if list(page.images): raise ValueError('Answer key contains images requiring review.')
+                    if keys.keys() & found.keys(): raise ValueError('Repeated question number across answer keys.')
+                    keys.update(found); key_pages.add(number)
+            except ValueError as error:
+                rejected.append(dict(page=number, reason=str(error)))
+                key_pages.add(number)
     for number, page in enumerate(reader.pages, 1):
         try:
-            raw = page.extract_text() or ''
+            if profile == 'auto' and (number in key_pages or number not in texts): continue
+            raw = texts[number] if profile == 'auto' else page.extract_text() or ''
             if profile == 'auto':
                 item = None
                 for known in (PROFILE, TRANSITIONS_PROFILE):
@@ -86,18 +108,25 @@ def extract(source, profile=PROFILE):
                     except ValueError:
                         pass
                 if item is None:
-                    raise ValueError('Unsupported page. Use a supported text-based SQB answer PDF; scans need manual entry.')
+                    item = parse_labelled_sqb(raw, number)
+                items = [item] if item is not None else parse_questions(raw, number, keys)
             else:
-                item = parse_page(raw, number, profile)
+                items = [parse_page(raw, number, profile)]
             for image in page.images:
-                if DIFFICULTY_ICONS.get(hashlib.sha256(image.data).hexdigest()) != item['difficulty']:
+                if len(items) != 1 or DIFFICULTY_ICONS.get(hashlib.sha256(image.data).hexdigest()) != items[0]['difficulty']:
                     raise ValueError('Unknown image or difficulty mismatch; manual visual review is required.')
-            if item['source_id'] in seen:
-                raise ValueError('Duplicate source question ID in this document.')
-            seen.add(item['source_id'])
-            candidates.append(item)
+            for item in items:
+                if item['source_id'] in seen:
+                    raise ValueError('Duplicate source question ID in this document.')
+                if item.get('source_number') in numbered:
+                    raise ValueError('Repeated question number; answer-key matching is ambiguous.')
+                seen.add(item['source_id'])
+                if item.get('source_number'): numbered.add(item['source_number'])
+                candidates.append(item)
         except Exception as error:
             rejected.append(dict(page=number, reason=str(error)))
+    if set(keys) - numbered:
+        rejected.append(dict(page=0, reason='Answer key has unmatched question numbers.'))
     return dict(profile=profile, source_name=source.name,
         source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(), pages=len(reader.pages),
         candidates=candidates, rejected=rejected, publication_allowed=False)

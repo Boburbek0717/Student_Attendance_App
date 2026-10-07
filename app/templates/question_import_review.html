@@ -13,6 +13,7 @@
 <p class="hint">Answers, difficulty and categories come from the PDF. Exact duplicates are skipped, including drafts or archived questions; their status stays unchanged. Check the text and answer keys below. Publishing makes these questions available to everyone; only publish material you have permission to share publicly. Original styling such as italics may not be preserved.</p>
 {% for row in rows %}{% set item = row.item %}
 <details class="qb-import-item"><summary>Page {{ item.page }} · {{ item.skill }} · {{ item.difficulty|capitalize }}{% if row.duplicate %} · Already in library{% endif %}</summary>
+{% if item.extraction_method %}<p class="hint">Auto-detected numbered worksheet · {{ item.evidence }}</p>{% endif %}
 <p class="hint">{{ item.assessment }} · {{ item.domain }} · ID {{ item.source_id }}</p>
 {% if row.existing_id %}<p><a href="/teacher/questions/{{ row.existing_id }}/preview">View existing question</a></p>{% endif %}
 <div class="qb-preview"><section class="qb-passage" aria-label="Passage"><p class="qb-prose">{{ item.passage }}</p></section><section class="qb-question"><p class="qb-prose">{{ item.stem }}</p><ol class="qb-choices">{% for choice in item.choices %}<li><span class="qb-letter">{{ 'ABCD'[loop.index0] }}</span><span class="qb-prose">{{ choice }}</span></li>{% endfor %}</ol><p><strong>Correct answer: {{ 'ABCD'[item.answer] }}</strong></p><p class="qb-prose">{{ item.explanation }}</p></section></div>

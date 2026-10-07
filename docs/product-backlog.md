@@ -986,3 +986,30 @@ No live database/credentials accessed, deployment or remote push. Scope remains
 Boundaries/Transitions SQB layouts; OCR/general PDF or diagram parsing is not added.
 Next for broader support: inspect one representative new layout and add a tested
 profile; do not infer missing difficulty or automatically publish uncertain pages.
+
+
+## Automatic PDF format recognition expansion — 2026-10-07
+
+Baseline d9e188d. Owner requested automatic new-format recognition without manual
+profiles. Added scripts/flexible_pdf.py fallback after the existing exact profiles:
+SQB metadata across new skills/assessments, numbered worksheets with variant A-D
+labels, multiple questions per page, inline answers or separate numbered key pages,
+explicit page/question taxonomy/difficulty, optional explanations and labelled
+passage/prompt. Two-pass extraction matches keys and rejects unmatched/duplicate
+numbers, conflicting answers, missing labels, extra choices and unknown images.
+Categories are validated and automatically created or reused by exact hierarchy
+names. Duplicate comparison now includes section. No AI calls or dependencies.
+
+Evidence: guarded test_flexible_pdf.py 8 passed (1.391s), including an actual generated
+two-page PDF through the subprocess parser; test_sqb_pdf_extract.py 5 passed
+(2.085s); test_question_import.py 10 passed after category reuse change (14.210s),
+including new Math category publication and repeat import skipping. Commands:
+.venv/Scripts/python.exe scripts/verify.py --pattern <filename>. git diff --check passed.
+All data fictional; no provided PDFs, live database, real publications, remote push
+or deployment. Updated upload/review guidance and docs/pdf-question-workflow.md.
+
+Limits: this does not identify every arbitrary format. Scans/OCR, complex diagrams,
+ambiguous reading order and cross-page question continuations remain unsupported.
+Unlabelled metadata/difficulty is not guessed. Review remains mandatory before
+publication; a flagged page blocks the batch. Next: evaluate representative owner
+PDFs against the new recognizer before claiming broad real-document coverage.
