@@ -9,7 +9,7 @@
 <form method="post" enctype="multipart/form-data" action="/teacher/questions/import" class="qb-editor">
 <input type="hidden" name="csrf" value="{{ csrf_token }}">
 <label for="pdf">Question PDF</label><input id="pdf" name="pdf" type="file" accept=".pdf,application/pdf" required aria-describedby="pdf-help">
-<p id="pdf-help" class="hint">Up to 10 MB and 200 pages. Auto-detects supported SQB exports and numbered text worksheets with A–D options, labeled assessment/section/domain/category/difficulty, and inline answers or numbered answer-key pages. Scans, diagrams and ambiguous layouts are flagged for review.</p>
+<p id="pdf-help" class="hint">Up to 10 MB and 200 pages. Auto-detects supported SQB exports and numbered text worksheets with A–D options, labeled assessment/section/domain/category/difficulty, and inline answers or numbered answer-key pages. Questions with detected graphs, tables, diagrams or images are skipped and listed separately. Add them manually with an image attachment. Ambiguous text layouts remain flagged for review.</p>
 <p class="hint">Question text, A–D options, the supplied correct answer, difficulty and category are extracted automatically. Difficulty must be stated in the PDF; it is never guessed.</p>
 <button type="submit">Extract and review</button>
 </form>

@@ -28,6 +28,28 @@ class QuestionBankSchemaTests(unittest.TestCase):
             db.add(Enrollment(id=1, student_id=2, group_id=1)); db.flush()
             db.add(LessonPackage(enrollment_id=1)); db.commit()
 
+    @staticmethod
+    def remove_v5_fixture(db):
+        # Reconstruct the older fictional schema, not just its version label.
+        db.exec_driver_sql('DROP TABLE qb_media_content')
+        for event in ('update', 'delete'):
+            db.exec_driver_sql(f'DROP TRIGGER qb_media_no_{event}')
+        db.exec_driver_sql('DELETE FROM qb_schema_versions WHERE version=5')
+
+    def test_v4_upgrade_preserves_content_and_is_repeatable(self):
+        upgrade(self.engine)
+        self.content()
+        with self.engine.begin() as db:
+            self.remove_v5_fixture(db)
+        before = inspect_database(self.path)
+        upgrade(self.engine); upgrade(self.engine)
+        after = inspect_database(self.path)
+        for name, digest in before['fingerprints'].items():
+            if name != 'qb_schema_versions':
+                self.assertEqual(after['fingerprints'][name], digest)
+        self.assertEqual(after['counts']['qb_media_content'], 0)
+        self.assertEqual(before['balance_digest'], after['balance_digest'])
+
     def content(self):
         with Session(self.engine) as db:
             skill = db.scalar(select(Skill.id).order_by(Skill.id))
@@ -112,6 +134,7 @@ class QuestionBankSchemaTests(unittest.TestCase):
     def test_version_one_upgrade_preserves_content_and_backup_compatibility(self):
         upgrade(self.engine); q,r,c=self.content()
         with self.engine.begin() as db:
+            self.remove_v5_fixture(db)
             for table in ('qb_assignment_attempts','qb_assignment_recipients','qb_assignment_items','qb_assignments'):
                 db.exec_driver_sql(f'DROP TABLE {table}')
             db.execute(text('DROP TABLE qb_publication_events'))
@@ -173,6 +196,7 @@ class QuestionBankSchemaTests(unittest.TestCase):
         with self.engine.begin() as db:
             db.exec_driver_sql('DROP TRIGGER qb_revision_seal_valid')
             _seal_trigger(db, require_explanation=True)
+            self.remove_v5_fixture(db)
             for table in ('qb_assignment_attempts','qb_assignment_recipients','qb_assignment_items','qb_assignments'):
                 db.exec_driver_sql(f'DROP TABLE {table}')
             db.exec_driver_sql('DELETE FROM qb_schema_versions WHERE version>=3')
@@ -196,6 +220,7 @@ class QuestionBankSchemaTests(unittest.TestCase):
         upgrade(self.engine)
         self.content()
         with self.engine.begin() as db:
+            self.remove_v5_fixture(db)
             for table in ('qb_assignment_attempts','qb_assignment_recipients','qb_assignment_items','qb_assignments'):
                 db.exec_driver_sql(f'DROP TABLE {table}')
             db.exec_driver_sql('DELETE FROM qb_schema_versions WHERE version=4')

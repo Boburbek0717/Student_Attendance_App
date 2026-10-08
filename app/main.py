@@ -86,6 +86,8 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
     app.include_router(lesson_router)
     app.include_router(correction_router)
     app.include_router(import_router)
+    from app.question_bank.media import router as media_router
+    app.include_router(media_router)
     app.include_router(question_router)
     app.include_router(practice_router)
     app.include_router(public_practice_router)

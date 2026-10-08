@@ -547,3 +547,8 @@ main.qb-workspace { max-width: 76rem; }
 .demo-notice a { color: inherit; text-decoration: underline; }
 .demo-access { padding: 16px; margin-block: 16px; border: 1px solid #ccd6bd; border-radius: 8px; }
 .demo-access code { overflow-wrap: anywhere; }
+
+/* Question attachments retain their aspect ratio on small screens. */
+.qb-image { margin: 0 0 1.5rem; min-width: 0; }
+.qb-image img { display: block; max-width: 100%; max-height: 32rem; width: auto; height: auto; object-fit: contain; border: 1px solid #d9dfda; border-radius: 8px; background: white; }
+.qb-image figcaption { margin-top: .5rem; font-size: .875rem; }

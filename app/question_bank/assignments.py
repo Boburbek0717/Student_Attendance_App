@@ -1,3 +1,4 @@
+from app.question_bank.media import image_view
 """Group assignments with pinned revisions and independent, append-only attempts."""
 import re
 from contextlib import contextmanager
@@ -255,7 +256,7 @@ def question_page(db, request, assignment_id, item_id, *, retry=False, error=Non
     choices = db.scalars(select(Choice).where(Choice.revision_id==revision.id).order_by(Choice.position)).all()
     fresh = attempt is not None and request.session.pop('assignment_feedback',None) == attempt.id
     return render(request,'assignment_question.html',status_code,user=user,assignment=assignment,item=item,
-        content=dict(id=revision.id,stem=revision.stem,passage=revision.passage,difficulty=revision.difficulty),
+        content=dict(id=revision.id,stem=revision.stem,passage=revision.passage,difficulty=revision.difficulty, image=image_view(db, revision)),
         choices=choices,attempt=attempt,answer=db.get(AnswerKey,revision.id) if reveal else None,
         explanation=revision.explanation if reveal else None,fresh_feedback=fresh,
         error=error, selected_choice=selected_choice, retry_key=retry_key or secrets.token_urlsafe(32),

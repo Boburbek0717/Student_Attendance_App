@@ -53,12 +53,13 @@ def inspect_database(path):
         qb_version = 0
         if 'qb_schema_versions' in actual:
             versions = db.execute('SELECT version FROM qb_schema_versions ORDER BY version').fetchall()
-            if versions not in ([(1,)], [(1,), (2,)], [(1,), (2,), (3,)], [(1,), (2,), (3,), (4,)]):
+            if versions not in ([(1,)], [(1,), (2,)], [(1,), (2,), (3,)], [(1,), (2,), (3,), (4,)], [(1,), (2,), (3,), (4,), (5,)]):
                 raise ValueError('Unsupported Question Bank schema version.')
             qb_version = versions[-1][0]
         expected = {name: table for name, table in Base.metadata.tables.items()
                     if (any(n.startswith('qb_') for n in actual) or not name.startswith('qb_'))
                     and (name != 'student_goals' or 'student_goals' in actual)
+                    and (qb_version >= 5 or name != 'qb_media_content')
                     and (qb_version >= 2 or name != 'qb_publication_events')
                     and (qb_version >= 4 or name not in {'qb_assignments','qb_assignment_items','qb_assignment_recipients','qb_assignment_attempts'})}
         if actual != set(expected):
@@ -68,6 +69,10 @@ def inspect_database(path):
             triggers = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'qb_%'")}
             if triggers != trigger_names(qb_version):
                 raise ValueError('Question Bank integrity triggers differ from this release.')
+        if qb_version >= 5:
+            for data, size, digest in db.execute('SELECT c.data, m.byte_size, m.sha256 FROM qb_media_content c JOIN qb_media m ON m.id=c.media_id'):
+                if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
+                    raise ValueError('Question image integrity validation failed.')
         counts, fingerprints = {}, {}
         for name, table in sorted(expected.items()):
             columns = {row[1] for row in db.execute(f'PRAGMA table_info("{name}")')}
@@ -76,7 +81,7 @@ def inspect_database(path):
             rows = db.execute(f'SELECT * FROM "{name}" ORDER BY ' + ','.join('"'+c.name+'"' for c in table.primary_key.columns)).fetchall()
             counts[name] = len(rows)
             if name != 'login_sessions':
-                fingerprints[name] = hashlib.sha256(json.dumps(rows, ensure_ascii=True, separators=(',', ':')).encode()).hexdigest()
+                fingerprints[name] = hashlib.sha256(json.dumps(rows, ensure_ascii=True, separators=(',', ':'), default=lambda value: {'bytes_sha256': hashlib.sha256(value).hexdigest()} if isinstance(value, bytes) else str(value)).encode()).hexdigest()
         violations = [
             "SELECT 1 FROM attendance a JOIN lessons l ON l.id=a.lesson_id JOIN enrollments e ON e.id=a.enrollment_id WHERE l.group_id != e.group_id LIMIT 1",
             "SELECT 1 FROM enrollments e JOIN users u ON u.id=e.student_id WHERE u.role != 'student' LIMIT 1",

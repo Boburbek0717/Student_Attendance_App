@@ -1,3 +1,5 @@
+from starlette.datastructures import UploadFile
+from app.question_bank.media import prepare_image, image_view, MAX_BYTES
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select, func, case
@@ -25,7 +27,9 @@ def skills(db):
 
 
 def editor(request, db, user, question=None, values=None, expected='', error=None):
+    revision = db.get(Revision, question.current_revision_id) if question else None
     return render(request, 'question_editor.html', 400 if error else 200,
+        image=image_view(db, revision) if revision else None,
         user=user, question=question, values=values or {}, expected=expected,
         domains=db.execute(select(Domain.id, Domain.name, (Bank.name + ' · ' + Section.name).label('section'))
             .join(Section, Domain.section_id == Section.id).join(Bank, Section.bank_id == Bank.id)
@@ -68,23 +72,30 @@ def new(request: Request, db: Session = Depends(get_db), user: User = Depends(re
 def edit(question_id: int, request: Request, db: Session = Depends(get_db), user: User = Depends(require_teacher)):
     question = question_or_404(db, question_id)
     revision = db.get(Revision, question.current_revision_id)
-    if not revision or question.status != 'draft' or revision.question_type != 'multiple_choice' or revision.media_id:
+    if not revision or question.status != 'draft' or revision.question_type != 'multiple_choice':
         raise HTTPException(400, 'This question cannot be edited with the draft editor.')
     return editor(request, db, user, question, editor_values(db, revision), str(revision.id))
 
 
 async def submit(request, db, user, question_id=None):
-    form = await request.form()
-    verify_csrf(request, str(form.get('csrf', '')))
-    names = list(FIELDS) + ['skill_id', 'difficulty', 'answer', 'new_category_name', 'new_category_domain'] + [f'choice_{i}' for i in range(6)]
+    form = await request.form(max_files=1, max_fields=30, max_part_size=192 * 1024)
+    names = list(FIELDS) + ['skill_id', 'difficulty', 'answer', 'new_category_name', 'new_category_domain', 'remove_image', 'image_alt'] + [f'choice_{i}' for i in range(6)]
     values = {name: str(form.get(name, '')) for name in names}
     expected = str(form.get('expected_revision', ''))
     try:
-        saved_id = await run_in_threadpool(save_draft, request.app.state.database_engine, request, values, question_id, expected)
+        verify_csrf(request, str(form.get('csrf', '')))
+        upload = form.get('image')
+        image = None
+        if isinstance(upload, UploadFile) and upload.filename:
+            data = await upload.read(MAX_BYTES + 1)
+            image = await run_in_threadpool(prepare_image, data, str(form.get('image_alt', '')))
+        saved_id = await run_in_threadpool(save_draft, request.app.state.database_engine, request, values, question_id, expected, image)
     except ValueError as error:
         db.expire_all()
         question = question_or_404(db, question_id) if question_id else None
         return editor(request, db, user, question, values, expected, error)
+    finally:
+        await form.close()
     return RedirectResponse(f'/teacher/questions/{saved_id}/preview?saved=1', status_code=303)
 
 
@@ -115,7 +126,7 @@ def preview(question_id: int, request: Request, revision_id: int | None = None,
         .select_from(Skill).join(Domain, Skill.domain_id == Domain.id)
         .join(Section, Domain.section_id == Section.id).join(Bank, Section.bank_id == Bank.id)
         .where(Skill.id == revision.skill_id)).one()
-    return render(request, 'question_preview.html', user=user, question=question, revision=revision, taxonomy=taxonomy,
+    return render(request, 'question_preview.html', user=user, question=question, revision=revision, image=image_view(db, revision), taxonomy=taxonomy,
         choices=db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all(),
         answer=db.get(AnswerKey, revision.id), source=db.get(Source, revision.source_id) if revision.source_id else None,
         history=history, duplicate=duplicate, saved=request.query_params.get('saved') == '1',

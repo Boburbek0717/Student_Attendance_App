@@ -1033,3 +1033,12 @@ Not complete visual import: all 70 question records are accounted for, but 35 vi
 questions block batch publication. Next needed implementation is faithful diagram/
 table attachments across extraction, private storage, review, student display and
 backup/recovery. Do not label this PDF fully importable until that path is verified.
+
+### Question image attachments / pre-hosting review — 2026-10-08
+
+Reviewed pending manual raster attachments, immutable revision images, schema v5,
+image-aware backup validation and explicit visual-question exclusions in PDF import.
+Updated old-schema test fixtures and added a v4 upgrade preservation check. See
+pilot-handover.md for final check evidence. Visual PDF extraction itself remains
+unsupported; skipped items require manual authoring. Public demo uploads remain
+blocked. Owner requested GitHub synchronization before Render continuation.

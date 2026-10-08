@@ -4,7 +4,7 @@ No student serializer should expose Revision.explanation or AnswerKey before a
 successful attempt. Role/access and publication validation belong to services.
 """
 from datetime import datetime
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, Index, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, Index, String, Text, UniqueConstraint, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
 from app.models import utc_now
@@ -71,6 +71,13 @@ class Media(Base):
     alt_text: Mapped[str] = mapped_column(Text)
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class MediaContent(Base):
+    """Validated raster bytes kept inside the same atomic SQLite backup."""
+    __tablename__ = 'qb_media_content'
+    media_id: Mapped[int] = mapped_column(ForeignKey('qb_media.id'), primary_key=True)
+    data: Mapped[bytes] = mapped_column(LargeBinary)
 
 
 class Question(Base):

@@ -1,3 +1,4 @@
+from app.question_bank.media import image_view
 """Authenticated practice; correctness and answer disclosure stay on the server."""
 import re
 import secrets
@@ -85,7 +86,7 @@ def question_page(request, db, user, question_id, attempt_id=None, error=None, r
             raise HTTPException(404, 'Attempt not found.')
     revision = db.get(Revision, attempt.revision_id if attempt and not public_mode else q.published_revision_id)
     # Explicit public projection: the full revision/key never enter pre-answer HTML.
-    content = dict(id=revision.id, stem=revision.stem, passage=revision.passage, difficulty=revision.difficulty)
+    content = dict(id=revision.id, stem=revision.stem, passage=revision.passage, difficulty=revision.difficulty, image=image_view(db, revision))
     taxonomy=db.execute(select(Bank.name,Section.name,Skill.name).select_from(Skill)
         .join(Domain,Skill.domain_id==Domain.id).join(Section,Domain.section_id==Section.id)
         .join(Bank,Section.bank_id==Bank.id).where(Skill.id==revision.skill_id)).one()

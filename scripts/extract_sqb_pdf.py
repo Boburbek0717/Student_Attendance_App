@@ -65,6 +65,16 @@ def parse_page(raw, page, profile=PROFILE):
         review_status='needs_review')
 
 
+def has_vector_art(page):
+    # Drawing operations can hold graphs or table borders absent from extracted
+    # text. Conservatively skip the whole page when layout cannot be separated.
+    if not hasattr(page, 'get_contents'):
+        return False
+    stream = page.get_contents()
+    return bool(stream and any(operator in (b'S', b's', b'f', b'F', b'f*', b'B', b'B*', b'b', b'b*', b'sh')
+                               for _, operator in stream.operations))
+
+
 def extract(source, profile=PROFILE):
     from pypdf import PdfReader
     source = Path(source).resolve(strict=True)
@@ -72,12 +82,12 @@ def extract(source, profile=PROFILE):
         raise ValueError('Use a PDF smaller than 10 MB for this rehearsal.')
     reader = PdfReader(source)
     if reader.is_encrypted or not 1 <= len(reader.pages) <= 200:
-        raise ValueError('Use an unencrypted PDF with 1–100 pages.')
+        raise ValueError('Use an unencrypted PDF with 1–200 pages.')
     try:
         from scripts.flexible_pdf import parse_questions, answer_key, parse_labelled_sqb
     except ModuleNotFoundError:
         from flexible_pdf import parse_questions, answer_key, parse_labelled_sqb
-    candidates, rejected, seen = [], [], set()
+    candidates, rejected, skipped, seen = [], [], [], set()
     texts, keys, key_pages, numbered = {}, {}, set(), set()
     if profile == 'auto':
         for number, page in enumerate(reader.pages, 1):
@@ -111,7 +121,7 @@ def extract(source, profile=PROFILE):
                 rejected.append(dict(page=start,reason='Missing or repeated SQB metadata.'));continue
             raw=metadata_pattern.sub('',raw).strip()+'\n'+headers[0]
             images=[image for i in range(start,end+1) for image in reader.pages[i-1].images]
-            records.append((start,end,SimpleNamespace(images=images),raw))
+            records.append((start,end,SimpleNamespace(images=images, vectors=any(has_vector_art(reader.pages[i-1]) for i in range(start,end+1))),raw))
     for number, end_page, page, record_text in records:
         try:
             if profile == 'auto' and (number in key_pages or number not in texts): continue
@@ -129,13 +139,13 @@ def extract(source, profile=PROFILE):
                 items = [item] if item is not None else parse_questions(raw, number, keys)
             else:
                 items = [parse_page(raw, number, profile)]
-            for item in items:
-                item['page_end'] = end_page
-                if re.search(r'\b(?:graph|table|chart|figure)\b',item['stem'],re.I):
-                    raise ValueError('Question uses a graph or table; visual content must be preserved before import.')
+            has_image = getattr(page, 'vectors', False) or has_vector_art(page)
             for image in page.images:
-                if len(items) != 1 or DIFFICULTY_ICONS.get(hashlib.sha256(image.data).hexdigest()) != items[0]['difficulty']:
-                    raise ValueError('Unknown image or difficulty mismatch; manual visual review is required.')
+                difficulty = DIFFICULTY_ICONS.get(hashlib.sha256(image.data).hexdigest())
+                if difficulty is None:
+                    has_image = True
+                elif len(items) != 1 or difficulty != items[0]['difficulty']:
+                    raise ValueError('Difficulty indicator disagrees with question metadata.')
             for item in items:
                 if item['source_id'] in seen:
                     raise ValueError('Duplicate source question ID in this document.')
@@ -143,14 +153,21 @@ def extract(source, profile=PROFILE):
                     raise ValueError('Repeated question number; answer-key matching is ambiguous.')
                 seen.add(item['source_id'])
                 if item.get('source_number'): numbered.add(item['source_number'])
-                candidates.append(item)
+                item['page_end'] = end_page
+                visual_reference = re.search(r'\b(?:graphs?|tables?|charts?|figures?|diagrams?|scatterplots?|histograms?)\b',
+                    item['stem'] + ' ' + item.get('passage', ''), re.I)
+                if has_image or visual_reference:
+                    skipped.append(dict(page=number, page_end=end_page, source_id=item['source_id'],
+                        reason='Visual question excluded. Add it manually with an image attachment.'))
+                else:
+                    candidates.append(item)
         except Exception as error:
             rejected.append(dict(page=number, reason=str(error)))
     if set(keys) - numbered:
         rejected.append(dict(page=0, reason='Answer key has unmatched question numbers.'))
     return dict(profile=profile, source_name=source.name,
         source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(), pages=len(reader.pages),
-        candidates=candidates, rejected=rejected, publication_allowed=False)
+        candidates=candidates, rejected=rejected, skipped=skipped, publication_allowed=False)
 
 
 def main():
@@ -164,7 +181,7 @@ def main():
     with args.output.open('x', encoding='utf-8') as stream:
         json.dump(result, stream, ensure_ascii=False, indent=2)
     print(json.dumps(dict(pages=result['pages'], candidates=len(result['candidates']),
-                         rejected=len(result['rejected']), output=str(args.output))))
+                         rejected=len(result['rejected']), skipped=len(result['skipped']), output=str(args.output))))
 
 
 if __name__ == '__main__':

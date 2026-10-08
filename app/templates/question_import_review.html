@@ -6,6 +6,8 @@
 <h1>{{ 'Import complete' if result else 'Review PDF questions' }}</h1>
 <p>{{ data.source_name }} · {{ data.pages }} pages</p>
 {% if notice %}<p class="error" role="alert">{{ notice }}</p>{% endif %}
+{% if data.skipped %}<section class="notice"><h2>{{ data.skipped|length }} visual questions skipped</h2><p>These questions will not be imported. Add them manually with an image attachment.</p><details><summary>Show skipped questions</summary><ul>{% for item in data.skipped %}<li>Page {{ item.page }}{% if item.page_end != item.page %}–{{ item.page_end }}{% endif %} · {{ item.source_id }}: {{ item.reason }}</li>{% endfor %}</ul></details></section>{% endif %}
+{% if not rows and not result %}<p>No supported text questions to import. <a href="/teacher/questions/new">Create a question manually</a>.</p>{% endif %}
 {% if result %}<p class="notice" role="status">{{ result.created }} questions {{ 'published' if result.mode == 'publish' else 'saved as drafts' }}. {{ result.skipped }} existing questions skipped.</p><a class="button" href="/teacher/questions">Open question library</a>
 {% else %}
 <p>{{ rows|length }} questions checked · {{ duplicates }} duplicates · {{ problems|length }} flagged pages</p>

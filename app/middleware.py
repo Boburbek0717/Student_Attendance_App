@@ -1,6 +1,6 @@
 import re
 from starlette.responses import PlainTextResponse
-from starlette.datastructures import MutableHeaders
+from starlette.datastructures import MutableHeaders, Headers
 
 SECURITY_HEADERS = {
     "Content-Security-Policy": "default-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
@@ -51,7 +51,8 @@ class RequestBodyLimit:
         pdf_upload = scope.get('method') == 'POST' and scope.get('path') == '/teacher/questions/import'
         question_form = scope.get('method') == 'POST' and bool(re.fullmatch(
             r'/teacher/questions/(?:new|[0-9]+/edit)', scope.get('path', '')))
-        limit = 10 * 1024 * 1024 + 65536 if pdf_upload else (192 * 1024 if question_form else self.max_bytes)
+        image_upload = question_form and Headers(scope=scope).get('content-type', '').lower().startswith('multipart/form-data')
+        limit = 10 * 1024 * 1024 + 65536 if pdf_upload else (4 * 1024 * 1024 + 192 * 1024 if image_upload else (192 * 1024 if question_form else self.max_bytes))
         body = bytearray()
         while True:
             message = await receive()

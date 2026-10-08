@@ -9,7 +9,7 @@ from starlette.exceptions import HTTPException
 from app.database import write_transaction
 from app.models import utc_now
 from app.teacher import require_teacher
-from app.question_bank.models import Question, Revision, Choice, AnswerKey, Skill, Source, Domain
+from app.question_bank.models import Question, Revision, Choice, AnswerKey, Skill, Source, Domain, Media, MediaContent
 
 FIELDS = {'stem': 2000, 'passage': 4000, 'explanation': 4000,
           'source_name': 200, 'rights_note': 600, 'source_reference': 200}
@@ -71,7 +71,7 @@ def validate(values):
     return clean
 
 
-def save_draft(engine, request, values, question_id=None, expected_revision=''):
+def save_draft(engine, request, values, question_id=None, expected_revision='', image=None):
     clean = validate(values)
     with write_transaction(engine) as db:
         # Recheck the actual session after acquiring the write lock, not just its role
@@ -92,7 +92,7 @@ def save_draft(engine, request, values, question_id=None, expected_revision=''):
             clean['skill_id'] = category.id
         if db.get(Skill, clean['skill_id']) is None:
             raise DraftError('Choose an available category.', 'skill_id')
-        digest = hashlib.sha256(json.dumps(clean, sort_keys=True).encode()).hexdigest()
+        media_id = None
         if question_id is None:
             question = Question(created_by=teacher.id)
             db.add(question)
@@ -107,11 +107,26 @@ def save_draft(engine, request, values, question_id=None, expected_revision=''):
             previous = db.get(Revision, question.current_revision_id)
             if db.scalar(select(Choice.id).where(Choice.revision_id == previous.id, Choice.position >= 4).limit(1)):
                 raise DraftError('This older question has more than four choices and cannot be edited here.')
-            if previous.question_type != 'multiple_choice' or previous.media_id:
+            if previous.question_type != 'multiple_choice':
                 raise DraftError('This editor cannot safely edit this question type or attached media.')
-            if previous.content_hash == digest:
-                return question.id
+            media_id = previous.media_id
             number = previous.number + 1
+        if values.get('remove_image') == '1':
+            media_id = None
+        if image is not None:
+            media = Media(storage_key=secrets.token_hex(32), mime_type='image/png',
+                byte_size=len(image['data']), sha256=image['sha256'], alt_text=image['alt'], created_by=teacher.id)
+            db.add(media)
+            db.flush()
+            db.add(MediaContent(media_id=media.id, data=image['data']))
+            media_id = media.id
+        hash_values = dict(clean)
+        if media_id:
+            media = db.get(Media, media_id)
+            hash_values['image'] = dict(sha256=media.sha256, alt=media.alt_text)
+        digest = hashlib.sha256(json.dumps(hash_values, sort_keys=True).encode()).hexdigest()
+        if question_id is not None and previous.content_hash == digest and image is None:
+            return question.id
         source_id = None
         if clean['source_name'] or clean['rights_note']:
             source = Source(name=clean['source_name'], rights_note=clean['rights_note'], created_by=teacher.id)
@@ -121,7 +136,7 @@ def save_draft(engine, request, values, question_id=None, expected_revision=''):
         revision = Revision(question_id=question.id, number=number,
             skill_id=clean['skill_id'], difficulty=clean['difficulty'],
             stem=clean['stem'], passage=clean['passage'], explanation=clean['explanation'],
-            source_id=source_id, source_reference=clean['source_reference'],
+            media_id=media_id, source_id=source_id, source_reference=clean['source_reference'],
             content_hash=digest, created_by=teacher.id)
         db.add(revision)
         db.flush()

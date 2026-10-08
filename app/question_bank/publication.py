@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from starlette.exceptions import HTTPException
 from app.models import User, utc_now
-from app.question_bank.models import Question, Revision, Choice, AnswerKey, PublicationEvent
+from app.question_bank.models import Question, Revision, Choice, AnswerKey, PublicationEvent, MediaContent
 
 
 def publish_revision(db, teacher_id, question_id, expected_revision):
@@ -15,7 +15,7 @@ def publish_revision(db, teacher_id, question_id, expected_revision):
     revision=db.get(Revision,expected_revision)
     if revision is None or revision.question_id != question.id:
         raise ValueError('Save a complete question draft before publishing.')
-    if revision.question_type!='multiple_choice' or revision.media_id:
+    if revision.question_type!='multiple_choice' or (revision.media_id and db.get(MediaContent, revision.media_id) is None):
         raise ValueError('Publish a complete multiple-choice draft without unsupported media.')
     choices = db.scalars(select(Choice).where(Choice.revision_id == revision.id).order_by(Choice.position)).all()
     answer = db.get(AnswerKey, revision.id)

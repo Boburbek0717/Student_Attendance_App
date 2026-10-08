@@ -1074,3 +1074,26 @@ Not complete visual import: all 70 question records are accounted for, but 35 vi
 questions block batch publication. Next needed implementation is faithful diagram/
 table attachments across extraction, private storage, review, student display and
 backup/recovery. Do not label this PDF fully importable until that path is verified.
+
+## Repository completion before hosting — 2026-10-08
+
+Owner explicitly requested all project changes pushed before continuing Render.
+Reviewed the pending image-attachment and visual-PDF-exclusion implementation.
+Images are re-encoded raster bytes, descriptions required, immutable across revisions,
+and included in validated SQLite backups. Published images follow public question
+access; private drafts/assignment snapshots keep their authorization checks.
+PDF visuals are explicitly skipped for manual attachment, not automatically extracted.
+
+Initial full check: 272 tests; four failures from stale schema test fixtures after
+schema v5 (expected table list and legacy fixtures retaining v5 objects). Corrected
+the fixtures and added v4-to-v5 fingerprint/balance preservation and repeat-upgrade
+coverage. No production schema workaround or live database modification performed.
+Final verification outcome is recorded below when complete. No new real-device UI
+acceptance is claimed. Current explicit priority is GitHub synchronization, then
+inspect the owner's old Render project and continue the Free demo deployment.
+
+Final `.venv\Scripts\python.exe scripts/check.py`: 273 Python tests passed
+(102.648s), 22 Node tests passed, pip compatibility and whitespace checks passed.
+Evidence: ignored output/pre-hosting-check-final.txt. All new/pending source and
+regression tests are included in the repository checkpoint; real records, PDFs,
+credentials and generated artifacts remain excluded. No Render changes yet.

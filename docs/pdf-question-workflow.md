@@ -102,3 +102,21 @@ visual information. This file remains blocked for batch publication: attached vi
 storage, rendering, backup and access handling are not implemented in this slice.
 Clear visual-content diagnostics replace the generic unsupported-format message.
 This is multi-page SQB support, not complete visual-question support.
+
+## Image attachments and visual PDF exclusions — 2026-10-08
+
+Question authoring now accepts one validated PNG/JPEG/WebP raster, up to 4 MB,
+8 million pixels and 6,000 pixels per side. A description is required. Image bytes
+are re-encoded without metadata and stored in SQLite with immutable media records;
+question revisions retain the original image when an attachment is replaced/removed.
+Published question images are public, matching guest practice access; draft images
+remain restricted. Assigned historical images remain accessible to active recipients.
+
+PDF extraction lists detected visual questions as skipped instead of flattening
+or silently importing their text. Supported text candidates still require teacher
+review. Graph/table detection is conservative and does not constitute OCR or faithful
+automatic visual extraction. Add skipped questions manually with the image field.
+
+Schema v5 adds qb_media_content and media immutability triggers. Backups include
+image bytes and verify their size/hash. Before a real upgrade, follow backup-recovery.md;
+no existing live database was migrated for this repository checkpoint.

@@ -50,7 +50,8 @@ class FlexiblePdfTests(unittest.TestCase):
                 pages[0].images=[SimpleNamespace(data=b'unknown diagram')]
                 result=extract(path,'auto')
                 self.assertEqual(result['candidates'],[])
-                self.assertTrue(result['rejected'])
+                self.assertEqual(result['rejected'], [])
+                self.assertEqual(len(result['skipped']), 1)
 
     def test_fifth_choice_is_not_silently_folded_into_fourth(self):
         with self.assertRaises(ValueError):parse_questions(HEADER+QUESTION+'E. 5\nAnswer: C',1)
