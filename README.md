@@ -11,9 +11,16 @@ product-development decisions: protecting balances under concurrent requests,
 keeping an audit trail, making retries safe, recovering SQLite data, and designing
 usable server-rendered screens.
 
-**Status:** actively developed for a supervised course pilot. Local simulations and
-automated checks exist; they do not establish production readiness or real-classroom
-acceptance. Public deployment is not part of this repository update.
+**Live portfolio demo:** [Explore SAT Factory](https://sat-factory-portfolio-demo.onrender.com/) · [Try the teacher/student portal](https://sat-factory-portfolio-demo.onrender.com/login).
+
+The login page provides public demo accounts. Course records are fictional and
+shared; changes reset on restart. Render’s free instance sleeps when idle, so the
+first visit can take 50 seconds or more. Account creation, uploads and content
+editing are disabled in this demo. Do not enter personal information.
+
+**Status:** publicly demonstrated, with course-pilot readiness still under development.
+Automated checks and simulated workflows do not establish real-classroom acceptance.
+See [hosting evidence and operations](docs/hosting-handover.md).
 
 ![Student dashboard with fictional demonstration data](docs/images/student-dashboard.png)
 

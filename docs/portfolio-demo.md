@@ -1,6 +1,12 @@
-# Portfolio demo: local preparation
+# Portfolio demo: hosted and local
 
-Scope: SF-13 demo preparation, separate from the postponed course launch.
+Scope: SF-13 portfolio demonstration, separate from the postponed course launch.
+
+Hosted demo: https://sat-factory-portfolio-demo.onrender.com/
+
+Deployment and verification evidence: [hosting handover](hosting-handover.md).
+The hosted version uses fictional temporary records, shared activity limits and
+restricted writes. Free-instance cold starts can take 50 seconds or more.
 
 Run from the repository using Python 3.14 and the installed project dependencies:
 
