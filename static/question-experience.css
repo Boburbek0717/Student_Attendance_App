@@ -1,0 +1,40 @@
+/* Shared reading surface for library and assignment questions. */
+body.question-experience { background:#f5f6fa; color:#202939; }
+.question-experience .practice-header { margin-bottom:1.4rem; border-color:#dce0e7; }
+.question-experience .practice-breadcrumb { margin-bottom:1rem; }
+.question-experience .practice-question-heading { background:#172733; color:white; padding:1.5rem 1.8rem; border-radius:16px; gap:1rem; margin-bottom:1rem; }
+.question-experience .practice-question-heading h1 { color:white; font-size:clamp(1.5rem,3vw,2.1rem); letter-spacing:-.04em; margin:0; }
+.question-experience .practice-question-heading .eyebrow { color:#c4f65d; margin-bottom:.5rem; }
+.question-experience .practice-question-heading form { margin:0; }
+.question-experience .practice-question-heading button { background:#f3f0ff; border-color:#f3f0ff; color:#403566; }
+.question-experience .practice-context { font-size:.8rem; color:#596477; }
+.question-experience .practice-navigator { background:white; border:1px solid #dce0e7; border-radius:10px; padding:.2rem 1rem; }
+.question-experience .practice-navigator[open] { padding-bottom:1rem; }
+.question-experience #practice-highlights { background:#eeebfa; border:1px solid #ded7f1; border-radius:12px; padding:1rem; }
+.question-experience #practice-highlights button { background:white; border-color:#c9bfdc; color:#493867; min-height:40px; }
+.question-experience #highlight-status { color:#615772; }
+.question-experience .practice-stage { border-color:#dce0e7; border-radius:16px; box-shadow:0 8px 28px #17273306; margin-top:1.2rem; }
+.question-experience .qb-passage { background:#fcfcff; border-color:#e1e3eb; }
+.question-experience .qb-passage .eyebrow { color:#695489; }
+.question-experience .practice-choice { border-color:#d2d8e2; border-radius:10px; padding:1rem; color:#202939; }
+.question-experience .practice-choice-letter { border-color:#c6cedb; background:#f3f5f9; color:#435067; border-radius:7px; width:2rem; height:2rem; }
+.question-experience .practice-choice:has(input:checked:not(:disabled)) { background:#f0ebff; border-color:#8163bc; box-shadow:inset 0 0 0 1px #8163bc; }
+.question-experience .practice-choice:has(input:checked:not(:disabled)) .practice-choice-letter { background:#624491; border-color:#624491; color:white; }
+.question-experience .practice-choice:has(input:not(:disabled)):hover { background:#f5f2fc; border-color:#9a87bd; }
+.question-experience .practice-choice:has(input:focus-visible) { outline:3px solid #7351a5; outline-offset:3px; }
+.question-experience .practice-submit,.question-experience .practice-footer .button:not(.secondary) { background:#c4f65d; border-color:#c4f65d; color:#172733; font-weight:700; }
+.question-experience .practice-submit:hover,.question-experience .practice-footer .button:not(.secondary):hover { background:#b4e64e; border-color:#b4e64e; }
+.question-experience .practice-footer { padding:1rem; border:1px solid #dce0e7; border-radius:12px; background:white; gap:.75rem; }
+.question-experience .practice-footer .secondary { background:#f1f3f8; color:#344155; border-color:#dce0e7; }
+.question-experience .practice-explanation { background:#f5f2fc; border:1px solid #e1d9ee; border-radius:10px; padding:1rem; margin-top:1.2rem; }
+.question-experience .practice-explanation summary { color:#503970; }
+.question-experience .practice-explanation .qb-prose { color:#435067; }
+.question-experience :is(a,button,summary):focus-visible { outline:3px solid #8b6abe; outline-offset:4px; }
+@media (prefers-reduced-motion:no-preference) {
+  .question-experience .practice-question-heading { animation:practice-enter 280ms ease-out both; }
+}
+@media (max-width:48rem) {
+  .question-experience .practice-question-heading { padding:1.2rem; flex-wrap:wrap; border-radius:12px; }
+  .question-experience .practice-stage > section { padding:1.1rem; }
+  .question-experience .practice-footer { justify-content:space-between; }
+}

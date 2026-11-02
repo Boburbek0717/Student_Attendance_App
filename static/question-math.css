@@ -1,0 +1,4 @@
+[data-math] { min-width: 0; overflow-wrap: anywhere; }
+[data-math] .katex { font-size: 1.12em; white-space: normal; }
+[data-math] .katex-display { overflow-x: auto; overflow-y: hidden; padding-block: .4rem; max-width: 100%; }
+.practice-choice-copy[data-math] { flex: 1; }
