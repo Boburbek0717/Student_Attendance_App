@@ -36,8 +36,11 @@ class PortfolioHomeTests(unittest.TestCase):
         self.assertIn(f'<h1 id="pf-title"', page.text)
         self.assertIn(str(TUTOR["sat"]), page.text)
         self.assertIn(TUTOR["university"], page.text)
+        self.assertIn("My students’<br>results", page.text)
+        self.assertIn(f"{len(RESULTS)} students I have taught", page.text)
         for row in RESULTS:
             self.assertIn(f'href="/results#result-{row["id"]}"', page.text)
+            self.assertIn(f'<td class="pf-table__section">{row["ebrw"]}</td>', page.text)
         reached = sum(row["ebrw"] + row["math"] >= 1350 for row in RESULTS)
         self.assertIn(f"<strong>{reached} of {len(RESULTS)}</strong> students reached 1350", page.text)
         self.assertNotIn("style=", page.text)

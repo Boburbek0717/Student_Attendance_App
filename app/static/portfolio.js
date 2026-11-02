@@ -3,7 +3,7 @@
     const reduced = () => motion.matches;
 
     // Entrances: each section's parts arrive once, in reading order.
-    const revealed = [...document.querySelectorAll('[data-reveal], [data-reveal-group], .pf-list__card')];
+    const revealed = [...document.querySelectorAll('[data-reveal], [data-reveal-group]')];
     document.querySelectorAll('[data-reveal-group]').forEach((group) => {
         [...group.children].forEach((child, index) => { child.style.transitionDelay = `${index * 70}ms`; });
     });
@@ -73,11 +73,18 @@
         const output = target.querySelector('output');
         const result = document.getElementById('pf-target-result');
         const dots = [...target.querySelectorAll('.pf-target__dot')];
-        const rows = [...document.querySelectorAll('.pf-names li')];
+        const rows = [...document.querySelectorAll('[data-result]')];
         const count = rows.length;
+        const scale = (total) => `${(Number(total) - 400) / 12}%`;
         dots.forEach((dot, index) => {
-            dot.style.left = `${(Number(dot.dataset.total) - 400) / 12}%`;
+            dot.style.left = scale(dot.dataset.total);
             dot.style.transitionDelay = `${120 + index * 60}ms`;
+        });
+        // Each row's bar shows its total on the same 400–1600 scale as the slider.
+        rows.forEach((row, index) => {
+            const bar = row.querySelector('[data-bar]');
+            bar.style.width = scale(row.dataset.total);
+            bar.style.transitionDelay = `${200 + index * 70}ms, 0ms`;
         });
         const update = () => {
             const goal = Number(input.value);

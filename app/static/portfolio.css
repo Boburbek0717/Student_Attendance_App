@@ -122,10 +122,30 @@ body.portfolio-site { margin: 0; padding: 0; background: var(--ground); color: v
 .pf-int { grid-column: 1; justify-self: end; }
 .pf-dec { grid-column: 2; justify-self: start; }
 
-/* ---------- Results: the printed list, with the target scale ---------- */
-.pf-list { margin-top: clamp(72px, 9vw, 140px); background: var(--accent); color: var(--ink); padding: clamp(72px, 8vw, 120px) var(--gutter) 0; overflow: hidden; }
-.pf-list__card { width: min(100%, 900px); margin: 0 auto -140px; padding: clamp(28px, 5vw, 56px) clamp(22px, 5vw, 56px) 200px; text-align: center; rotate: -1.5deg; }
-.pf-list__title { font-family: var(--font-display); font-weight: 800; font-size: var(--step-head); line-height: 0.9; text-transform: uppercase; text-wrap: balance; }
+/* ---------- Results: my students' scores as a ranked table, with the target scale ---------- */
+.pf-results { margin-top: clamp(72px, 9vw, 140px); background: var(--paper); color: var(--ink); padding: clamp(72px, 8vw, 128px) var(--gutter);
+    display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; }
+.pf-results__intro { grid-column: 1 / span 5; position: sticky; top: 40px; }
+.pf-results__lead { margin-top: 24px; max-width: 26ch; font-size: var(--step-lead); line-height: 1.35; }
+.pf-results .pf-target { margin: 40px 0 0; max-width: none; }
+.pf-results__more { display: inline-block; margin-top: 28px; font-weight: 600; }
+.pf-table { grid-column: 7 / -1; width: 100%; border-collapse: collapse; font-size: var(--step-body); font-variant-numeric: tabular-nums; }
+.pf-table th, .pf-table td { padding: 18px 0 18px 24px; border-bottom: 1px solid #cdc8bf; background: none; text-align: right; vertical-align: middle; transition: color var(--t-ui) ease; }
+.pf-table tbody tr:hover { background: none; }
+.pf-table thead th, .pf-table td { white-space: nowrap; }
+.pf-table th:first-child { padding-left: 0; text-align: left; }
+.pf-table thead th { padding-top: 0; padding-bottom: 14px; border-bottom-color: var(--ink); font-size: var(--step-small); font-weight: 400; color: var(--muted); }
+.pf-table tbody th { font-weight: 600; line-height: 1.3; }
+.pf-table tbody th a { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 0.22em; transition: text-decoration-color var(--t-hover) ease; }
+.pf-table td:last-child { width: 38%; }
+.pf-table__total { display: block; font-family: var(--font-display); font-weight: 800; font-size: var(--step-lead); line-height: 1; }
+.pf-table__bar { display: none; height: 6px; margin-top: 10px; background: var(--surface); }
+.js .pf-table__bar { display: block; }
+.pf-table__bar > span { display: block; height: 100%; background: var(--ink); transform-origin: left center; transition: background-color var(--t-ui) ease; }
+.pf-table__split { display: none; margin-top: 4px; font-size: var(--step-small); font-weight: 400; color: var(--muted); }
+.pf-table tr.is-below th, .pf-table tr.is-below td { color: var(--muted); }
+.pf-table tr.is-below .pf-table__bar > span { background: #a8a39a; }
+@media (hover: hover) and (pointer: fine) { .pf-table tbody th a:hover { text-decoration-color: currentColor; } }
 .pf-target { margin: 36px auto 0; max-width: 560px; text-align: left; display: none; }
 .js .pf-target { display: block; }
 .pf-target__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
@@ -147,16 +167,6 @@ body.portfolio-site { margin: 0; padding: 0; background: var(--ground); color: v
 .pf-target__dot--me.is-below { background: var(--paper); border-color: #a19c93; }
 .pf-target__ends { display: flex; justify-content: space-between; font-size: var(--step-small); color: var(--muted); font-variant-numeric: tabular-nums; }
 .pf-target__result { margin-top: 18px; font-size: var(--step-lead); }
-.pf-names { list-style: none; padding: 0; margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 40px; text-align: left; }
-.pf-names li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 10px 14px; background: var(--surface); transition: color var(--t-ui) ease, background-color var(--t-ui) ease; }
-.pf-names a { font-weight: 600; text-decoration: none; line-height: 1.3; }
-.pf-names__name { display: block; }
-.pf-names__total { font-weight: 600; font-size: var(--step-lead); font-variant-numeric: tabular-nums; }
-.pf-names__split { display: block; margin-top: 2px; font-weight: 400; font-size: var(--step-small); color: var(--muted); }
-.pf-names li.is-below { background: transparent; }
-.pf-names li.is-below { color: var(--muted); }
-@media (hover: hover) and (pointer: fine) { .pf-names a:hover .pf-names__name { text-decoration: underline; text-underline-offset: 0.22em; } }
-.pf-list__more { display: inline-block; margin-top: 40px; font-weight: 600; }
 
 /* ---------- Stories: quotes on torn paper slips ---------- */
 .pf-slips { background: var(--field); color: var(--ink); padding: clamp(88px, 10vw, 150px) var(--gutter) 0; overflow: hidden; }
@@ -254,6 +264,8 @@ body.portfolio-site { margin: 0; padding: 0; background: var(--ground); color: v
 /* ---------- Tablet ---------- */
 @media (max-width: 1023px) {
     .pf-ledger__paper { grid-template-columns: 1fr; row-gap: 48px; }
+    .pf-results__intro { grid-column: 1 / -1; position: static; }
+    .pf-table { grid-column: 1 / -1; margin-top: 48px; }
     .pf-ledger .pf-head, .pf-ledger__rows { grid-column: 1; }
     .pf-platform { grid-template-columns: 1fr; min-height: 0; }
     .pf-platform__plate { margin: 24px var(--gutter) 0; }
@@ -289,8 +301,9 @@ body.portfolio-site { margin: 0; padding: 0; background: var(--ground); color: v
     .pf-ledger__rows { gap: 28px; }
     .pf-ledger__row { grid-template-columns: 52% 1fr; row-gap: 6px; }
     .pf-ledger__row dt { grid-column: 1 / -1; grid-row: 2; padding: 0; font-size: var(--step-small); }
-    .pf-list__card { width: 92%; rotate: -1deg; padding-inline: 20px; padding-top: 28px; }
-    .pf-names { grid-template-columns: 1fr; gap: 18px; margin-top: 32px; }
+    .pf-table__section { display: none; }
+    .pf-table__split { display: block; }
+    .pf-table td:last-child { width: 42%; }
     .pf-slip { width: 82%; padding: 32px 22px 80px; }
     .pf-letter__sheet, .pf-letter__stub { width: calc(100% + 2 * var(--gutter)); margin-inline: calc(-1 * var(--gutter)); }
     .pf-letter__sheet { padding: 32px 24px; }
@@ -338,8 +351,8 @@ body.portfolio-site { margin: 0; padding: 0; background: var(--ground); color: v
     .js [data-reveal-group] > * { opacity: 0; transform: translateY(20px); transition: opacity 600ms var(--ease-out), transform 800ms var(--ease-expo); }
     .js [data-reveal-group].is-in > * { opacity: 1; transform: none; }
 
-    .js .pf-list__card { rotate: -5deg; translate: 0 80px; transition: rotate 1200ms var(--ease-expo), translate 1200ms var(--ease-expo); }
-    .js .pf-list__card.is-in { rotate: -1.5deg; translate: 0 0; }
+    .js .pf-table__bar > span { transform: scaleX(0); transition: transform 1000ms var(--ease-expo), background-color var(--t-ui) ease; }
+    .js .pf-table tbody.is-in .pf-table__bar > span { transform: none; }
     .js .pf-target__dot { scale: 0; transition: scale 500ms var(--ease-out); }
     .js .pf-target.is-in .pf-target__dot { scale: 1; }
 

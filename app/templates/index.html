@@ -6,7 +6,7 @@
 {% block extra_styles %}
     <link rel="preload" href="{{ url_for('static', path='/fonts/big-shoulders-800-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ url_for('static', path='/fonts/public-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ url_for('static', path='/portfolio.css') }}?v=2">
+    <link rel="stylesheet" href="{{ url_for('static', path='/portfolio.css') }}?v=3">
     <script src="{{ url_for('static', path='/portfolio-flag.js') }}"></script>
 {% endblock %}
 {% block brand_header %}
@@ -63,9 +63,10 @@
 
 {% set target = 1350 %}
 {% set reached = figures.ranked|selectattr('total', 'ge', target)|list|length %}
-<section class="pf-list" id="results" aria-labelledby="results-title">
-    <div class="pf-card pf-list__card">
-        <h2 id="results-title" class="pf-list__title" data-reveal>{{ figures.count }} students, {{ figures.count }} scores</h2>
+<section class="pf-results" id="results" aria-labelledby="results-title">
+    <div class="pf-results__intro">
+        <h2 id="results-title" class="pf-head" data-reveal>My students’<br>results</h2>
+        <p class="pf-results__lead" data-reveal>{{ figures.count }} students I have taught, and the SAT scores they reached. Highest total first.</p>
         <div class="pf-target" data-target data-reveal>
             <div class="pf-target__head">
                 <label for="pf-target-input">Your target score</label>
@@ -79,16 +80,24 @@
             <div class="pf-target__ends" aria-hidden="true"><span>400</span><span>1600</span></div>
         </div>
         <p id="pf-target-result" class="pf-target__result" aria-live="polite" data-reveal><strong>{{ reached }} of {{ figures.count }}</strong> students reached {{ target }} or higher.</p>
-        <ol class="pf-names" data-reveal-group>
-            {% for result in figures.ranked %}
-            <li data-total="{{ result.total }}" {% if result.total < target %}class="is-below"{% endif %}>
-                <a href="/results#result-{{ result.id }}"><span class="pf-names__name">{{ result.name }}</span><span class="pf-names__split">Reading and Writing {{ result.ebrw }} · Math {{ result.math }}</span></a>
-                <span class="pf-names__total">{{ result.total }}</span>
-            </li>
-            {% endfor %}
-        </ol>
-        <a class="pf-link pf-list__more" href="/results">Every score card, with stories <span aria-hidden="true">→</span></a>
+        <a class="pf-link pf-results__more" href="/results" data-reveal>Every score card, with stories <span aria-hidden="true">→</span></a>
     </div>
+    <table class="pf-table">
+        <caption class="sr-only">SAT scores of my students, highest total first</caption>
+        <thead>
+            <tr><th scope="col">Student</th><th scope="col" class="pf-table__section">Reading and Writing</th><th scope="col" class="pf-table__section">Math</th><th scope="col">Total, out of 1600</th></tr>
+        </thead>
+        <tbody data-reveal-group>
+            {% for result in figures.ranked %}
+            <tr data-result data-total="{{ result.total }}" {% if result.total < target %}class="is-below"{% endif %}>
+                <th scope="row"><a href="/results#result-{{ result.id }}">{{ result.name }}</a><span class="pf-table__split">Reading and Writing {{ result.ebrw }} · Math {{ result.math }}</span></th>
+                <td class="pf-table__section">{{ result.ebrw }}</td>
+                <td class="pf-table__section">{{ result.math }}</td>
+                <td><span class="pf-table__total">{{ result.total }}</span><span class="pf-table__bar" aria-hidden="true"><span data-bar></span></span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </section>
 
 <section class="pf-slips" id="stories" aria-labelledby="stories-title">
@@ -192,4 +201,4 @@
     </div>
 </footer>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', path='/portfolio.js') }}?v=1" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/portfolio.js') }}?v=2" defer></script>{% endblock %}
