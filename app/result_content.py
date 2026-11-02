@@ -60,7 +60,3 @@ RESULTS = [{'name': 'Asilbek Shukurov',
   'tag': '1420 TOTAL',
   'summary': "Go'zal earns 1420 overall, with 760 in Math and 660 in EBRW.",
   'id': 9}]
-
-FEATURED_RESULTS = [next(row for row in RESULTS if row["id"] == key) for key in (6, 9, 5)]
-
-SPOTLIGHT_RESULTS = [next(row for row in RESULTS if row["id"] == key) for key in (6, 9, 7)]

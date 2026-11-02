@@ -1,69 +1,195 @@
 {% extends "base.html" %}
-{% block title %}SAT Factory · Built through practice{% endblock %}
-{% block main_class %}welcome-page home-page{% endblock %}
-{% block body_class %}public-site home-experience{% endblock %}
-{% block brand_header %}{% set public_page = 'home' %}{% include "public_header.html" %}{% endblock %}
-{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', path='/home.css') }}?v=5">{% endblock %}
-{% block content %}
-<section class="factory-hero home-intro" aria-labelledby="welcome-heading">
-    <div class="hero-copy">
-        <h1 id="welcome-heading">Small steps. Serious <span>progress.</span></h1>
-        <p class="page-intro">Student scores and stories from SAT Factory.</p>
-
-        <a class="hero-action" href="/results">Explore student results <span aria-hidden="true">&#8599;</span></a>
-    </div>
-    {% if spotlights %}
-    <div class="score-scene" data-spotlight aria-label="Student result spotlight">
-        <div class="score-orbit orbit-one" aria-hidden="true"></div>
-        <div class="score-orbit orbit-two" aria-hidden="true"></div>
-        <span class="scene-spark" aria-hidden="true">✳</span>
-        <div class="spotlight-cards">
-        {% for spotlight in spotlights %}
-        <a id="spotlight-{{ loop.index }}" {% if not loop.first %}hidden{% endif %} class="spotlight-ticket" href="/results#result-{{ spotlight.id }}" aria-label="{{ spotlight.name }}, SAT {{ spotlight.ebrw + spotlight.math }}. View result.">
-            <span class="spotlight-top">SAT FACTORY <span aria-hidden="true">↗</span></span>
-            <span class="spotlight-caption">Student spotlight</span>
-            <strong class="spotlight-score">{{ spotlight.ebrw + spotlight.math }}<small>/ 1600</small></strong>
-            <span class="spotlight-name">{{ spotlight.name }}</span>
-            <span class="spotlight-split"><span>EBRW <b>{{ spotlight.ebrw }}</b></span><span>Math <b>{{ spotlight.math }}</b></span></span>
-        </a>
-        {% endfor %}
-        </div>
-        <div class="spotlight-controls" role="group" aria-label="Choose a student result" hidden>
-            <button type="button" aria-label="Next student result"><span aria-hidden="true">→</span></button>
-        </div>
-        <span class="sr-only" data-spotlight-status role="status" aria-live="polite" aria-atomic="true"></span>
-    </div>{% endif %}
-</section>
-<section id="results" class="featured-results" aria-labelledby="featured-heading">
-    <div class="section-heading"><h2 id="featured-heading">Featured results</h2><a class="text-action" href="/results">View all {{ result_count }} results ↗</a></div>
-    <p class="swipe-hint" id="swipe-hint">Swipe to explore. Select a result for the full score card.</p>
-    <div class="featured-track" aria-label="Featured student results" aria-describedby="swipe-hint">
-        {% for result in featured %}
-        <a class="featured-card" href="/results#result-{{ result.id }}" aria-label="{{ result.name }}, SAT {{ result.ebrw + result.math }}. View score card.">
-            <span class="featured-label"><span class="ticket-index">0{{ loop.index }} / SAT score</span> <span aria-hidden="true">↗</span></span>
-            <h3>{{ result.name }}</h3>
-            <div class="featured-total">{{ result.ebrw + result.math }}<span>/ 1600</span></div>
-            <dl class="result-breakdown"><div><dt>EBRW</dt><dd>{{ result.ebrw }}</dd></div><div><dt>Math</dt><dd>{{ result.math }}</dd></div></dl>
-        </a>
-        {% endfor %}
-    </div>
-</section>
-<section id="teacher" class="teacher-feature" aria-labelledby="teacher-feature-heading">
-    <div class="teacher-introduction">
-        <p class="eyebrow">YOUR TEACHER</p>
-        <h2 id="teacher-feature-heading">Noraliev Boburbek</h2>
-        <p class="teacher-role">Teaching SAT since 2024 · Student at a top European university.</p>
-        <p class="teacher-approach">Practical understanding comes first. Build your knowledge through focused practice and clear explanations.</p>
-    </div>
-    <dl class="teacher-credentials" aria-label="Teacher scores">
-        <div><dt>SAT</dt><dd>1430<span>/ 1600</span></dd></div>
-        <div><dt>IELTS</dt><dd>8.5<span>/ 9</span></dd></div>
-    </dl>
-</section>
-<section class="portal-entry" aria-labelledby="portal-heading"><div><h2 id="portal-heading">Already a student?</h2><p>Check in, review attendance, and keep track of your lessons.</p></div>
-{% if user %}<a class="button secondary" href="/{{ user.role }}">Go to my dashboard</a>{% else %}<a class="button secondary" href="/login">Open course portal <span aria-hidden="true">→</span></a>{% endif %}
-</section>
-<footer class="home-footer"><strong>SAT Factory.</strong></footer>
+{% set contact = tutor.contact %}
+{% block title %}{{ tutor.name }} · SAT tutor · SAT Factory{% endblock %}
+{% block main_class %}portfolio{% endblock %}
+{% block body_class %}portfolio-site{% endblock %}
+{% block extra_styles %}
+    <link rel="preload" href="{{ url_for('static', path='/fonts/big-shoulders-800-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', path='/fonts/public-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ url_for('static', path='/portfolio.css') }}?v=1">
+    <script src="{{ url_for('static', path='/portfolio-flag.js') }}"></script>
 {% endblock %}
+{% block brand_header %}
+<header class="pf-bar">
+    <a class="pf-bar__mark" href="/" aria-label="SAT Factory home">
+        <img src="{{ url_for('static', path='/branding/sat-factory-logo.png') }}" alt="SAT Factory" width="56" height="56">
+    </a>
+    <nav class="pf-bar__nav" aria-label="Main navigation">
+        <a href="#results">Results</a>
+        <a href="#about">About me</a>
+        <a href="/questions">Free practice</a>
+        {% if not user %}<a href="/login">Course portal</a>{% endif %}
+    </nav>
+    {% if user %}<a class="pf-button" href="/{{ user.role }}">Go to my dashboard</a>
+    {% elif contact %}<a class="pf-button" href="{{ contact.href }}">{{ contact.label }}</a>
+    {% else %}<a class="pf-button" href="#results">See the results</a>{% endif %}
+</header>
+{% endblock %}
+{% block content %}
+<div class="pf-sheet">
+<section class="pf-hero" aria-labelledby="pf-title">
+    <div class="pf-card pf-hero__card">
+        <img class="pf-hero__seal" src="{{ url_for('static', path='/branding/sat-factory-logo.png') }}" alt="" width="64" height="64">
+        <h1 id="pf-title" class="pf-name pf-lines">
+            <span class="pf-line"><span data-line class="pf-line__a">{{ tutor.first_name }}</span></span>
+            <span class="pf-line"><span data-line class="pf-line__b">{{ tutor.name.split(' ')[-1] }}</span></span>
+        </h1>
+        <p class="pf-lead pf-hero__lead" data-load>SAT tutor. I teach Reading and Writing and Math online, from Szeged to students in Uzbekistan.</p>
+        <p class="pf-hero__details" data-load>Student at the {{ tutor.university }}<span class="pf-diamond" aria-hidden="true"></span>Teaching SAT since {{ tutor.teaching_since }}</p>
+        <dl class="pf-hero__scores" data-load>
+            <div><dt>SAT total, out of 1600</dt><dd class="pf-hero__score">{{ tutor.sat }}</dd></div>
+            <div><dt>IELTS band, out of 9</dt><dd class="pf-hero__score">{{ tutor.ielts }}</dd></div>
+        </dl>
+        <div class="pf-hero__scale" data-load aria-hidden="true">
+            <span class="pf-hero__end">400</span>
+            <span class="pf-hero__rail"><span class="pf-hero__me"></span></span>
+            <span class="pf-hero__end">1600</span>
+        </div>
+    </div>
+</section>
 
-{% block scripts %}<script src="/static/spotlight.js?v=2" defer></script><script src="{{ url_for('static', path='/home-motion.js') }}?v=2" defer></script>{% endblock %}
+<section class="pf-ledger" id="numbers" aria-labelledby="ledger-title">
+    <div class="pf-ledger__paper">
+        <h2 id="ledger-title" class="pf-head" data-reveal>My scores<br>and theirs</h2>
+        <dl class="pf-ledger__rows" data-reveal-group>
+            <div class="pf-ledger__row"><dt>my SAT total, out of 1600</dt><dd><span class="pf-int" data-roll>{{ tutor.sat }}</span><span class="pf-dec"></span></dd></div>
+            <div class="pf-ledger__row"><dt>my IELTS band, out of 9</dt><dd><span class="pf-int" data-roll>{{ tutor.ielts.split('.')[0] }}</span><span class="pf-dec" data-roll>.{{ tutor.ielts.split('.')[1] }}</span></dd></div>
+            <div class="pf-ledger__row"><dt>the highest student total: {{ figures.best.name }}, {{ figures.best_total - tutor.sat }} points above mine</dt><dd><span class="pf-int" data-roll>{{ figures.best_total }}</span><span class="pf-dec"></span></dd></div>
+            <div class="pf-ledger__row"><dt>the average total of the {{ figures.count }} results on this page</dt><dd><span class="pf-int" data-roll>{{ figures.average.split('.')[0] }}</span><span class="pf-dec" data-roll>.{{ figures.average.split('.')[1] }}</span></dd></div>
+            <div class="pf-ledger__row"><dt>in Math, the highest section score, reached by {{ figures.top_math_count }} students</dt><dd><span class="pf-int" data-roll>{{ figures.top_math }}</span><span class="pf-dec"></span></dd></div>
+        </dl>
+    </div>
+</section>
+
+{% set target = 1350 %}
+{% set reached = figures.ranked|selectattr('total', 'ge', target)|list|length %}
+<section class="pf-list" id="results" aria-labelledby="results-title">
+    <div class="pf-card pf-list__card">
+        <h2 id="results-title" class="pf-list__title" data-reveal>{{ figures.count }} students, {{ figures.count }} scores</h2>
+        <div class="pf-target" data-target data-reveal>
+            <div class="pf-target__head">
+                <label for="pf-target-input">Your target score</label>
+                <output id="pf-target-output" for="pf-target-input">{{ target }}</output>
+            </div>
+            <input id="pf-target-input" type="range" min="400" max="1600" step="10" value="{{ target }}" aria-describedby="pf-target-result">
+            <div class="pf-target__track" aria-hidden="true">
+                {% for result in figures.ranked %}<span class="pf-target__dot" data-total="{{ result.total }}"></span>{% endfor %}
+                <span class="pf-target__dot pf-target__dot--me" data-total="{{ tutor.sat }}"></span>
+            </div>
+            <div class="pf-target__ends" aria-hidden="true"><span>400</span><span>1600</span></div>
+        </div>
+        <p id="pf-target-result" class="pf-target__result" aria-live="polite" data-reveal><strong>{{ reached }} of {{ figures.count }}</strong> students reached {{ target }} or higher.</p>
+        <ol class="pf-names" data-reveal-group>
+            {% for result in figures.ranked %}
+            <li data-total="{{ result.total }}" {% if result.total < target %}class="is-below"{% endif %}>
+                <a href="/results#result-{{ result.id }}"><span class="pf-names__name">{{ result.name }}</span><span class="pf-names__split">Reading and Writing {{ result.ebrw }} · Math {{ result.math }}</span></a>
+                <span class="pf-names__total">{{ result.total }}</span>
+            </li>
+            {% endfor %}
+        </ol>
+        <a class="pf-link pf-list__more" href="/results">Every score card, with stories <span aria-hidden="true">→</span></a>
+    </div>
+</section>
+
+<section class="pf-slips" id="stories" aria-labelledby="stories-title">
+    <h2 id="stories-title" class="pf-head" data-reveal>In their<br>own words</h2>
+    <div class="pf-slips__fan" data-reveal-group>
+        {% for story in figures.quoted %}
+        <figure class="pf-slip">
+            <figcaption class="pf-slip__name">{{ story.name }}</figcaption>
+            <p class="pf-slip__score">{{ story.ebrw + story.math }}</p>
+            <p class="pf-slip__tag">{{ story.tag|capitalize }} · Reading and Writing {{ story.ebrw }} · Math {{ story.math }}</p>
+            <blockquote><p>{{ story.quote }}</p></blockquote>
+        </figure>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="pf-letter" id="about" aria-labelledby="letter-title">
+    <article class="pf-letter__sheet">
+        <img class="pf-letter__seal" src="{{ url_for('static', path='/branding/sat-factory-logo.png') }}" alt="" width="44" height="44">
+        <h2 id="letter-title" class="pf-head" data-reveal>A letter<br>from Szeged</h2>
+        <div class="pf-letter__body" data-reveal-group>
+            <p>Dear future student,</p>
+            <p>I’m {{ tutor.first_name }}. I study at the {{ tutor.university }} in Hungary, and since {{ tutor.teaching_since }} I have taught the SAT online to students in Uzbekistan.</p>
+            <p>I scored {{ tutor.sat }} on the SAT and {{ tutor.ielts }} on IELTS, so I know both tests from the student’s side of the desk.</p>
+            <figure class="pf-letter__plate">
+                <img src="{{ url_for('static', path='/portfolio/szeged-university-bolyai.jpg') }}" alt="The pink Bolyai Building of the University of Szeged behind a row of trees" width="1280" height="720" loading="lazy" decoding="async">
+                <figcaption>The Bolyai Building, University of Szeged.</figcaption>
+            </figure>
+            <p>Practical understanding comes first. We build your knowledge through focused practice and clear explanations, one skill at a time.</p>
+            <p>My favourite result so far is {{ figures.best.name.split(' ')[-1] }}’s {{ figures.best_total }}, {{ figures.best_total - tutor.sat }} points above my own. That is the goal: <mark>students who go further than their teacher.</mark></p>
+            <p class="pf-letter__sign">{{ tutor.name }}</p>
+            <p class="pf-letter__role">SAT tutor, SAT Factory</p>
+        </div>
+    </article>
+    <div class="pf-letter__stub">
+        {% if contact %}<a class="pf-button" href="{{ contact.href }}">{{ contact.label }}</a>
+        {% else %}<a class="pf-button" href="/questions">Try a free practice question</a>{% endif %}
+    </div>
+</section>
+
+<section class="pf-platform" id="platform" aria-labelledby="platform-title">
+    <div class="pf-platform__plate" data-reveal>
+        <img class="is-shown" data-plate="dashboard" src="{{ url_for('static', path='/portfolio/app-dashboard.jpg') }}" alt="SAT Factory student dashboard with practice, assignments and lesson check-in" width="960" height="960" loading="lazy" decoding="async">
+        <img data-plate="practice" src="{{ url_for('static', path='/portfolio/app-question.jpg') }}" alt="A practice question in SAT Factory marked correct after the first attempt" width="960" height="960" loading="lazy" decoding="async">
+        <img data-plate="assignments" src="{{ url_for('static', path='/portfolio/app-assignment.jpg') }}" alt="An assignment overview in SAT Factory with its due date and question list" width="960" height="960" loading="lazy" decoding="async">
+    </div>
+    <div class="pf-platform__text">
+        <div class="pf-tabs" role="tablist" aria-label="Parts of the platform" data-tabs>
+            <button type="button" role="tab" id="tab-dashboard" aria-controls="panel-dashboard" aria-selected="true" data-tab="dashboard">Dashboard</button>
+            <button type="button" role="tab" id="tab-practice" aria-controls="panel-practice" aria-selected="false" tabindex="-1" data-tab="practice">Practice</button>
+            <button type="button" role="tab" id="tab-assignments" aria-controls="panel-assignments" aria-selected="false" tabindex="-1" data-tab="assignments">Assignments</button>
+        </div>
+        <div class="pf-platform__copy">
+            <h2 id="platform-title" class="pf-head" data-reveal>I built the<br>platform too</h2>
+            <div class="pf-panel" role="tabpanel" id="panel-dashboard" aria-labelledby="tab-dashboard"><p>Each student has one page for practice, assignments and lesson check-in, so nothing gets lost between lessons.</p></div>
+            <div class="pf-panel" role="tabpanel" id="panel-practice" aria-labelledby="tab-practice"><p>Questions are sorted by the College Board’s own SAT skills. The answer stays hidden until a correct try or a second attempt.</p></div>
+            <div class="pf-panel" role="tabpanel" id="panel-assignments" aria-labelledby="tab-assignments"><p>I set questions for a group with a deadline and see who finished, and who got it right the first time.</p></div>
+        </div>
+        <div class="pf-platform__actions">
+            <a class="pf-cell pf-cell--ink" href="/questions">Try free practice <span aria-hidden="true">→</span></a>
+            <a class="pf-cell" href="/login">Open the portal <span aria-hidden="true">→</span></a>
+        </div>
+    </div>
+</section>
+
+<section class="pf-visit" id="lessons" aria-labelledby="visit-title">
+    <div class="pf-visit__photo">
+        <img data-drift src="{{ url_for('static', path='/portfolio/szeged-tisza.jpg') }}" alt="The Tisza river in Szeged with the twin towers of the Votive Church on the far bank" width="1920" height="1285" loading="lazy" decoding="async">
+    </div>
+    <div class="pf-visit__card" data-reveal>
+        <h2 id="visit-title">Lessons, online</h2>
+        <p>From Szeged, Hungary,<br>to students in Uzbekistan.</p>
+        <dl class="pf-visit__clocks">
+            <div><dt>Szeged</dt><dd data-clock="Europe/Budapest">Central European Time</dd></div>
+            <div><dt>Tashkent</dt><dd data-clock="Asia/Tashkent">UTC+5</dd></div>
+            <div><dt>Since</dt><dd>{{ tutor.teaching_since }}</dd></div>
+        </dl>
+        <p class="pf-visit__caption">Pictured: the Tisza and the Votive Church, Szeged.</p>
+        {% if contact %}<a class="pf-button pf-visit__button" href="{{ contact.href }}">{{ contact.label }}</a>
+        {% else %}<a class="pf-button pf-visit__button" href="/results">See all {{ figures.count }} results</a>{% endif %}
+    </div>
+</section>
+</div>
+
+<footer class="pf-back" aria-labelledby="back-title">
+    <div class="pf-back__card">
+        <div class="pf-back__message">
+            <h2 id="back-title">See you in class.</h2>
+            <p>Bring your current score and the one you want. We will close the gap one skill at a time.</p>
+        </div>
+        <div class="pf-back__address">
+            <img class="pf-back__stamp" src="{{ url_for('static', path='/portfolio/tashkent-tower.jpg') }}" alt="The Tashkent TV tower seen across a lake" width="480" height="640" loading="lazy" decoding="async">
+            <ul>
+                {% if contact %}<li><a href="{{ contact.href }}">{{ contact.label }}</a></li>{% endif %}
+                <li><a href="/results">All student results</a></li>
+                <li><a href="/questions">Free SAT practice</a></li>
+                <li><a href="/login">Course portal</a></li>
+            </ul>
+        </div>
+        <p class="pf-back__imprint">© 2026 {{ tutor.name }} · SAT Factory. Photographs, cropped: “Tisza River with Szeged cathedral” by Chmee2 / Valtameri, CC BY 3.0; “Szeged – Szegedi Tudományegyetem Bolyai Épület” by Fred Romero, CC BY 2.0; “Tashkent 2023” by Basiyra, CC BY 4.0; all via Wikimedia Commons.</p>
+    </div>
+</footer>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/portfolio.js') }}?v=1" defer></script>{% endblock %}

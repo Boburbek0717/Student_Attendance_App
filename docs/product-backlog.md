@@ -1042,3 +1042,26 @@ Updated old-schema test fixtures and added a v4 upgrade preservation check. See
 pilot-handover.md for final check evidence. Visual PDF extraction itself remains
 unsupported; skipped items require manual authoring. Public demo uploads remain
 blocked. Owner requested GitHub synchronization before Render continuation.
+
+
+## Portfolio homepage redesign — 2026-11-02
+
+Owner reprioritized the public homepage as a personal portfolio/CV; attendance and
+Question Bank work are not current priorities. Owner supplied: University of Szeged,
+no photo (typographic design), full student names published with permission, contact
+to be supplied later. Replaced index.html with the "score report" stationery design:
+hero card (name, SAT 1430, IELTS 8.5), decimal-aligned figures ledger, ranked list of
+all nine results with a 400–1600 target slider, quote slips, letter, platform
+screenshots with tabs, Szeged/Tashkent clocks and a footer. Facts live in
+app/portfolio_content.py; student figures are derived from RESULTS. TUTOR['contact']
+is None, so every contact button stays hidden until the owner adds one. Fonts (OFL)
+and pictures are self-hosted under app/static to satisfy the existing CSP; photo
+credits are in the footer. Removed the unused spotlight.js, home.css and the
+FEATURED/SPOTLIGHT result lists. Results, login and portal pages are unchanged.
+
+Verification (fictional data only): `.venv\Scripts\python.exe scripts/check.py`
+passed 277 Python tests (4 new in tests/test_portfolio_home.py), 22 Node checks,
+pip check and whitespace checks. Local portfolio demo (scripts/portfolio_demo.py)
+inspected at 1440/768/390 px with the taste-skill inspector: 0 FAIL; slider, tab
+keyboard navigation and clocks exercised in a browser. Not deployed, not committed,
+no push. Owner review and the contact handle are pending.
