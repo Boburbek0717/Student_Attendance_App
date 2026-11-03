@@ -97,6 +97,7 @@ body.portfolio-site { margin: 0; padding: 0; background: var(--ground); color: v
 .pf-line__a { padding-right: 12%; }
 .pf-line__b { padding-left: 12%; }
 .pf-hero__lead { max-width: 30ch; margin-top: 36px; text-wrap: balance; }
+.pf-hero__award { flex-basis: 100%; margin-bottom: 2px; }
 .pf-hero__details { margin-top: 20px; font-size: var(--step-small); color: var(--muted); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 0; }
 .pf-diamond { display: inline-block; width: 10px; height: 10px; margin: 0 14px; background: var(--ink); rotate: 45deg; }
 .pf-hero__scores { margin-top: 32px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; }
