@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.database import make_engine
 from app.main import create_app
-from app.portfolio_content import TUTOR, portfolio_figures
+from app.portfolio_content import TUTOR, portfolio_figures, result_files
 from app.result_content import RESULTS
 
 
@@ -52,6 +52,22 @@ class PortfolioHomeTests(unittest.TestCase):
         with patch.dict(TUTOR, contact=contact):
             page = self.client.get("/").text
         self.assertIn('href="https://t.me/example">Message me on Telegram', page)
+
+    def test_results_page_files_every_result_once(self):
+        files = result_files()
+        filed = [row["id"] for file in files for row in file["results"]]
+        self.assertCountEqual(filed, [row["id"] for row in RESULTS])
+        page = self.client.get("/results")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("My students’</span>", page.text)
+        self.assertNotIn("Filed by result", page.text)
+        for file in files:
+            self.assertIn(f'id="file-{file["key"]}"', page.text)
+        for row in RESULTS:
+            self.assertEqual(page.text.count(f'id="result-{row["id"]}"'), 1)
+            if row.get("quote"):
+                self.assertIn(f'<summary aria-label="Read {row["name"]}’s story">', page.text)
+        self.assertNotIn("style=", page.text)
 
     def test_page_assets_are_served_locally(self):
         page = self.client.get("/").text

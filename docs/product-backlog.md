@@ -1065,3 +1065,22 @@ pip check and whitespace checks. Local portfolio demo (scripts/portfolio_demo.py
 inspected at 1440/768/390 px with the taste-skill inspector: 0 FAIL; slider, tab
 keyboard navigation and clocks exercised in a browser. Not deployed, not committed,
 no push. Owner review and the contact handle are pending.
+
+
+## Results page redesign — 2026-11-03
+
+Owner asked for the public results page to match the portfolio homepage, using the
+impeccable skill; audience confirmed as universities and employers, quotes kept behind
+a click, layout "Filed by story" chosen by the owner. results.html now files the nine
+results under Top totals, Math highlights, Started from scratch and Persistence paid off
+(grouping derived from the owner's tags in app/portfolio_content.py). Each score report
+shows the total, a 400–1600 rail with the tutor's 1430 marked, both sections, and one
+proof line quoted verbatim from the student's own words where it adds a fact. Owner
+removed the file index mid-build. The portfolio bar and head are shared partials.
+PRODUCT.md and DESIGN.md (+ .impeccable/design.json) now record product truth and the
+portfolio visual system; the course portal pages are outside that system.
+
+Verification: impeccable finish review (disposition fix, six of seven fixes scored
+resolved after one batch); guarded check.py passed 280 Python tests and 22 Node checks;
+portfolio, export and auth tests re-run after the final template edit. Open for the
+owner: student name order is mixed (three names surname first).

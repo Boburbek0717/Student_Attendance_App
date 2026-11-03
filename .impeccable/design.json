@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-02T23:56:22+00:00",
+  "title": "Design System: SAT Factory Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Report Navy",
+        "canonical": "oklch(23.4% 0.027 247)",
+        "tonalRamp": [
+          "#070c10",
+          "#1f262d",
+          "#3a434c",
+          "#57636e",
+          "#768492",
+          "#9aa7b3",
+          "#bfcbd6",
+          "#e6f0f9"
+        ]
+      },
+      "ground-ink": {
+        "role": "neutral",
+        "displayName": "Ground Ink",
+        "canonical": "oklch(95.4% 0.007 132)",
+        "tonalRamp": [
+          "#0a0c09",
+          "#242622",
+          "#40433f",
+          "#60625e",
+          "#81837f",
+          "#a3a6a1",
+          "#c7cac5",
+          "#edf0eb"
+        ]
+      },
+      "ground-muted": {
+        "role": "neutral",
+        "displayName": "Ground Slate",
+        "canonical": "oklch(79.6% 0.014 234)",
+        "tonalRamp": [
+          "#060c10",
+          "#1f262b",
+          "#3b4348",
+          "#5a6368",
+          "#7b848a",
+          "#9da7ad",
+          "#c1cbd1",
+          "#e6f0f7"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Report Paper",
+        "canonical": "oklch(94.4% 0.003 68)",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262523",
+          "#434240",
+          "#62615f",
+          "#848280",
+          "#a6a5a3",
+          "#cbc9c7",
+          "#f0eeec"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Paper Shade",
+        "canonical": "oklch(90.2% 0.008 81)",
+        "tonalRamp": [
+          "#0d0b08",
+          "#272521",
+          "#44423e",
+          "#63615c",
+          "#85827d",
+          "#a7a5a0",
+          "#ccc9c4",
+          "#f1eee9"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Desk Kraft",
+        "canonical": "oklch(82.2% 0.021 75)",
+        "tonalRamp": [
+          "#0e0b07",
+          "#29241e",
+          "#474139",
+          "#686056",
+          "#8a8175",
+          "#aca499",
+          "#cfc8be",
+          "#f4ede5"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Report Ink",
+        "canonical": "oklch(24.3% 0.022 249)",
+        "tonalRamp": [
+          "#080c0f",
+          "#20262b",
+          "#3c434a",
+          "#59626c",
+          "#79848f",
+          "#9ca6b0",
+          "#c2cad3",
+          "#e8eff7"
+        ]
+      },
+      "ink-hover": {
+        "role": "neutral",
+        "displayName": "Ink Lift",
+        "canonical": "oklch(34.1% 0.028 245)",
+        "tonalRamp": [
+          "#070c10",
+          "#1e262d",
+          "#39434d",
+          "#56636f",
+          "#758592",
+          "#99a7b3",
+          "#bfcbd6",
+          "#e6f0f9"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Caption Grey",
+        "canonical": "oklch(47.3% 0.008 185)",
+        "tonalRamp": [
+          "#080c0c",
+          "#212625",
+          "#3e4342",
+          "#5d6362",
+          "#7d8483",
+          "#a0a7a5",
+          "#c4cbca",
+          "#e9f0ef"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Score Lime",
+        "canonical": "oklch(90.9% 0.186 125)",
+        "tonalRamp": [
+          "#041000",
+          "#182d00",
+          "#314d00",
+          "#4c6f00",
+          "#689300",
+          "#8db634",
+          "#b4d973",
+          "#ddfcaa"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Bright Lime",
+        "canonical": "oklch(94.6% 0.155 125)",
+        "tonalRamp": [
+          "#050f00",
+          "#1b2c00",
+          "#354b00",
+          "#506d00",
+          "#6e9100",
+          "#93b34f",
+          "#b9d684",
+          "#e1fab6"
+        ]
+      },
+      "accent-ink": {
+        "role": "neutral",
+        "displayName": "Lime Ink",
+        "canonical": "oklch(23.4% 0.027 247)",
+        "tonalRamp": [
+          "#070c10",
+          "#1f262d",
+          "#3a434c",
+          "#57636e",
+          "#768492",
+          "#9aa7b3",
+          "#bfcbd6",
+          "#e6f0f9"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The page name block: the tutor's name on the homepage card, the results page h1. Uppercase, two masked lines."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section and file headings (uppercase) and every large score figure."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Secondary figures: section scores in reports, totals in the results table."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "One-sentence intros and panel copy, 26-40ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text; 600 for names and actions; italic only on the letter signature."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Captions, scale ends, units, table heads, imprint."
+      }
+    },
+    "shadows": [],
+    "shapes": [
+      {
+        "name": "notch-report",
+        "value": "polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%, 0 20px)",
+        "purpose": "Top-corner notch on score reports and the results back card (28px on the hero card)."
+      },
+      {
+        "name": "tear",
+        "value": "var(--tear)",
+        "purpose": "Zigzag torn top and bottom edge of quote slips."
+      },
+      {
+        "name": "perforation",
+        "value": "border-top: 10px dotted var(--ground)",
+        "purpose": "Perforated rule on the ledger (7px on the letter stub)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Hover, press and small rises."
+      },
+      {
+        "name": "ease-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Paper arrivals, line reveals, rail fills, number rolls."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.76, 0, 0.24, 1)",
+        "purpose": "Platform plate wipe."
+      },
+      {
+        "name": "t-press",
+        "value": "140ms",
+        "purpose": "Press scale (0.97 buttons, 0.98 cells)."
+      },
+      {
+        "name": "t-hover",
+        "value": "180ms",
+        "purpose": "Underline and background hover changes."
+      },
+      {
+        "name": "t-ui",
+        "value": "240ms",
+        "purpose": "State changes: tabs, disclosure chevron, slip straighten."
+      },
+      {
+        "name": "t-reveal",
+        "value": "800ms",
+        "purpose": "Scroll reveals; all entrances only under prefers-reduced-motion: no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "379px"
+      },
+      {
+        "name": "phone",
+        "value": "719px"
+      },
+      {
+        "name": "tablet",
+        "value": "1023px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one lime action per view: bar action, visit-card foot.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">See the results</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: 0; border-radius: 0; background: var(--accent, #c4f65d); color: var(--accent-ink, #131f2a); font: 600 1.0625rem/1.2 var(--font-text, \"Public Sans\", \"Helvetica Neue\", Arial, sans-serif); text-decoration: none; transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease; } .ds-btn-primary:hover { background: var(--accent-hover, #d6ff86); } .ds-btn-primary:active { transform: scale(0.97); } .ds-btn-primary:focus-visible { outline: 3px solid var(--accent, #c4f65d); outline-offset: 4px; }"
+    },
+    {
+      "name": "Ink Button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "The action when it sits on paper, as on the letter stub.",
+      "html": "<a class=\"ds-btn-ink\" href=\"#\">Try a free practice question</a>",
+      "css": ".ds-btn-ink { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: 0; border-radius: 0; background: var(--ink, #18212a); color: var(--paper, #eeecea); font: 600 1.0625rem/1.2 var(--font-text, \"Public Sans\", \"Helvetica Neue\", Arial, sans-serif); text-decoration: none; transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease; } .ds-btn-ink:hover { background: #2c3a46; } .ds-btn-ink:active { transform: scale(0.97); } .ds-btn-ink:focus-visible { outline: 3px solid var(--ink, #18212a); outline-offset: 4px; }"
+    },
+    {
+      "name": "Portfolio Bar",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Shared bar: logo seal, centred links with a lime underline for hover and the current page, primary action.",
+      "html": "<header class=\"ds-bar\"><span class=\"ds-bar__seal\"></span><nav class=\"ds-bar__nav\"><a href=\"#\" aria-current=\"page\">Results</a><a href=\"#\">About me</a><a href=\"#\">Free practice</a></nav><a class=\"ds-bar__btn\" href=\"#\">Back to my portfolio</a></header>",
+      "css": ".ds-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 20px 24px; background: var(--ground, #131f2a); color: var(--ground-ink, #eef1ec); font: 400 1.0625rem/1.55 var(--font-text, \"Public Sans\", \"Helvetica Neue\", Arial, sans-serif); } .ds-bar__seal { width: 44px; height: 44px; border-radius: 50%; background: var(--paper, #eeecea); } .ds-bar__nav { display: flex; gap: 28px; } .ds-bar__nav a { color: inherit; white-space: nowrap; text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 0.08em; text-underline-offset: 0.3em; transition: text-decoration-color 180ms ease; } .ds-bar__nav a:hover, .ds-bar__nav a[aria-current=\"page\"] { text-decoration-color: var(--accent, #c4f65d); } .ds-bar__nav a:focus-visible { outline: 3px solid var(--accent, #c4f65d); outline-offset: 4px; } .ds-bar__btn { justify-self: end; display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; background: var(--accent, #c4f65d); color: var(--accent-ink, #131f2a); font-weight: 600; text-decoration: none; } .ds-bar__btn:hover { background: var(--accent-hover, #d6ff86); }"
+    },
+    {
+      "name": "Text Link",
+      "kind": "custom",
+      "refersTo": "nav-link",
+      "description": "Underline at 35% of the current colour, full colour on hover.",
+      "html": "<a class=\"ds-link\" href=\"#\">Every score card, with stories</a>",
+      "css": ".ds-link { color: var(--ink, #18212a); font: 600 1.0625rem/1.55 var(--font-text, \"Public Sans\", \"Helvetica Neue\", Arial, sans-serif); text-decoration: underline; text-decoration-thickness: 0.07em; text-underline-offset: 0.22em; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); transition: text-decoration-color 180ms ease; } .ds-link:hover { text-decoration-color: currentColor; } .ds-link:focus-visible { outline: 3px solid var(--ink, #18212a); outline-offset: 4px; }"
+    },
+    {
+      "name": "Action Cell",
+      "kind": "button",
+      "refersTo": "cell",
+      "description": "Full-bleed action tile at the foot of a paper panel, shade or ink.",
+      "html": "<div class=\"ds-cells\"><a class=\"ds-cell ds-cell--ink\" href=\"#\">Try free practice</a><a class=\"ds-cell\" href=\"#\">Open the portal</a></div>",
+      "css": ".ds-cells { display: grid; grid-template-columns: 1fr 1fr; } .ds-cell { display: flex; align-items: center; min-height: 72px; padding: 0 22px; background: var(--surface, #e1ded9); color: var(--ink, #18212a); font: 600 1.0625rem/1.2 var(--font-text, \"Public Sans\", \"Helvetica Neue\", Arial, sans-serif); text-decoration: none; transition: background-color 180ms ease, transform 140ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-cell:hover { background: #d7d2c7; } .ds-cell:active { transform: scale(0.98); } .ds-cell--ink { background: var(--ink, #18212a); color: var(--paper, #eeecea); } .ds-cell--ink:hover { background: #2c3a46; } .ds-cell:focus-visible { outline: 3px solid var(--ink, #18212a); outline-offset: 4px; }"
+    },
+    {
+      "name": "Tabs",
+      "kind": "chip",
+      "description": "Plain muted text; the selected tab takes ink and a 3px underline.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\"><button role=\"tab\" aria-selected=\"true\">Dashboard</button><button role=\"tab\" aria-selected=\"false\">Practice</button><button role=\"tab\" aria-selected=\"false\">Assignments</button></div>",
+      "css": ".ds-tabs { display: flex; flex-wrap: wrap; gap: 8px 28px; background: var(--paper, #eeecea); padding: 16px; } .ds-tabs button { appearance: none; min-height: 44px; padding: 0; border: 0; border-radius: 0; background: none; color: var(--muted, #575d5c); font: 400 1.0625rem/1.2 var(--font-text, \"Public Sans\", \"Helvetica Neue\", Arial, sans-serif); cursor: pointer; text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 3px; text-underline-offset: 0.5em; transition: color 180ms ease, text-decoration-color 240ms ease; } .ds-tabs button:hover { color: var(--ink, #18212a); } .ds-tabs button[aria-selected=\"true\"] { color: var(--ink, #18212a); text-decoration-color: var(--ink, #18212a); } .ds-tabs button:focus-visible { outline: 3px solid var(--ink, #18212a); outline-offset: 4px; }"
+    },
+    {
+      "name": "Score Report",
+      "kind": "card",
+      "refersTo": "report",
+      "description": "Signature unit: notched paper card with total, 400-1600 rail marking the tutor's 1430, section cells and a story disclosure.",
+      "html": "<article class=\"ds-report\"><h3 class=\"ds-report__name\">Student name</h3><p class=\"ds-report__total\"><span class=\"ds-report__score\">1470</span><span class=\"ds-report__of\">total</span></p><div class=\"ds-report__rail\"><span class=\"ds-report__fill\"></span><span class=\"ds-report__mine\"></span></div><div class=\"ds-report__ticks\"><span>400</span><span>1600</span></div><dl class=\"ds-report__sections\"><div><dt>Reading and Writing</dt><dd>720</dd></div><div><dt>Math</dt><dd>750</dd></div></dl><details class=\"ds-report__story\"><summary>Read the story</summary><p>Quote text.</p></details></article>",
+      "css": ".ds-report { display: grid; gap: 14px; width: 340px; padding: 32px 32px 28px; background: var(--paper, #eeecea); color: var(--ink, #18212a); font: 400 1.0625rem/1.55 var(--font-text, \"Public Sans\", \"Helvetica Neue\", Arial, sans-serif); clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%, 0 20px); } .ds-report__name { margin: 0; font-size: 1.375rem; font-weight: 600; line-height: 1.2; } .ds-report__total { display: flex; align-items: baseline; gap: 14px; margin: 10px 0 0; } .ds-report__score { font: 800 4rem/0.9 var(--font-display, \"Big Shoulders\", \"Arial Narrow\", Arial, sans-serif); font-variant-numeric: tabular-nums; } .ds-report__of, .ds-report__ticks, .ds-report__sections dt { font-size: 0.8125rem; color: var(--muted, #575d5c); } .ds-report__rail { position: relative; height: 8px; background: var(--surface, #e1ded9); } .ds-report__fill { position: absolute; z-index: 1; inset: 0 auto 0 0; width: 89.17%; background: var(--ink, #18212a); } .ds-report__fill::after { content: \"\"; position: absolute; top: 50%; right: -9px; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--accent, #c4f65d); border: 4px solid var(--ink, #18212a); box-sizing: border-box; } .ds-report__mine { position: absolute; top: -5px; bottom: -5px; left: 85.833%; width: 4px; margin-left: -2px; background: var(--muted, #575d5c); border-inline: 1px solid var(--paper, #eeecea); } .ds-report__ticks { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; } .ds-report__sections { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0 0; } .ds-report__sections div { padding: 12px 14px 14px; background: var(--surface, #e1ded9); } .ds-report__sections dd { margin: 2px 0 0; font: 800 1.5rem/1 var(--font-display, \"Big Shoulders\", \"Arial Narrow\", Arial, sans-serif); font-variant-numeric: tabular-nums; } .ds-report__story summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 30%, transparent); text-underline-offset: 0.22em; } .ds-report__story summary:hover { text-decoration-color: currentColor; } .ds-report__story summary:focus-visible { outline: 3px solid var(--ink, #18212a); outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Score Report Stationery",
+    "overview": "The public pages are printed as SAT Factory's own stationery: a score report, its ledger, torn quote slips, a letter with a tear-off stub, the back of the card. Every paper piece sits on one deep navy ground, and the figures on it are set the way an official report sets them, large condensed numerals over small plain captions. The page is a CV for universities and employers, so the stationery carries real numbers and nothing decorative stands in for them.\n\nDensity is low and deliberate. Paper pieces are large, separated by generous navy, and laid on a 12-column grid that lets headings and figures sit on opposite sides of the page. Depth comes from paper on ground, overlap and slight rotation, never from shadows. The one lime accent is a signal colour: the primary action, the marker on a score rail, keyboard focus and the current page.\n\nThis world covers the public portfolio pages only: the homepage (`app/templates/index.html`) and the results page (`app/templates/results.html`), sharing `app/static/portfolio.css`, `portfolio.js` and the portfolio bar and head partials, and exported as static files to GitHub Pages. The course portal (login, teacher and student dashboards, question practice) still uses the older `app/static/style.css` and its own stylesheets and is not part of this system.",
+    "keyCharacteristics": [
+      "Paper reports on a navy ground; ground, paper and one lime accent.",
+      "Condensed 800-weight uppercase display over a plain humanist-grotesque text face.",
+      "Every score sits on a 400 to 1600 rail with the tutor's 1430 marked on it.",
+      "Square corners everywhere; edges are notched, torn or perforated like paper.",
+      "Flat: no shadows, no radius, no gradients.",
+      "Motion lifts paper into place and fills rails; the finished state is the reduced-motion state."
+    ],
+    "rules": [
+      {
+        "name": "The Signal Lime Rule",
+        "body": "Lime marks something you can act on or a position on a scale: the primary action, a rail marker, focus, the current page. It is never a fill for panels, headings or body text, and never sits on paper as a background larger than a button.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paper On Ground Rule",
+        "body": "Content lives on paper, paper lives on navy. Ink text never sits directly on the ground, and ground-ink text never sits on paper.",
+        "section": "colors"
+      },
+      {
+        "name": "The Numerals Speak Rule",
+        "body": "Every score is set in Big Shoulders 800 with tabular numerals and sits beside a small Public Sans caption that says what it is out of. A figure is never set in the text face, and a caption is never set in the display face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two Faces Rule",
+        "body": "Big Shoulders is for names, headings and numbers; Public Sans is for everything read as a sentence. Italic appears only on the letter's signature.",
+        "section": "typography"
+      },
+      {
+        "name": "The Real Positions Rule",
+        "body": "A rail fill, marker or dot is placed at its true position on the 400 to 1600 scale ((score - 400) / 12 percent). Because the Content Security Policy forbids inline style attributes, these per-element positions are set from `portfolio.js`, never written into the markup.",
+        "section": "layout"
+      },
+      {
+        "name": "The No Shadow Rule",
+        "body": "Separation is paper against ground or shade against paper. A drop shadow, glow or blur never stands in for it.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Paper Edge Rule",
+        "body": "A paper piece is shaped by how paper is cut, notched, torn or perforated, never by rounding its corners.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** put every new public surface on Report Navy with its content on Report Paper pieces, and keep the tokens on `:root` in `portfolio.css`.",
+      "**Do** set every score in Big Shoulders 800 with tabular numerals, beside a Public Sans caption saying what it is out of.",
+      "**Do** place any score on the 400 to 1600 rail at its true position, with the tutor's 1430 marked.",
+      "**Do** keep lime to actions, rail markers, focus, selection and the current page.",
+      "**Do** shape paper by notching, tearing or perforating it, with square corners.",
+      "**Do** self-host every font, image and script and set per-element positions from JavaScript: the Content Security Policy is `default-src 'self'`, with no inline style attributes and no inline scripts.",
+      "**Do** make the reduced-motion state the finished state: entrances, fills and rolls only run under `prefers-reduced-motion: no-preference`."
+    ],
+    "donts": [
+      "**Don't** round the corners of paper pieces, buttons or cells.",
+      "**Don't** add drop shadows, glows or blurs for depth.",
+      "**Don't** fill panels, headings or body text with lime, or put lime on paper larger than a button.",
+      "**Don't** set figures in the text face or sentences in the display face.",
+      "**Don't** apply this system to the course portal pages, which still run on `app/static/style.css`."
+    ]
+  }
+}

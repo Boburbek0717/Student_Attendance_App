@@ -4,27 +4,9 @@
 {% block main_class %}portfolio{% endblock %}
 {% block body_class %}portfolio-site{% endblock %}
 {% block extra_styles %}
-    <link rel="preload" href="{{ url_for('static', path='/fonts/big-shoulders-800-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', path='/fonts/public-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ url_for('static', path='/portfolio.css') }}?v=3">
-    <script src="{{ url_for('static', path='/portfolio-flag.js') }}"></script>
+{% include "portfolio_head.html" %}
 {% endblock %}
-{% block brand_header %}
-<header class="pf-bar">
-    <a class="pf-bar__mark" href="/" aria-label="SAT Factory home">
-        <img src="{{ url_for('static', path='/branding/sat-factory-logo.png') }}" alt="SAT Factory" width="56" height="56">
-    </a>
-    <nav class="pf-bar__nav" aria-label="Main navigation">
-        <a href="#results">Results</a>
-        <a href="#about">About me</a>
-        <a href="/questions">Free practice</a>
-        {% if not user %}<a href="/login">Course portal</a>{% endif %}
-    </nav>
-    {% if user %}<a class="pf-button" href="/{{ user.role }}">Go to my dashboard</a>
-    {% elif contact %}<a class="pf-button" href="{{ contact.href }}">{{ contact.label }}</a>
-    {% else %}<a class="pf-button" href="#results">See the results</a>{% endif %}
-</header>
-{% endblock %}
+{% block brand_header %}{% set portfolio_page = 'home' %}{% include "portfolio_header.html" %}{% endblock %}
 {% block content %}
 <div class="pf-sheet">
 <section class="pf-hero" aria-labelledby="pf-title">
@@ -201,4 +183,4 @@
     </div>
 </footer>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', path='/portfolio.js') }}?v=2" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/portfolio.js') }}?v=4" defer></script>{% endblock %}

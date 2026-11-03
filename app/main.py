@@ -13,8 +13,7 @@ from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.result_content import RESULTS
-from app.portfolio_content import TUTOR, portfolio_figures
+from app.portfolio_content import TUTOR, portfolio_figures, result_files
 from app.database import engine, initialize_database
 from app.security import authenticate, current_user, load_session_secret, verify_csrf
 from app.security import limit_login_attempt, start_session, revoke_session
@@ -115,7 +114,8 @@ def create_app(database_engine: Engine = engine, session_secret: str | None = No
 
     @app.get("/results", response_class=HTMLResponse)
     def results_page(request: Request, db: Session = Depends(get_db)):
-        return render(request, "results.html", user=current_user(request, db), results=RESULTS)
+        return render(request, "results.html", user=current_user(request, db), tutor=TUTOR,
+                      figures=portfolio_figures(), files=result_files())
 
     @app.get("/login", response_class=HTMLResponse)
     def login_page(request: Request, db: Session = Depends(get_db)):

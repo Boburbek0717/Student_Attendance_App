@@ -1,0 +1,18 @@
+{# Shared portfolio bar; `portfolio_page` is 'home' or 'results'. #}
+{% set on_home = portfolio_page == 'home' %}
+{% set contact = tutor.contact %}
+<header class="pf-bar">
+    <a class="pf-bar__mark" href="/" aria-label="SAT Factory home">
+        <img src="{{ url_for('static', path='/branding/sat-factory-logo.png') }}" alt="SAT Factory" width="56" height="56">
+    </a>
+    <nav class="pf-bar__nav" aria-label="Main navigation">
+        {% if on_home %}<a href="#results">Results</a>{% else %}<a href="/results" aria-current="page">Results</a>{% endif %}
+        <a href="{{ '#about' if on_home else '/#about' }}">About me</a>
+        <a href="/questions">Free practice</a>
+        {% if not user %}<a href="/login">Course portal</a>{% endif %}
+    </nav>
+    {% if user %}<a class="pf-button" href="/{{ user.role }}">Go to my dashboard</a>
+    {% elif contact %}<a class="pf-button" href="{{ contact.href }}">{{ contact.label }}</a>
+    {% elif on_home %}<a class="pf-button" href="#results">See the results</a>
+    {% else %}<a class="pf-button" href="/">Back to my portfolio</a>{% endif %}
+</header>

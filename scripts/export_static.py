@@ -21,6 +21,7 @@ LINKS = [
     ('href="/results#', 'href="results.html#'),
     ('href="/results"', 'href="results.html"'),
     ('href="/#teacher"', 'href="./#about"'),
+    ('href="/#', 'href="./#'),
     ('href="/questions"', f'href="{APP_ORIGIN}/questions"'),
     ('href="/login"', f'href="{APP_ORIGIN}/login"'),
     ('href="/"', 'href="./"'),
