@@ -66,6 +66,16 @@
         document.querySelectorAll('.pf-roll').forEach(show);
     }
 
+    // Results page: each report's rail fills to its total, one report after another within a file.
+    document.querySelectorAll('.pf-report[data-total]').forEach((report) => {
+        const fill = report.querySelector('[data-fill]');
+        if (!fill) return;
+        fill.style.width = `${(Number(report.dataset.total) - 400) / 12}%`;
+        fill.style.transitionDelay = `${260 + [...report.parentElement.children].indexOf(report) * 120}ms`;
+        const mine = `${(Number(fill.parentElement.dataset.mine) - 400) / 12}%`;
+        report.querySelectorAll('.pf-report__mine, .pf-report__mine-label').forEach((mark) => { mark.style.left = mine; });
+    });
+
     // The live thing: set a target on the 400–1600 scale and see who reached it.
     const target = document.querySelector('[data-target]');
     if (target) {
