@@ -7,6 +7,7 @@ TUTOR = {
     'sat': 1430,
     'ielts': '8.5',
     'university': 'University of Szeged',
+    'scholarship': 'Stipendium Hungaricum',
     'city': 'Szeged, Hungary',
     'teaching_since': 2024,
     # Shown only when filled in, e.g. {'label': 'Message me on Telegram', 'href': 'https://t.me/<handle>'}.

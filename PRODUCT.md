@@ -10,7 +10,7 @@ web
 Primary visitors are universities and employers reading the public site as Boburbek Noraliyev's CV: they want to see his own scores, his teaching track record and the software he built. The course portal (attendance, practice, assignments) serves his own students and is secondary for now.
 
 ## Product Purpose
-SAT Factory is the owner's SAT course and its course platform. The public homepage and results page work as a portfolio: they show who he is (SAT 1430, IELTS 8.5, student at the University of Szeged, teaching SAT online since 2024) and the results of students he taught. Success is a reviewer understanding, within one visit, that he scores highly, teaches students to high scores and built the platform himself.
+SAT Factory is the owner's SAT course and its course platform. The public homepage and results page work as a portfolio: they show who he is (SAT 1430, IELTS 8.5, Stipendium Hungaricum scholarship winner, student at the University of Szeged, teaching SAT online since 2024, and helping students get into Hungarian universities) and the results of students he taught. Success is a reviewer understanding, within one visit, that he scores highly, teaches students to high scores and built the platform himself.
 
 ## Positioning
 A tutor whose own results and whose students' results are on the page as real numbers, one of whom (Javohir Allonazarov, 1470) scored above the tutor, and who wrote the platform the students use.
@@ -30,7 +30,7 @@ Name SAT Factory with the SF monogram logo (app/static/branding/sat-factory-logo
 
 ## Evidence on Hand
 - Nine student results with Reading and Writing and Math scores in app/result_content.py; each has a short tag, three have the student's own written quote and six have a one-line summary. The owner confirmed the students agreed to be shown publicly with full names.
-- The owner's scores: SAT 1430, IELTS 8.5.
+- The owner's scores: SAT 1430, IELTS 8.5. Owner-stated: Stipendium Hungaricum scholarship winner; he helps students get into Hungarian universities.
 - Real screenshots of the platform (fictional demo data) in app/static/portfolio/.
 - No photo of the owner, no university programme or year, no press, reviews or other testimonials. Do not invent any.
 

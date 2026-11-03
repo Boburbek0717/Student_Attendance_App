@@ -16,8 +16,8 @@
             <span class="pf-line"><span data-line class="pf-line__a">{{ tutor.first_name }}</span></span>
             <span class="pf-line"><span data-line class="pf-line__b">{{ tutor.name.split(' ')[-1] }}</span></span>
         </h1>
-        <p class="pf-lead pf-hero__lead" data-load>SAT tutor. I teach Reading and Writing and Math online, from Szeged to students in Uzbekistan.</p>
-        <p class="pf-hero__details" data-load>Student at the {{ tutor.university }}<span class="pf-diamond" aria-hidden="true"></span>Teaching SAT since {{ tutor.teaching_since }}</p>
+        <p class="pf-lead pf-hero__lead" data-load>SAT tutor. I teach Reading and Writing and Math online, and I help students get into Hungarian universities.</p>
+        <p class="pf-hero__details" data-load><span class="pf-hero__award">{{ tutor.scholarship }} winner</span>Student at the {{ tutor.university }}<span class="pf-diamond" aria-hidden="true"></span>Teaching SAT since {{ tutor.teaching_since }}</p>
         <dl class="pf-hero__scores" data-load>
             <div><dt>SAT total, out of 1600</dt><dd class="pf-hero__score">{{ tutor.sat }}</dd></div>
             <div><dt>IELTS band, out of 9</dt><dd class="pf-hero__score">{{ tutor.ielts }}</dd></div>
@@ -102,7 +102,7 @@
         <h2 id="letter-title" class="pf-head" data-reveal>A letter<br>from Szeged</h2>
         <div class="pf-letter__body" data-reveal-group>
             <p>Dear future student,</p>
-            <p>I’m {{ tutor.first_name }}. I study at the {{ tutor.university }} in Hungary, and since {{ tutor.teaching_since }} I have taught the SAT online to students in Uzbekistan.</p>
+            <p>I’m {{ tutor.first_name }}. I study at the {{ tutor.university }} in Hungary as a {{ tutor.scholarship }} scholarship winner, and since {{ tutor.teaching_since }} I have taught the SAT online to students in Uzbekistan.</p>
             <p>I scored {{ tutor.sat }} on the SAT and {{ tutor.ielts }} on IELTS, so I know both tests from the student’s side of the desk.</p>
             <figure class="pf-letter__plate">
                 <img src="{{ url_for('static', path='/portfolio/szeged-university-bolyai.jpg') }}" alt="The pink Bolyai Building of the University of Szeged behind a row of trees" width="1280" height="720" loading="lazy" decoding="async">
