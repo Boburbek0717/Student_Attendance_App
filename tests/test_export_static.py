@@ -14,7 +14,7 @@ class StaticExportTests(unittest.TestCase):
             export(site)
             home = (site / 'index.html').read_text(encoding='utf-8')
             self.assertIn('href="results.html#result-', home)
-            self.assertIn(f'href="{APP_ORIGIN}/questions"', home)
+            self.assertNotIn(APP_ORIGIN, home)  # practice and portal links are hidden while unused
             self.assertNotIn('testserver', home)
             for asset in re.findall(r'(?:href|src)="(static/[^"?]+)', home):
                 self.assertTrue((site / asset).is_file(), asset)

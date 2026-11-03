@@ -8,8 +8,8 @@
     <nav class="pf-bar__nav" aria-label="Main navigation">
         {% if on_home %}<a href="#results">Results</a>{% else %}<a href="/results" aria-current="page">Results</a>{% endif %}
         <a href="{{ '#about' if on_home else '/#about' }}">About me</a>
-        <a href="/questions">Free practice</a>
-        {% if not user %}<a href="/login">Course portal</a>{% endif %}
+        {% if tutor.app_links %}<a href="/questions">Free practice</a>
+        {% if not user %}<a href="/login">Course portal</a>{% endif %}{% endif %}
     </nav>
     {% if user %}<a class="pf-button" href="/{{ user.role }}">Go to my dashboard</a>
     {% elif contact %}<a class="pf-button" href="{{ contact.href }}">{{ contact.label }}</a>

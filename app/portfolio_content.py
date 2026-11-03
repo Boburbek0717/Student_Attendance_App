@@ -11,6 +11,8 @@ TUTOR = {
     'teaching_since': 2024,
     # Shown only when filled in, e.g. {'label': 'Message me on Telegram', 'href': 'https://t.me/<handle>'}.
     'contact': None,
+    # Links to free practice and the course portal; hidden while those parts are not in use.
+    'app_links': False,
 }
 
 QUOTED_IDS = (1, 2, 3)

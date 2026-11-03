@@ -116,7 +116,8 @@
     </article>
     <div class="pf-letter__stub">
         {% if contact %}<a class="pf-button" href="{{ contact.href }}">{{ contact.label }}</a>
-        {% else %}<a class="pf-button" href="/questions">Try a free practice question</a>{% endif %}
+        {% elif tutor.app_links %}<a class="pf-button" href="/questions">Try a free practice question</a>
+        {% else %}<a class="pf-button" href="/results">See my students’ results</a>{% endif %}
     </div>
 </section>
 
@@ -138,10 +139,10 @@
             <div class="pf-panel" role="tabpanel" id="panel-practice" aria-labelledby="tab-practice"><p>Questions are sorted by the College Board’s own SAT skills. The answer stays hidden until a correct try or a second attempt.</p></div>
             <div class="pf-panel" role="tabpanel" id="panel-assignments" aria-labelledby="tab-assignments"><p>I set questions for a group with a deadline and see who finished, and who got it right the first time.</p></div>
         </div>
-        <div class="pf-platform__actions">
+        {% if tutor.app_links %}<div class="pf-platform__actions">
             <a class="pf-cell pf-cell--ink" href="/questions">Try free practice <span aria-hidden="true">→</span></a>
             <a class="pf-cell" href="/login">Open the portal <span aria-hidden="true">→</span></a>
-        </div>
+        </div>{% endif %}
     </div>
 </section>
 
@@ -175,8 +176,9 @@
             <ul>
                 {% if contact %}<li><a href="{{ contact.href }}">{{ contact.label }}</a></li>{% endif %}
                 <li><a href="/results">All student results</a></li>
-                <li><a href="/questions">Free SAT practice</a></li>
-                <li><a href="/login">Course portal</a></li>
+                <li><a href="#about">About me</a></li>
+                {% if tutor.app_links %}<li><a href="/questions">Free SAT practice</a></li>
+                <li><a href="/login">Course portal</a></li>{% endif %}
             </ul>
         </div>
         <p class="pf-back__imprint">© 2026 {{ tutor.name }} · SAT Factory. Photographs, cropped: “Tisza River with Szeged cathedral” by Chmee2 / Valtameri, CC BY 3.0; “Szeged – Szegedi Tudományegyetem Bolyai Épület” by Fred Romero, CC BY 2.0; “Tashkent 2023” by Basiyra, CC BY 4.0; all via Wikimedia Commons.</p>

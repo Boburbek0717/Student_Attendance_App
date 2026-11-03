@@ -69,6 +69,17 @@ class PortfolioHomeTests(unittest.TestCase):
                 self.assertIn(f'<summary aria-label="Read {row["name"]}’s story">', page.text)
         self.assertNotIn("style=", page.text)
 
+    def test_practice_and_portal_links_follow_the_switch(self):
+        for path in ("/", "/results"):
+            page = self.client.get(path).text
+            self.assertNotIn('href="/questions"', page, path)
+            self.assertNotIn('href="/login"', page, path)
+        with patch.dict(TUTOR, app_links=True):
+            for path in ("/", "/results"):
+                page = self.client.get(path).text
+                self.assertIn('href="/questions"', page, path)
+                self.assertIn('href="/login"', page, path)
+
     def test_page_assets_are_served_locally(self):
         page = self.client.get("/").text
         for path in ("/static/portfolio.css", "/static/portfolio.js", "/static/portfolio-flag.js",
